@@ -43,9 +43,9 @@ there are no functions, only recipes, tags, trades and recipe-book advancements.
   recipe id unlocks with `recipe give`, and opening the world shows no experimental warning.
   Note `recipe give *` undercounts: unlocking one recipe of a group completes its recipe-book
   advancement, which hands out the rest of the group first.
-- NeoForge: `node tools/neoforge-server-test.js "<scratch>" --fresh-world --mod dist/<jar>`, alone,
-  with `--modrinth biomes-o-plenty,terrablender`, and with `--modrinth ecologics,promenade,wilder-wild
-  --ignore "FrozenLib.*Unable to read config"`; each must end "loaded ... 0 problem line(s)".
+- NeoForge (and Fabric, and the zip on plain vanilla): `bash tools/ci-load-test.sh neoforge none|A|B`
+  installs the newest NeoForge server, adds the jar (and a wood-mod group from Modrinth) and runs
+  `tools/server-test.js`, which must end with 0 problem lines. Needs jq and curl (CI has both).
 - The stonecutter screen: `gametest/` (`./gradlew runClientGameTest -Pexpect=../pack`, plus
   `-PwoodMods=<folder>` per wood-mod group) clicks every stonecutter recipe in the real screen.
 - **CI** (`.github/workflows/build.yml`) runs all of it on every push: the build (vanilla jar from

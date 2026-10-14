@@ -68,8 +68,8 @@ jobs:
           - { loader: fabric, group: A, name: 'Fabric with Biomes O'' Plenty and Ecologics' }
           - { loader: fabric, group: B, name: 'Fabric with Wilder Wild and Promenade' }
           - { loader: neoforge, group: none, name: 'NeoForge' }
-          - { loader: neoforge, group: A, name: 'NeoForge with Biomes O'' Plenty and Ecologics' }
-          - { loader: neoforge, group: B, name: 'NeoForge with Wilder Wild and Promenade' }
+          - { loader: neoforge, group: A, name: 'NeoForge with Biomes O'' Plenty' }
+          - { loader: neoforge, group: B, name: 'NeoForge with Ecologics, Wilder Wild and Promenade' }
           - { loader: vanilla, group: none, name: 'vanilla with the data pack' }
     name: load (${{ matrix.name }})
     steps:

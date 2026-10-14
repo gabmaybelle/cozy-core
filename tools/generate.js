@@ -14,14 +14,23 @@ const DEFAULT_JAR = path.join(process.env.USERPROFILE || '', 'mods-dev', 'tools'
 	`${MC_VERSION}-0.19.5`, 'versions', MC_VERSION, `server-${MC_VERSION}.jar`);
 
 // ---------- vanilla data ----------
+// unzip some patterns from a jar. Info-ZIP exits 11 when a pattern matches nothing (vanilla has no
+// item-tag sub-folders, and Linux's unzip lets '*' match '/' so the '*/*' pattern can come up
+// empty); that's fine here, any other failure isn't.
+function unzipSome(jar, patterns, dest) {
+	fs.mkdirSync(dest, { recursive: true }); // unzip makes the last folder only
+	const r = require('child_process').spawnSync('unzip', ['-o', '-q', jar, ...patterns, '-d', dest], { encoding: 'utf8' });
+	if (r.error) throw r.error;
+	if (r.status !== 0 && r.status !== 11) throw new Error(`unzip ${jar} failed (${r.status}): ${r.stderr}`);
+}
 
 function extractVanilla(jar) {
 	if (fs.existsSync(path.join(VANILLA, 'recipe'))) return;
 	if (!fs.existsSync(jar)) throw new Error(`No vanilla data cached and no jar at ${jar}`);
 	// Git Bash's unzip doesn't match '/' with '*', so sub-folders get their own '*/*' pattern.
-	execFileSync('unzip', ['-o', '-q', jar, 'data/minecraft/recipe/*', 'data/minecraft/tags/item/*', 'data/minecraft/tags/item/*/*',
-		'data/minecraft/tags/worldgen/structure/*', 'data/minecraft/trade_set/*/*', 'data/minecraft/tags/villager_trade/*/*',
-		'-d', path.dirname(path.dirname(VANILLA))]);
+	unzipSome(jar, ['data/minecraft/recipe/*', 'data/minecraft/tags/item/*', 'data/minecraft/tags/item/*/*',
+		'data/minecraft/tags/worldgen/structure/*', 'data/minecraft/trade_set/*/*', 'data/minecraft/tags/villager_trade/*/*'],
+		path.dirname(path.dirname(VANILLA)));
 }
 
 const readJson = p => JSON.parse(fs.readFileSync(p, 'utf8'));
@@ -43,7 +52,7 @@ function extractMods(modsDir) {
 		const jar = fs.existsSync(modsDir) && fs.readdirSync(modsDir).find(f => f.startsWith(JAR_PREFIX[modid]) && f.endsWith('.jar'));
 		if (!jar) throw new Error(`No ${modid} jar in ${modsDir}: run node tools/fetch-test-mods.js "<test folder>" first`);
 		const out = path.join(MOD_CACHE, jar.slice(0, -4));
-		execFileSync('unzip', ['-o', '-q', path.join(modsDir, jar), 'data/*/recipe/*', 'data/*/tags/item/*', 'data/*/tags/item/*/*', '-d', out]);
+		unzipSome(path.join(modsDir, jar), ['data/*/recipe/*', 'data/*/tags/item/*', 'data/*/tags/item/*/*'], out);
 		roots[modid] = path.join(out, 'data');
 	}
 	return roots;

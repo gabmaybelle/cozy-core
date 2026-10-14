@@ -4,9 +4,9 @@
 #   tools/ci-load-test.sh fabric   [none|A|B] <wood mods folder>   the mod on Fabric (+ Fabric API)
 #   tools/ci-load-test.sh neoforge [none|A|B]                      the mod on NeoForge
 #   tools/ci-load-test.sh vanilla                                  the data pack zip on plain vanilla
-# Wood-mod groups: A = Biomes O' Plenty (with GlitchCore and TerraBlender) and Ecologics;
-# B = Wilder Wild (with FrozenLib) and Promenade. Biolith, bundled in Wilder Wild and Promenade,
-# crashes with TerraBlender, so the two groups never share a server.
+# Wood-mod groups on Fabric: A = Biomes O' Plenty (with GlitchCore and TerraBlender) and Ecologics;
+# B = Wilder Wild (with FrozenLib) and Promenade. On NeoForge, Ecologics is in B. Biolith, bundled
+# in Wilder Wild and Promenade, crashes with TerraBlender, so the two groups never share a server.
 # Expects dist/ (node tools/build.js) and, for vanilla, ~/mc/server-bundler.jar (the CI build job).
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -58,14 +58,24 @@ case $LOADER in
 		echo "$out" | grep -q "file/$(basename "$ZIP")" || { echo "the Cozy Core data pack isn't enabled"; exit 1; }
 		;;
 	neoforge)
-		mkdir -p tools/.cache
-		echo "Gabby agreed to the Minecraft EULA for local test servers; CI runs those same tests." > tools/.cache/eula-accepted
+		# The newest NeoForge release for this Minecraft version, installed as a server.
+		NEOFORGE=$(curl -fsS https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml \
+			| grep -o "<version>$MC\.[0-9.]*</version>" | sed 's/<[^>]*>//g' | sort -V | tail -1)
+		curl -fsSL -o "$RUN/installer.jar" "https://maven.neoforged.net/releases/net/neoforged/neoforge/$NEOFORGE/neoforge-$NEOFORGE-installer.jar"
+		(cd "$RUN" && java -jar installer.jar --install-server . > /dev/null)
+		mkdir -p "$RUN/mods"
+		cp "$JAR" "$RUN/mods/"
+		# NeoForge groups (as tested): A = Biomes O' Plenty with GlitchCore and TerraBlender;
+		# B = Ecologics, Wilder Wild with FrozenLib, and Promenade.
 		case $GROUP in
-			A) extra=(--modrinth biomes-o-plenty,terrablender,ecologics) ;;
-			B) extra=(--modrinth promenade,wilder-wild --ignore 'FrozenLib.*Unable to read config') ;;
-			*) extra=() ;;
+			A) slugs="biomes-o-plenty glitchcore terrablender" ;;
+			B) slugs="ecologics wilder-wild frozenlib promenade"; export IGNORE='FrozenLib.*Unable to read config' ;;
+			*) slugs="" ;;
 		esac
-		node tools/neoforge-server-test.js "$RUN" --fresh-world --mod "$JAR" "${extra[@]}"
+		for s in $slugs; do modrinth_jar "$s" neoforge "$RUN/mods"; done
+		server_files
+		echo "NeoForge $NEOFORGE, group $GROUP: $(ls "$RUN/mods" | tr '\n' ' ')"
+		node tools/server-test.js "$RUN" java "@libraries/net/neoforged/neoforge/$NEOFORGE/unix_args.txt" "datapack list enabled"
 		;;
 	*) echo "usage: tools/ci-load-test.sh fabric|neoforge|vanilla [none|A|B] [wood folder]"; exit 2 ;;
 esac
