@@ -25,9 +25,10 @@ group_jars() { # the wood-mod jars of a group, from a folder of all of them
 }
 
 modrinth_jar() { # newest Modrinth file of a project for a loader and Minecraft version -> folder
+	# (the newest release, or the newest beta when there's no release yet, as for BOP on NeoForge 26.3)
 	local url
 	url=$(curl -fsS "https://api.modrinth.com/v2/project/$1/version?loaders=%5B%22$2%22%5D&game_versions=%5B%22$MC%22%5D" \
-		| jq -r '[.[] | select(.version_type == "release")][0].files | (map(select(.primary)) + .)[0].url')
+		| jq -r '([.[] | select(.version_type == "release")] + .)[0].files | (map(select(.primary)) + .)[0].url')
 	curl -fsSL -o "$3/$(basename "$url")" "$url"
 }
 
@@ -43,6 +44,8 @@ case $LOADER in
 		modrinth_jar fabric-api fabric "$RUN/mods"
 		cp "$JAR" "$RUN/mods/"
 		for j in $(group_jars); do cp "$WOOD/$j" "$RUN/mods/"; done
+		# FrozenLib (group B) logs harmless config-entry errors on a first start.
+		if [ "$GROUP" = B ]; then export IGNORE='FrozenLib.*Unable to read config'; fi
 		server_files
 		echo "Fabric $MC, group $GROUP: $(ls "$RUN/mods" | tr '\n' ' ')"
 		node tools/server-test.js "$RUN" java "$RUN/server.jar" "datapack list enabled"
