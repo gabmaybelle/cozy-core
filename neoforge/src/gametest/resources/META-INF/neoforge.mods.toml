@@ -1,0 +1,16 @@
+# Cozy Core's NeoForge game tests. Only `./gradlew :neoforge:runGameTestServer` loads this mod;
+# nothing here ships in the jar.
+license = "MIT"
+
+[[mods]]
+modId = "cozy_core_gametest"
+version = "1.0.0"
+displayName = "Cozy Core game tests"
+description = '''The checks behind Cozy Core's rules and the Hearth Lantern, for vanilla's test framework.'''
+
+[[dependencies.cozy_core_gametest]]
+modId = "cozy_core"
+type = "required"
+versionRange = "[0,)"
+ordering = "AFTER"
+side = "BOTH"

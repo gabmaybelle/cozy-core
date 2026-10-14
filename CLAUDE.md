@@ -91,11 +91,24 @@ it is.
   room 10 blocks away, not from 40, off at radius 0, hanging above the room) and takes the
   `hearth_lantern` screenshot; `StonecutterTest` clicks every stonecutter recipe in the real screen.
   A proof run with the mixins emptied out of `cozy_core.mixins.json` fails the kind-side checks.
+- The NeoForge game test: `./gradlew :neoforge:runGameTestServer` (about a minute, no window).
+  `neoforge/src/gametest` is a mod of its own (`cozy_core_gametest`, loaded only by that run) that
+  registers one vanilla test instance per check through `RegisterGameTestsEvent`, with the test
+  functions in the `TEST_FUNCTION` registry (`RegisterEvent`). Two environments: `kind` (a new
+  world's defaults) and `vanilla` (the rules set to vanilla's behaviour), so each rule is checked
+  both ways; the lantern, explosion and fire checks are the Fabric test's, rewritten on
+  `GameTestHelper`; `recipes` checks every recipe in `pack/` (`-Pexpect=<dir>`, default `pack/`)
+  is in the game, or isn't when its mod isn't loaded. The templates in
+  `neoforge/src/gametest/resources/data/cozy_core_gametest/structure/` are only sizes, made by
+  `tools/generate-test-structures.js`; each test builds its own scene. Vanilla's test server
+  world has `spawn_mobs` off and no players, and natural spawning wants a player (and the spawn
+  point) more than 24 blocks away, so the lantern test adds a mock player high above its room
+  and moves the spawn point for its duration. A failing check exits the run non-zero.
 - **CI** (`.github/workflows/build.yml`) runs all of it on every push: the build (vanilla jar from
   Mojang, wood mods from Modrinth, both jars from Gradle) and a check that the committed `pack/`
   is what the generator makes; `tools/ci-load-test.sh` on Fabric (alone and with groups A, B and
-  C), NeoForge (alone and with A and B) and plain vanilla with the zip; and the game test alone
-  and with each group. `node tools/build.js <vanilla server jar> <wood mods folder>` builds from
+  C), NeoForge (alone and with A and B) and plain vanilla with the zip; the game test alone
+  and with each group; and the NeoForge game test. `node tools/build.js <vanilla server jar> <wood mods folder>` builds from
   given inputs.
 
 ## Gotchas

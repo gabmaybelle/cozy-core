@@ -8,6 +8,8 @@
 # - game: the in-game test (fabric/src/gametest) plays through the rules and the Hearth Lantern
 #   and clicks every stonecutter recipe in the real screen, with and without the wood mods (and
 #   the decoration mod).
+# - game (NeoForge): vanilla's test server runs the NeoForge jar's own checks (neoforge/src/gametest):
+#   the rules both ways, the Hearth Lantern, and every recipe in pack/ being in the game.
 
 name: build
 on: [pull_request, push]
@@ -168,3 +170,24 @@ jobs:
           name: Game test screenshots (${{ matrix.name }})
           path: fabric/build/run/clientGameTest/screenshots/
           if-no-files-found: ignore
+
+  game-neoforge:
+    needs: build
+    runs-on: ubuntu-24.04
+    name: game (NeoForge)
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+      - name: setup jdk
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+      - name: setup gradle (with caching)
+        uses: gradle/actions/setup-gradle@v6
+      - name: game test
+        # A dedicated test server: no window, so no virtual display needed.
+        timeout-minutes: 20
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :neoforge:runGameTestServer -Pexpect=pack

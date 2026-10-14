@@ -10,22 +10,47 @@ sourceSets.main {
 	resources.srcDir rootProject.file('pack')
 }
 
+// The game tests (src/gametest) are a mod of their own, loaded only by runGameTestServer below;
+// nothing in them ships in the jar.
+sourceSets {
+	gametest {
+		compileClasspath += sourceSets.main.output
+		runtimeClasspath += sourceSets.main.output
+	}
+}
+
 neoForge {
 	version = project.neoforge_version
+	addModdingDependenciesTo(sourceSets.gametest)
 
 	mods {
 		"cozy_core" {
 			sourceSet sourceSets.main
+		}
+		"cozy_core_gametest" {
+			sourceSet sourceSets.gametest
 		}
 	}
 
 	runs {
 		client {
 			client()
+			loadedMods = [mods.cozy_core]
 		}
 		server {
 			server()
 			programArgument '--nogui'
+			loadedMods = [mods.cozy_core]
+		}
+		// Server game tests: `./gradlew :neoforge:runGameTestServer` starts vanilla's test server
+		// (a flat world, no window) and runs the checks in src/gametest: the rules both ways, the
+		// Hearth Lantern, and that every recipe in pack/ is in the game. It exits non-zero if one fails.
+		//   -Pexpect=<pack dir>  take the expected recipes from another pack folder (default: pack/)
+		gameTestServer {
+			type = 'gameTestServer'
+			loadedMods = [mods.cozy_core, mods.cozy_core_gametest]
+			programArguments.addAll('--tests', 'cozy_core_gametest:*')
+			systemProperty 'cozy.expect', rootProject.file(project.hasProperty('expect') ? project.expect : 'pack').absolutePath
 		}
 	}
 }
