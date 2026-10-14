@@ -44,8 +44,9 @@ case $LOADER in
 		modrinth_jar fabric-api fabric "$RUN/mods"
 		cp "$JAR" "$RUN/mods/"
 		for j in $(group_jars); do cp "$WOOD/$j" "$RUN/mods/"; done
-		# FrozenLib (group B) logs harmless config-entry errors on a first start.
-		if [ "$GROUP" = B ]; then export IGNORE='FrozenLib.*Unable to read config'; fi
+		# FrozenLib (group B) logs harmless config-entry errors on a first start. On Fabric the lines
+		# come from the "main" logger and don't name FrozenLib.
+		if [ "$GROUP" = B ]; then export IGNORE='\]: Unable to read config entry \w+$'; fi
 		server_files
 		echo "Fabric $MC, group $GROUP: $(ls "$RUN/mods" | tr '\n' ' ')"
 		node tools/server-test.js "$RUN" java "$RUN/server.jar" "datapack list enabled"
