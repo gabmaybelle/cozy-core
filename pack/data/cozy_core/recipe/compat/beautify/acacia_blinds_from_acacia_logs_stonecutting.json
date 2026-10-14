@@ -16,6 +16,7 @@
   "type": "minecraft:stonecutting",
   "ingredient": "#minecraft:acacia_logs",
   "result": {
+    "count": 4,
     "id": "beautify:acacia_blinds"
   }
 }

@@ -4,12 +4,9 @@
 #   tools/ci-load-test.sh fabric   [none|A|B|C] <wood mods folder> the mod on Fabric (+ Fabric API)
 #   tools/ci-load-test.sh neoforge [none|A|B]                      the mod on NeoForge
 #   tools/ci-load-test.sh vanilla                                  the data pack zip on plain vanilla
-# Wood-mod groups on Fabric: A = Biomes O' Plenty (with GlitchCore and TerraBlender) and Ecologics;
-# B = Wilder Wild (with FrozenLib) and Promenade; C = the decoration mods, Beautify (with Cloth
-# Config) and Farmer's Delight. On NeoForge, Ecologics is in B; there is no C yet: Beautify ReFoxed
-# 2.0.0 crashes on NeoForge 26.3's release builds by itself (ModConfig$Type.SERVER, 2026-10-13), and
-# Farmer's Delight has no NeoForge 26.3 build. Biolith, bundled
-# in Wilder Wild and Promenade, crashes with TerraBlender, so the two groups never share a server.
+# The Fabric groups are tools/group-jars.sh's: A and B wood mods, C the decoration mod (Beautify).
+# On NeoForge, Ecologics is in B; there is no C yet: Beautify ReFoxed 2.0.0 crashes on NeoForge
+# 26.3's release builds by itself (ModConfig$Type.SERVER, 2026-10-13).
 # Expects dist/ (node tools/build.js) and, for vanilla, ~/mc/server-bundler.jar (the CI build job).
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -18,15 +15,6 @@ MC=26.3 FABRIC_LOADER=0.19.5 FABRIC_INSTALLER=1.1.2
 JAR=$(ls dist/cozy-core-*-fabric-neoforge.jar | head -1)
 ZIP=$(ls dist/cozy-core-*[0-9].zip | head -1)
 RUN=$(mktemp -d)
-
-group_jars() { # the wood-mod jars of a group, from a folder of all of them
-	case $GROUP in
-		A) ls "$WOOD" | grep -E '^(BiomesOPlenty|GlitchCore|TerraBlender|Ecologics)' ;;
-		B) ls "$WOOD" | grep -E '^(WilderWild|FrozenLib|promenade)' ;;
-		C) ls "$WOOD" | grep -E '^(beautify|cloth-config|FarmersDelight)' ;;
-		*) true ;;
-	esac
-}
 
 modrinth_jar() { # newest Modrinth file of a project for a loader and Minecraft version -> folder
 	# (the newest release, or the newest beta when there's no release yet, as for BOP on NeoForge 26.3)
@@ -47,7 +35,7 @@ case $LOADER in
 		curl -fsSL -o "$RUN/server.jar" "https://meta.fabricmc.net/v2/versions/loader/$MC/$FABRIC_LOADER/$FABRIC_INSTALLER/server/jar"
 		modrinth_jar fabric-api fabric "$RUN/mods"
 		cp "$JAR" "$RUN/mods/"
-		for j in $(group_jars); do cp "$WOOD/$j" "$RUN/mods/"; done
+		for j in $(bash tools/group-jars.sh "$GROUP" "$WOOD"); do cp "$WOOD/$j" "$RUN/mods/"; done
 		# FrozenLib (group B) logs harmless config-entry errors on a first start. On Fabric the lines
 		# come from the "main" logger and don't name FrozenLib.
 		if [ "$GROUP" = B ]; then export IGNORE='\]: Unable to read config entry \w+$'; fi
@@ -85,5 +73,5 @@ case $LOADER in
 		echo "NeoForge $NEOFORGE, group $GROUP: $(ls "$RUN/mods" | tr '\n' ' ')"
 		node tools/server-test.js "$RUN" java "@libraries/net/neoforged/neoforge/$NEOFORGE/unix_args.txt" "datapack list enabled"
 		;;
-	*) echo "usage: tools/ci-load-test.sh fabric|neoforge|vanilla [none|A|B] [wood folder]"; exit 2 ;;
+	*) echo "usage: tools/ci-load-test.sh fabric|neoforge|vanilla [none|A|B|C] [wood folder]"; exit 2 ;;
 esac

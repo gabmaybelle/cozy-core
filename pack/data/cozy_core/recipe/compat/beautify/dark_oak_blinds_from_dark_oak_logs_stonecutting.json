@@ -16,6 +16,7 @@
   "type": "minecraft:stonecutting",
   "ingredient": "#minecraft:dark_oak_logs",
   "result": {
+    "count": 4,
     "id": "beautify:dark_oak_blinds"
   }
 }

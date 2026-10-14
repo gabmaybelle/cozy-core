@@ -16,6 +16,7 @@
   "type": "minecraft:stonecutting",
   "ingredient": "#minecraft:crimson_stems",
   "result": {
+    "count": 4,
     "id": "beautify:crimson_blinds"
   }
 }

@@ -25,20 +25,26 @@ there are no functions, only recipes, tags, trades and recipe-book advancements.
 - `art/icon.ase`: Gabby's own 32x32 sprite; `art/icon.png` is it at 512x512 (nearest-neighbour).
   The build puts it in the zip as `pack.png` and in the jar as `icon.png` (Fabric `icon`, NeoForge
   `logoFile`). Never replace it with generated art; re-export from the .ase.
-- `tools/fetch-test-mods.js "<test folder>"` downloads the supported wood mods (SHA-512 checked).
+- `tools/pack-info.js`: the version, Minecraft version and descriptions the generator and the
+  build share. `tools/group-jars.sh`: the wood-mod test groups (A, B, C), used by
+  `ci-load-test.sh` and the workflow, so they're defined once.
+- `tools/fetch-test-mods.js "<test folder>"` downloads the supported wood and decoration mods
+  (SHA-512 checked).
 - `tools/server-test.js` starts a dedicated server with the pack and prints errors.
 - `tools/crafter-test.js "<test folder>" <player> [mod ids]` crafts every crafting recipe with
   crafter blocks in a running test game (bridge with commands on) and checks the output.
 - `tools/trade-test.js "<test folder>" <n> wandering_trader | villager <profession> <level>`
   opens merchants through the bridge and counts their offers.
 - `pack/data/cozy_core/recipe/compat/<modid>/`: wood-mod recipes, each with Fabric and NeoForge
-  load conditions. Decoration mods (`DECOR_MODS`: Beautify, Farmer's Delight; Gabby's picks
-  2026-10-13, "fair price") get stonecutter recipes from one plank or one log at what the piece
-  costs in planks by its own recipe (slab/stick = ½, trapdoor = 3, log = 4), rounded down; pieces
-  worth more than a log, or needing non-wood items, are skipped and listed by the generator. They
-  only use vanilla woods, because a compat recipe's load condition names one mod. Mods Gabby wants
-  later, once they reach 26.3: Let's Do Vinery, Supplementaries, Decorative Blocks, Nature's Spirit,
-  Macaw's (declined for Espresso, so ask first).
+  load conditions. Decoration mods (`DECOR_MODS`: Beautify; Gabby's pick 2026-10-13) get the same
+  cheap rate as vanilla's pieces (`decorCutting`): a piece made of one vanilla wood (planks, slabs,
+  logs, sticks) is one per plank and four per log, or its own rate per plank if that's cheaper.
+  Pieces needing non-wood items or mixing woods are skipped. They only use vanilla woods, because
+  a compat recipe's load condition names one mod. Farmer's Delight was tried and dropped (2026-10-13):
+  its cabinets are its only all-wood pieces and the rule was decided per mod, not per piece; add it
+  back if Gabby wants its cabinets cheap too. Mods Gabby wants later, once they reach 26.3: Let's Do
+  Vinery, Supplementaries, Decorative Blocks, Nature's Spirit, Macaw's (declined for Espresso, so
+  ask first).
 - Beautify ReFoxed 2.0.0 (the NeoForge port) crashes by itself on NeoForge 26.3 release builds
   (`ModConfig$Type.SERVER`, 2026-10-13), so CI has no NeoForge decoration group until it's fixed.
 
@@ -58,8 +64,8 @@ there are no functions, only recipes, tags, trades and recipe-book advancements.
   `-PwoodMods=<folder>` per wood-mod group) clicks every stonecutter recipe in the real screen.
 - **CI** (`.github/workflows/build.yml`) runs all of it on every push: the build (vanilla jar from
   Mojang, wood mods from Modrinth) and a check that the committed `pack/` is what the generator
-  makes; `tools/ci-load-test.sh` on Fabric, NeoForge (each alone and with wood-mod groups A and B)
-  and plain vanilla with the zip; and the stonecutter test alone and with each group.
+  makes; `tools/ci-load-test.sh` on Fabric (alone and with groups A, B and C), NeoForge (alone and
+  with A and B) and plain vanilla with the zip; and the stonecutter test alone and with each group.
   `node tools/build.js <vanilla server jar> <wood mods folder>` builds from given inputs.
 
 ## Gotchas
@@ -108,8 +114,8 @@ computer and others in the cloud. These rules keep their work fitting together.
 or test names. Check the diff for these before every push.
 
 **Tests.**
-- `node tools/build.js` and the server load test must pass before
-  a commit. The game test opens a real game window for a minute or two.
+- `node tools/build.js` and the server load test must pass before a commit. The game test opens a
+  real game window for a minute or two.
 - A new or changed check should fail with the feature switched off: run it that way once, then
   put the code back. A check that compares against the setting it tests proves nothing.
 - On Linux without a screen, run game tests under `xvfb-run -a`. 26.3 also needs

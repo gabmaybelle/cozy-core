@@ -16,6 +16,7 @@
   "type": "minecraft:stonecutting",
   "ingredient": "#minecraft:birch_logs",
   "result": {
+    "count": 4,
     "id": "beautify:birch_blinds"
   }
 }

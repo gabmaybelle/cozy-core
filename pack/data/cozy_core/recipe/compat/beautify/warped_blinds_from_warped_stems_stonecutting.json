@@ -16,6 +16,7 @@
   "type": "minecraft:stonecutting",
   "ingredient": "#minecraft:warped_stems",
   "result": {
+    "count": 4,
     "id": "beautify:warped_blinds"
   }
 }

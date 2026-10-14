@@ -13,10 +13,7 @@
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
 const zipDir = require('./zip');
 
-const VERSION = '0.1.0';
-const MC = '26.3';
-const DESCRIPTION = 'Put the kettle on and build. Thoughtful recipes and trades that take the grind out of decorating.';
-const DATAPACK_DESCRIPTION = 'Put the kettle on and build. Thoughtful recipes that take the grind out of decorating.';
+const { VERSION, MC, DESCRIPTION, DATAPACK_DESCRIPTION } = require('./pack-info');
 const ROOT = path.join(__dirname, '..');
 const PACK = path.join(ROOT, 'pack');
 const STAGE = path.join(ROOT, 'build');

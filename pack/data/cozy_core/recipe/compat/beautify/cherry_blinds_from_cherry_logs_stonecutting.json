@@ -16,6 +16,7 @@
   "type": "minecraft:stonecutting",
   "ingredient": "#minecraft:cherry_logs",
   "result": {
+    "count": 4,
     "id": "beautify:cherry_blinds"
   }
 }
