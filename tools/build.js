@@ -21,6 +21,9 @@ const ROOT = path.join(__dirname, '..');
 const PACK = path.join(ROOT, 'pack');
 const STAGE = path.join(ROOT, 'build');
 const DIST = path.join(ROOT, 'dist');
+// Gabby's own sprite (art/icon.ase, 32x32), exported at 512x512 with each pixel kept sharp.
+// It's the data pack's pack.png and the mod's icon.png. Never swap in generated art.
+const ICON = path.join(ROOT, 'art', 'icon.png');
 
 execFileSync(process.execPath, [path.join(__dirname, 'generate.js')], { stdio: 'inherit' });
 fs.rmSync(STAGE, { recursive: true, force: true });
@@ -35,6 +38,7 @@ const mcmeta = JSON.parse(fs.readFileSync(path.join(datapack, 'pack.mcmeta'), 'u
 mcmeta.pack.description.text = DATAPACK_DESCRIPTION;
 fs.writeFileSync(path.join(datapack, 'pack.mcmeta'), JSON.stringify(mcmeta, null, 2) + '\n');
 fs.copyFileSync(path.join(ROOT, 'LICENSE'), path.join(datapack, 'LICENSE'));
+fs.copyFileSync(ICON, path.join(datapack, 'pack.png'));
 
 // The mod: the whole pack, plus Fabric and NeoForge metadata. Fabric only skips compat/ recipes
 // with Fabric API's resource conditions installed, so the mod requires Fabric API (by that name,
@@ -42,9 +46,10 @@ fs.copyFileSync(path.join(ROOT, 'LICENSE'), path.join(datapack, 'LICENSE'));
 const mod = path.join(STAGE, 'mod');
 fs.cpSync(PACK, mod, { recursive: true });
 fs.copyFileSync(path.join(ROOT, 'LICENSE'), path.join(mod, 'LICENSE'));
+fs.copyFileSync(ICON, path.join(mod, 'icon.png'));
 fs.writeFileSync(path.join(mod, 'fabric.mod.json'), JSON.stringify({
 	schemaVersion: 1, id: 'cozy_core', version: VERSION, name: 'Cozy Core', description: DESCRIPTION,
-	authors: ['Gabby'], license: 'MIT', environment: '*',
+	authors: ['Gabby'], license: 'MIT', icon: 'icon.png', environment: '*',
 	depends: { minecraft: `~${MC}`, fabricloader: '>=0.16.0', 'fabric-api': '*' },
 }, null, 2) + '\n');
 fs.mkdirSync(path.join(mod, 'META-INF'), { recursive: true });
@@ -56,6 +61,7 @@ fs.writeFileSync(path.join(mod, 'META-INF', 'neoforge.mods.toml'), `license = "M
 modId = "cozy_core"
 version = "${VERSION}"
 displayName = "Cozy Core"
+logoFile = "icon.png"
 authors = "Gabby"
 description = "${DESCRIPTION}"
 

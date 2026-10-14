@@ -68,4 +68,4 @@ Minecraft 26.3. The mod version runs on Fabric (with Fabric API) or NeoForge.
 
 [MIT](LICENSE).
 
-Cozy Core is made by Gabby with help from Claude, an AI assistant.
+Cozy Core is made by Gabby with help from Claude, an AI assistant. The icon is Gabby's own pixel art: `art/icon.ase` is the source, and `art/icon.png` is it at 512 pixels, each pixel kept sharp.

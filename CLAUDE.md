@@ -22,6 +22,9 @@ there are no functions, only recipes, tags, trades and recipe-book advancements.
   (everything as a code-free Fabric/NeoForge mod: recipes, trades and `compat/`). The jar requires
   Fabric API on Fabric; its neoforge.mods.toml has no modLoader/loaderVersion (NeoForge's advice
   for data-only mods; "lowcodefml" is deprecated). The build stops if a mod-only file would reach the zip.
+- `art/icon.ase`: Gabby's own 32x32 sprite; `art/icon.png` is it at 512x512 (nearest-neighbour).
+  The build puts it in the zip as `pack.png` and in the jar as `icon.png` (Fabric `icon`, NeoForge
+  `logoFile`). Never replace it with generated art; re-export from the .ase.
 - `tools/fetch-test-mods.js "<test folder>"` downloads the supported wood mods (SHA-512 checked).
 - `tools/server-test.js` starts a dedicated server with the pack and prints errors.
 - `tools/crafter-test.js "<test folder>" <player> [mod ids]` crafts every crafting recipe with
