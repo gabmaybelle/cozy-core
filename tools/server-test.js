@@ -1,6 +1,6 @@
 // Starts a dedicated server in <folder> (server.properties, eula.txt and world/datapacks already
 // set up), waits for "Done", runs the given console commands, stops it and prints every log line
-// that mentions an error, cozy_core, or a command's reply.
+// that mentions an error, cozy_core, or a command's reply. Exits 1 unless it loaded with no problems.
 //   node tools/server-test.js "<folder>" "<java.exe>" "<server jar>" ["command" ...]
 const { spawn } = require('child_process');
 
@@ -28,5 +28,10 @@ server.on('exit', code => {
 	clearTimeout(timeout);
 	const keep = lines.filter(l => /ERROR|WARN|Exception|cozy_core|Couldn't|Failed|Unknown|There are|Done \(/.test(l));
 	console.log(keep.join('\n'));
-	console.log(`--- server exited (${code}); ${lines.length} log lines, ${lines.filter(l => /ERROR/.test(l)).length} ERROR lines`);
+	// Problems: anything that stops data loading, or an ERROR line that isn't known noise (Windows
+	// process statistics, offline mode). Exits 1 if the server never finished loading or had one.
+	const problems = lines.filter(l => /ERROR|Errors in element|Failed to load registries/.test(l)
+		&& !/Perflib|oshi|Win32Exception|Realms|realms|authlib|Failed to fetch/.test(l));
+	console.log(`--- server exited (${code}); ${lines.length} log lines, ${problems.length} problem line(s)`);
+	process.exit(sent && problems.length === 0 ? 0 : 1);
 });

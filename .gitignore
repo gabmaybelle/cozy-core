@@ -2,3 +2,7 @@ tools/.vanilla-*/
 tools/.mods-*/
 build/
 dist/
+tools/.cache/
+gametest/build/
+gametest/.gradle/
+gametest/run/

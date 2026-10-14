@@ -1,0 +1,15 @@
+{
+	"schemaVersion": 1,
+	"id": "cozy_core_gametest",
+	"version": "1.0.0",
+	"name": "Cozy Core game tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-client-gametest": [
+			"com.gabbymaybelle.cozycore.gametest.StonecutterTest"
+		]
+	},
+	"depends": {
+		"cozy_core": "*"
+	}
+}

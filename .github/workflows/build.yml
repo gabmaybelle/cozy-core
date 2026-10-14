@@ -1,0 +1,160 @@
+# Builds Cozy Core on every push and pull request, then tests what it built:
+# - build: regenerates the pack from vanilla 26.3's data and the wood mods, checks for recipe
+#   clashes and block-making loops, and checks the committed pack/ is what the generator makes
+#   (a wood mod changing its recipes shows up here too). The downloads are attached as "Downloads".
+# - load: real dedicated servers (Fabric, NeoForge and plain vanilla with the data pack), with and
+#   without the wood mods, must load with no data errors.
+# - stonecutter: the stonecutter screen test (gametest/) clicks every stonecutter recipe in a real
+#   game, with and without the wood mods.
+
+name: build
+on: [pull_request, push]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    # A pull request from a branch in this repo is already built by its push; only build forks' twice.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+      - name: setup node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: vanilla 26.3 server
+        run: |
+          mkdir -p ~/mc
+          url=$(curl -fsS https://piston-meta.mojang.com/mc/game/version_manifest_v2.json | jq -r '.versions[] | select(.id == "26.3").url')
+          curl -fsSL -o ~/mc/server-bundler.jar "$(curl -fsS "$url" | jq -r '.downloads.server.url')"
+          unzip -p ~/mc/server-bundler.jar META-INF/versions/26.3/server-26.3.jar > ~/mc/server-26.3.jar
+      - name: wood mods
+        run: node tools/fetch-test-mods.js ~/wood
+      - name: build
+        run: |
+          node tools/build.js ~/mc/server-26.3.jar ~/wood/mods | tee build.log
+          grep -q "No recipe clashes or block-making loops found." build.log
+      - name: the committed pack is what the generator makes
+        run: |
+          if [ -n "$(git status --porcelain pack)" ]; then
+            git status --short pack | head -20
+            echo "pack/ differs from the generator's output: run node tools/build.js and commit pack/ (or a wood mod changed its recipes)."
+            exit 1
+          fi
+      - name: capture the downloads
+        uses: actions/upload-artifact@v7
+        with:
+          name: Downloads
+          path: dist/
+      - name: keep the test inputs for the other jobs
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-inputs
+          path: |
+            ~/mc/server-bundler.jar
+            ~/wood/mods/
+
+  load:
+    needs: build
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { loader: fabric, group: none, name: 'Fabric' }
+          - { loader: fabric, group: A, name: 'Fabric with Biomes O'' Plenty and Ecologics' }
+          - { loader: fabric, group: B, name: 'Fabric with Wilder Wild and Promenade' }
+          - { loader: neoforge, group: none, name: 'NeoForge' }
+          - { loader: neoforge, group: A, name: 'NeoForge with Biomes O'' Plenty and Ecologics' }
+          - { loader: neoforge, group: B, name: 'NeoForge with Wilder Wild and Promenade' }
+          - { loader: vanilla, group: none, name: 'vanilla with the data pack' }
+    name: load (${{ matrix.name }})
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+      - name: setup node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: setup jdk
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+      - name: the downloads
+        uses: actions/download-artifact@v8
+        with:
+          name: Downloads
+          path: dist/
+      - name: the test inputs
+        uses: actions/download-artifact@v8
+        with:
+          name: test-inputs
+          path: ~/
+      - name: load test
+        timeout-minutes: 15
+        run: bash tools/ci-load-test.sh ${{ matrix.loader }} ${{ matrix.group }} ~/wood/mods
+
+  stonecutter:
+    needs: build
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { group: none, name: 'vanilla wood' }
+          - { group: A, name: 'with Biomes O'' Plenty and Ecologics' }
+          - { group: B, name: 'with Wilder Wild and Promenade' }
+    name: stonecutter (${{ matrix.name }})
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+      - name: setup jdk
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+      - name: setup gradle (with caching)
+        uses: gradle/actions/setup-gradle@v6
+      - name: the downloads
+        uses: actions/download-artifact@v8
+        with:
+          name: Downloads
+          path: dist/
+      - name: the test inputs
+        uses: actions/download-artifact@v8
+        with:
+          name: test-inputs
+          path: ~/
+      - name: this group's wood mods
+        run: |
+          mkdir -p ~/group
+          case ${{ matrix.group }} in
+            A) ls ~/wood/mods | grep -E '^(BiomesOPlenty|GlitchCore|TerraBlender|Ecologics)' | xargs -I{} cp ~/wood/mods/{} ~/group/ ;;
+            B) ls ~/wood/mods | grep -E '^(WilderWild|FrozenLib|promenade)' | xargs -I{} cp ~/wood/mods/{} ~/group/ ;;
+          esac
+          ls ~/group
+      - name: install EGL
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libegl1 libegl-mesa0
+      - name: stonecutter screen test
+        working-directory: gametest
+        # 26.3 asks for an sRGB-capable window, which Xvfb's GLX can't give, so the game would hang
+        # at startup. Mesa's EGL can; SDL uses it with this set.
+        env:
+          SDL_VIDEO_FORCE_EGL: '1'
+        timeout-minutes: 20
+        run: |
+          chmod +x gradlew
+          args="-Pexpect=$GITHUB_WORKSPACE/pack"
+          if [ "${{ matrix.group }}" != none ]; then args="$args -PwoodMods=$HOME/group"; fi
+          xvfb-run -a ./gradlew runClientGameTest $args
+      - name: capture the screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: Stonecutter screenshots (${{ matrix.name }})
+          path: gametest/build/run/clientGameTest/screenshots/
+          if-no-files-found: ignore

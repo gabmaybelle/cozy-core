@@ -9,7 +9,7 @@
 //   show "Worlds using Experimental Settings are not supported" every time the world opens (no
 //   Realms either), and they need a restart. A mod's data doesn't get that warning (both tested
 //   2026-10-13). Without them the zip reloads live with /reload.
-//   node tools/build.js
+//   node tools/build.js [vanilla 26.3 server jar] [folder of wood-mod jars]
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
 const zipDir = require('./zip');
 
@@ -25,7 +25,8 @@ const DIST = path.join(ROOT, 'dist');
 // It's the data pack's pack.png and the mod's icon.png. Never swap in generated art.
 const ICON = path.join(ROOT, 'art', 'icon.png');
 
-execFileSync(process.execPath, [path.join(__dirname, 'generate.js')], { stdio: 'inherit' });
+// Anything after build.js is passed on to generate.js: [vanilla jar] [wood mods folder] (CI uses both).
+execFileSync(process.execPath, [path.join(__dirname, 'generate.js'), ...process.argv.slice(2)], { stdio: 'inherit' });
 fs.rmSync(STAGE, { recursive: true, force: true });
 fs.mkdirSync(DIST, { recursive: true });
 const MOD_ONLY = /^data\/(cozy_core\/(recipe|advancement\/recipes)\/compat|cozy_core\/villager_trade|minecraft\/trade_set|minecraft\/tags\/villager_trade)(\/|$)/;

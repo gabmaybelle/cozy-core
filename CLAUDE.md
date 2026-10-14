@@ -43,11 +43,16 @@ there are no functions, only recipes, tags, trades and recipe-book advancements.
   recipe id unlocks with `recipe give`, and opening the world shows no experimental warning.
   Note `recipe give *` undercounts: unlocking one recipe of a group completes its recipe-book
   advancement, which hands out the rest of the group first.
-- NeoForge: `node ../tools/neoforge-server-test.js "<scratch>" --fresh-world --mod dist/<jar>`, alone,
+- NeoForge: `node tools/neoforge-server-test.js "<scratch>" --fresh-world --mod dist/<jar>`, alone,
   with `--modrinth biomes-o-plenty,terrablender`, and with `--modrinth ecologics,promenade,wilder-wild
   --ignore "FrozenLib.*Unable to read config"`; each must end "loaded ... 0 problem line(s)".
-- The stonecutter screen: `../cozy-core-gametest` (`./gradlew runClientGameTest -Pexpect=../cozy-core/pack`,
-  plus `-PwoodMods=<folder>` per wood-mod group) clicks every stonecutter recipe in the real screen.
+- The stonecutter screen: `gametest/` (`./gradlew runClientGameTest -Pexpect=../pack`, plus
+  `-PwoodMods=<folder>` per wood-mod group) clicks every stonecutter recipe in the real screen.
+- **CI** (`.github/workflows/build.yml`) runs all of it on every push: the build (vanilla jar from
+  Mojang, wood mods from Modrinth) and a check that the committed `pack/` is what the generator
+  makes; `tools/ci-load-test.sh` on Fabric, NeoForge (each alone and with wood-mod groups A and B)
+  and plain vanilla with the zip; and the stonecutter test alone and with each group.
+  `node tools/build.js <vanilla server jar> <wood mods folder>` builds from given inputs.
 
 ## Gotchas
 
