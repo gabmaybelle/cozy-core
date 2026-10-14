@@ -40,13 +40,17 @@ const vanillaJson = rel => readJson(path.join(VANILLA, rel));
 // from the jars, so their own wood types are covered the same way as vanilla's. Every recipe made
 // for a mod only loads when that mod is installed (Fabric and NeoForge load conditions).
 const WOOD_MODS = ['biomesoplenty', 'ecologics', 'wilderwild', 'promenade'];
-const JAR_PREFIX = { biomesoplenty: 'BiomesOPlenty', ecologics: 'Ecologics', wilderwild: 'WilderWild', promenade: 'promenade' };
+// Decoration mods (Gabby's picks, 2026-10-13): their wooden pieces go in the stonecutter at a fair
+// price (see fairPrice). Beautify's Fabric and NeoForge ports share the mod id and the recipes.
+const DECOR_MODS = ['beautify', 'farmersdelight'];
+const JAR_PREFIX = { biomesoplenty: 'BiomesOPlenty', ecologics: 'Ecologics', wilderwild: 'WilderWild', promenade: 'promenade',
+	beautify: 'beautify-fabric', farmersdelight: 'FarmersDelight' };
 const MOD_CACHE = path.join(__dirname, `.mods-${MC_VERSION}`);
 const DEFAULT_MODS = path.join(ROOT, '..', 'cozy-core-test', 'mods'); // filled by tools/fetch-test-mods.js
 
 function extractMods(modsDir) {
 	const roots = {};
-	for (const modid of WOOD_MODS) {
+	for (const modid of [...WOOD_MODS, ...DECOR_MODS]) {
 		const cached = fs.existsSync(MOD_CACHE) && fs.readdirSync(MOD_CACHE).find(d => d.startsWith(JAR_PREFIX[modid]));
 		if (cached) { roots[modid] = path.join(MOD_CACHE, cached, 'data'); continue; }
 		const jar = fs.existsSync(modsDir) && fs.readdirSync(modsDir).find(f => f.startsWith(JAR_PREFIX[modid]) && f.endsWith('.jar'));
@@ -185,6 +189,57 @@ function woodcutting(recipes) {
 		stonecutting([...inputs][0], r.result.id, 1); n++;
 	}
 	return { n, planks: Object.keys(sources) };
+}
+
+// ---------- 1b. decoration mods' wooden pieces at a fair price ----------
+// What a piece costs in planks by its own crafting recipe (vanilla prices: a slab or a stick is half
+// a plank, a trapdoor 3, a log 4), and the stonecutter hands out no more than that. The stonecutter
+// takes one item, so a piece is cut from one plank or one log (4 planks), rounded down: a trellis
+// (1.5 planks) is 2 per log, blinds (3 planks) 1 per log. Pieces costing more than a log, or needing
+// anything that isn't wood (a picture frame's wool), stay crafting-table recipes.
+
+const woodValue = {}; // item -> { plank, planks }: which wood it is and what it's worth
+const logSources = {}; // plank -> [{ logs, perLog }]
+
+function learnWoodValues(recipes) {
+	for (const r of Object.values(recipes)) {
+		if (r.group !== 'planks' || r.type !== 'minecraft:crafting_shapeless' || r.ingredients.length !== 1) continue;
+		const plank = r.result.id, perLog = r.result.count || 1;
+		(logSources[plank] ??= []).push({ logs: r.ingredients[0], perLog });
+		woodValue[plank] = { plank, planks: 1 };
+		for (const log of ingredientItems(r.ingredients[0])) woodValue[log] ??= { plank, planks: perLog };
+	}
+	// Pieces made of one plank (and sticks), worth what they cost: slabs, trapdoors, fences...
+	for (const r of Object.values(recipes)) {
+		if (!(r.group in PER_PLANK) && r.group !== 'wooden_slab') continue;
+		const inputs = r.type === 'minecraft:crafting_shaped' ? r.pattern.join('').replace(/ /g, '').split('').map(c => r.key[c]) : recipeInputs(r);
+		const planks = inputs.filter(i => woodValue[i]);
+		if (!planks.length || planks.length + inputs.filter(i => STICKS.has(i)).length !== inputs.length) continue;
+		const total = inputs.reduce((s, i) => s + (STICKS.has(i) ? 0.5 : woodValue[i].planks), 0);
+		woodValue[r.result.id] ??= { plank: woodValue[planks[0]].plank, planks: total / (r.result.count || 1) };
+	}
+}
+
+function fairPrice(recipes) {
+	let n = 0;
+	for (const r of Object.values(recipes)) {
+		if (r.type !== 'minecraft:crafting_shaped' && r.type !== 'minecraft:crafting_shapeless') continue;
+		// Every slot, counted (a shaped recipe's key letter can be used several times).
+		const slots = r.type === 'minecraft:crafting_shaped' ? r.pattern.join('').replace(/ /g, '').split('').map(c => r.key[c]) : r.ingredients;
+		if (slots.some(s => typeof s !== 'string' || (!STICKS.has(s) && !woodValue[s]))) continue; // not only wood
+		const woods = new Set(slots.filter(s => woodValue[s]).map(s => woodValue[s].plank));
+		if (woods.size !== 1) continue; // one wood type, so the piece matches its log
+		const plank = [...woods][0];
+		const cost = slots.reduce((s, i) => s + (STICKS.has(i) ? 0.5 : woodValue[i].planks), 0) / (r.result.count || 1);
+		const bestLog = Math.max(0, ...(logSources[plank] || []).map(l => l.perLog));
+		if (cost > bestLog) { console.log(`  fair price: ${r.result.id} costs ${cost} planks, more than a log; stays a crafting recipe`); continue; }
+		if (Math.floor(1 / cost) >= 1) { stonecutting(plank, r.result.id, Math.floor(1 / cost)); n++; }
+		for (const { logs, perLog } of logSources[plank] || []) {
+			const per = Math.floor(perLog / cost);
+			if (per >= 1) { stonecutting(logs, r.result.id, per); n++; }
+		}
+	}
+	return n;
 }
 
 function bambooMosaic() { // bamboo's second plank: 1 bamboo plank -> 1 mosaic, mosaic -> stairs/slab
@@ -420,8 +475,13 @@ const counts = {
 	woodcutting: wood.n + bambooMosaic(), planks_from_slabs: slabsToPlanks(recipes, wood.planks, 'planks_from_slabs'),
 	redye: redye(), hard_blocks: hardBlocks(),
 };
+// What vanilla's wooden pieces are worth, for the decoration mods' fair prices. Vanilla only: a
+// decoration recipe's load condition names just its own mod, so it mustn't use another mod's logs
+// (Wilder Wild's hollowed logs, say). Beautify and Farmer's Delight only make vanilla woods.
+learnWoodValues(recipes);
 for (const [modid, root] of Object.entries(modRoots)) {
 	currentMod = modid;
+	if (DECOR_MODS.includes(modid)) { counts[modid] = { fair_price: fairPrice(loadRecipes(root, modid)) }; continue; }
 	const own = loadRecipes(root, modid); // only the mod's own recipe folder
 	const modWood = woodcutting(own);
 	counts[modid] = { woodcutting: modWood.n, planks_from_slabs: slabsToPlanks(own, modWood.planks, 'planks_from_slabs') };

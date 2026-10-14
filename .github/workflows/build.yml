@@ -5,7 +5,7 @@
 # - load: real dedicated servers (Fabric, NeoForge and plain vanilla with the data pack), with and
 #   without the wood mods, must load with no data errors.
 # - stonecutter: the stonecutter screen test (gametest/) clicks every stonecutter recipe in a real
-#   game, with and without the wood mods.
+#   game, with and without the wood mods (and the decoration mods).
 
 name: build
 on: [pull_request, push]
@@ -67,6 +67,7 @@ jobs:
           - { loader: fabric, group: none, name: 'Fabric' }
           - { loader: fabric, group: A, name: 'Fabric with Biomes O'' Plenty and Ecologics' }
           - { loader: fabric, group: B, name: 'Fabric with Wilder Wild and Promenade' }
+          - { loader: fabric, group: C, name: 'Fabric with Beautify and Farmer''s Delight' }
           - { loader: neoforge, group: none, name: 'NeoForge' }
           - { loader: neoforge, group: A, name: 'NeoForge with Biomes O'' Plenty' }
           - { loader: neoforge, group: B, name: 'NeoForge with Ecologics, Wilder Wild and Promenade' }
@@ -108,6 +109,7 @@ jobs:
           - { group: none, name: 'vanilla wood' }
           - { group: A, name: 'with Biomes O'' Plenty and Ecologics' }
           - { group: B, name: 'with Wilder Wild and Promenade' }
+          - { group: C, name: 'with Beautify and Farmer''s Delight' }
     name: stonecutter (${{ matrix.name }})
     steps:
       - name: checkout repository
@@ -135,6 +137,7 @@ jobs:
           case ${{ matrix.group }} in
             A) ls ~/wood/mods | grep -E '^(BiomesOPlenty|GlitchCore|TerraBlender|Ecologics)' | xargs -I{} cp ~/wood/mods/{} ~/group/ ;;
             B) ls ~/wood/mods | grep -E '^(WilderWild|FrozenLib|promenade)' | xargs -I{} cp ~/wood/mods/{} ~/group/ ;;
+            C) ls ~/wood/mods | grep -E '^(beautify|cloth-config|FarmersDelight)' | xargs -I{} cp ~/wood/mods/{} ~/group/ ;;
           esac
           ls ~/group
       - name: install EGL

@@ -185,6 +185,14 @@ public class StonecutterTest implements FabricClientGameTest {
 			throw new AssertionError("Failed: " + (index < COLUMNS * ROWS ? "clicking" : "picking") + " recipe button " + index
 					+ " didn't select it (the screen's buttons aren't where the test expects, or the click was ignored)", e);
 		}
+		// The server fills the result slot and sends it over; on a busy machine that took more than
+		// two ticks once (a correct recipe read as "gave 0 air"). Wait for it, and let the caller's
+		// check report what's there if it never comes.
+		try {
+			ctx.waitFor(mc -> !((StonecutterMenu) mc.player.containerMenu).getSlot(StonecutterMenu.RESULT_SLOT).getItem().isEmpty(), 40);
+		} catch (AssertionError ignored) {
+			// reported by the caller
+		}
 		ctx.waitTicks(2);
 	}
 

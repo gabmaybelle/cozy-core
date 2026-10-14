@@ -5,7 +5,9 @@ const fs = require('fs'), path = require('path'), crypto = require('crypto');
 
 const MC = '26.3';
 // TerraBlender is a BOP requirement Modrinth's dependency list doesn't show (found 2026-10-13).
-const PROJECTS = ['biomes-o-plenty', 'glitchcore', 'terrablender', 'ecologics', 'wilder-wild', 'frozenlib', 'promenade'];
+// Beautify (Refabricated, the Fabric port) needs Cloth Config.
+const PROJECTS = ['biomes-o-plenty', 'glitchcore', 'terrablender', 'ecologics', 'wilder-wild', 'frozenlib', 'promenade',
+	'beautify-refabricated', 'cloth-config', 'farmers-delight-refabricated'];
 const UA = { 'User-Agent': 'gabmaybelle/cozy-core test setup' };
 
 (async () => {

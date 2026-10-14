@@ -42,6 +42,13 @@ change colour without starting over.
 - masons sell tuff and mud bricks at their first level, and calcite and packed mud at their
   second, again with one more offer at each of those levels.
 
+**Decorations in the stonecutter** (in the Fabric and NeoForge version, when the mod is
+installed). [Beautify](https://modrinth.com/mod/beautify-refabricated)'s blinds and trellises
+can be cut from a log, at the same price in wood as their own recipes: a log makes one set of
+blinds or two trellises. Picture frames still need wool, so they stay at the crafting table.
+[Farmer's Delight](https://modrinth.com/mod/farmers-delight-refabricated)'s cabinets cost more
+wood than a log holds, so they stay crafted too, but the mod is ready for anything cheaper it adds.
+
 New recipes show up in your recipe book as you pick up what they need, like vanilla's.
 
 ## Two ways to install
@@ -51,6 +58,7 @@ New recipes show up in your recipe book as you pick up what they need, like vani
 | Recipes | Yes | Yes |
 | Trades | No | Yes |
 | Wood from other mods | No | Biomes O' Plenty, Ecologics, Promenade and Wilder Wild |
+| Decorations from other mods | No | Beautify (and Farmer's Delight, when it adds something a log can cover) |
 | Install | Into a world's `datapacks` folder; `/reload` and it works straight away | Into your `mods` folder (Fabric needs [Fabric API](https://modrinth.com/mod/fabric-api)) |
 
 The data pack is recipes only so it can go into a world you're already playing, with no restart

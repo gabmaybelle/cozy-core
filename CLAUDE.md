@@ -32,7 +32,15 @@ there are no functions, only recipes, tags, trades and recipe-book advancements.
 - `tools/trade-test.js "<test folder>" <n> wandering_trader | villager <profession> <level>`
   opens merchants through the bridge and counts their offers.
 - `pack/data/cozy_core/recipe/compat/<modid>/`: wood-mod recipes, each with Fabric and NeoForge
-  load conditions.
+  load conditions. Decoration mods (`DECOR_MODS`: Beautify, Farmer's Delight; Gabby's picks
+  2026-10-13, "fair price") get stonecutter recipes from one plank or one log at what the piece
+  costs in planks by its own recipe (slab/stick = ½, trapdoor = 3, log = 4), rounded down; pieces
+  worth more than a log, or needing non-wood items, are skipped and listed by the generator. They
+  only use vanilla woods, because a compat recipe's load condition names one mod. Mods Gabby wants
+  later, once they reach 26.3: Let's Do Vinery, Supplementaries, Decorative Blocks, Nature's Spirit,
+  Macaw's (declined for Espresso, so ask first).
+- Beautify ReFoxed 2.0.0 (the NeoForge port) crashes by itself on NeoForge 26.3 release builds
+  (`ModConfig$Type.SERVER`, 2026-10-13), so CI has no NeoForge decoration group until it's fixed.
 
 ## Build and test
 

@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 # CI server load tests. Each one starts a real dedicated server with Cozy Core and fails unless the
 # world loads with no data errors.
-#   tools/ci-load-test.sh fabric   [none|A|B] <wood mods folder>   the mod on Fabric (+ Fabric API)
+#   tools/ci-load-test.sh fabric   [none|A|B|C] <wood mods folder> the mod on Fabric (+ Fabric API)
 #   tools/ci-load-test.sh neoforge [none|A|B]                      the mod on NeoForge
 #   tools/ci-load-test.sh vanilla                                  the data pack zip on plain vanilla
 # Wood-mod groups on Fabric: A = Biomes O' Plenty (with GlitchCore and TerraBlender) and Ecologics;
-# B = Wilder Wild (with FrozenLib) and Promenade. On NeoForge, Ecologics is in B. Biolith, bundled
+# B = Wilder Wild (with FrozenLib) and Promenade; C = the decoration mods, Beautify (with Cloth
+# Config) and Farmer's Delight. On NeoForge, Ecologics is in B; there is no C yet: Beautify ReFoxed
+# 2.0.0 crashes on NeoForge 26.3's release builds by itself (ModConfig$Type.SERVER, 2026-10-13), and
+# Farmer's Delight has no NeoForge 26.3 build. Biolith, bundled
 # in Wilder Wild and Promenade, crashes with TerraBlender, so the two groups never share a server.
 # Expects dist/ (node tools/build.js) and, for vanilla, ~/mc/server-bundler.jar (the CI build job).
 set -euo pipefail
@@ -20,6 +23,7 @@ group_jars() { # the wood-mod jars of a group, from a folder of all of them
 	case $GROUP in
 		A) ls "$WOOD" | grep -E '^(BiomesOPlenty|GlitchCore|TerraBlender|Ecologics)' ;;
 		B) ls "$WOOD" | grep -E '^(WilderWild|FrozenLib|promenade)' ;;
+		C) ls "$WOOD" | grep -E '^(beautify|cloth-config|FarmersDelight)' ;;
 		*) true ;;
 	esac
 }

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- In the mod version: Beautify's blinds and trellises can be cut from a log in the stonecutter,
+  for the same wood their own recipes cost (one set of blinds or two trellises per log). Farmer's
+  Delight is supported the same way, though its cabinets cost more wood than a log holds, so for
+  now nothing changes there.
+
 ## 0.1.0
 
 The first release.
