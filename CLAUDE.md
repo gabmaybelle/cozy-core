@@ -35,6 +35,8 @@ there are no functions, only recipes, tags, trades and recipe-book advancements.
   crafter blocks in a running test game (bridge with commands on) and checks the output.
 - `tools/trade-test.js "<test folder>" <n> wandering_trader | villager <profession> <level>`
   opens merchants through the bridge and counts their offers.
+  Both talk to the bridge through `mcf.js` from Gabby's local toolkit (`~/mods-dev/tools`, not in
+  this repo; `MCF` points them elsewhere), so they're for her machine, not CI.
 - `pack/data/cozy_core/recipe/compat/<modid>/`: wood-mod recipes, each with Fabric and NeoForge
   load conditions. Decoration mods (`DECOR_MODS`: Beautify; Gabby's pick 2026-10-13) get the same
   cheap rate as vanilla's pieces (`decorCutting`): a piece made of one vanilla wood (planks, slabs,
