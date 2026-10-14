@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks_from_slabs",
+  "ingredients": [
+    "minecraft:cherry_slab",
+    "minecraft:cherry_slab"
+  ],
+  "result": {
+    "id": "minecraft:cherry_planks"
+  }
+}

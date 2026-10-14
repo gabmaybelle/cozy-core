@@ -1,0 +1,54 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "promenade"
+      ]
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "promenade"
+    }
+  ],
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_items": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "promenade:dark_amaranth_slab",
+              "promenade:maple_slab",
+              "promenade:palm_slab",
+              "promenade:sakura_slab"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipes": "cozy_core:compat/promenade/dark_amaranth_planks_from_slabs"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_items"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "cozy_core:compat/promenade/dark_amaranth_planks_from_slabs",
+      "cozy_core:compat/promenade/maple_planks_from_slabs",
+      "cozy_core:compat/promenade/palm_planks_from_slabs",
+      "cozy_core:compat/promenade/sakura_planks_from_slabs"
+    ]
+  }
+}

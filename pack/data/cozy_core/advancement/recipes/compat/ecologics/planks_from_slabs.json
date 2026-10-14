@@ -1,0 +1,56 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "ecologics"
+      ]
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "ecologics"
+    }
+  ],
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_items": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "ecologics:azalea_slab",
+              "ecologics:coconut_slab",
+              "ecologics:flowering_azalea_slab",
+              "ecologics:maple_slab",
+              "ecologics:walnut_slab"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipes": "cozy_core:compat/ecologics/azalea_planks_from_slabs"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_items"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "cozy_core:compat/ecologics/azalea_planks_from_slabs",
+      "cozy_core:compat/ecologics/coconut_planks_from_slabs",
+      "cozy_core:compat/ecologics/flowering_azalea_planks_from_slabs",
+      "cozy_core:compat/ecologics/maple_planks_from_slabs",
+      "cozy_core:compat/ecologics/walnut_planks_from_slabs"
+    ]
+  }
+}

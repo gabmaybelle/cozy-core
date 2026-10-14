@@ -1,0 +1,22 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "promenade"
+      ]
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "promenade"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": "promenade:sakura_planks",
+  "result": {
+    "count": 2,
+    "id": "promenade:sakura_slab"
+  }
+}

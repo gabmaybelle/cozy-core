@@ -1,0 +1,4 @@
+tools/.vanilla-*/
+tools/.mods-*/
+build/
+dist/

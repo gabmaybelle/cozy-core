@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:vine",
+    "minecraft:glow_ink_sac"
+  ],
+  "result": {
+    "count": 4,
+    "id": "minecraft:glow_lichen"
+  }
+}

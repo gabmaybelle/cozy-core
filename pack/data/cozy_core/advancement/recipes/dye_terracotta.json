@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_items": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#cozy_core:dyed_terracotta"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipes": "cozy_core:dye_white_terracotta"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_items"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "cozy_core:dye_white_terracotta",
+      "cozy_core:dye_orange_terracotta",
+      "cozy_core:dye_magenta_terracotta",
+      "cozy_core:dye_light_blue_terracotta",
+      "cozy_core:dye_yellow_terracotta",
+      "cozy_core:dye_lime_terracotta",
+      "cozy_core:dye_pink_terracotta",
+      "cozy_core:dye_gray_terracotta",
+      "cozy_core:dye_light_gray_terracotta",
+      "cozy_core:dye_cyan_terracotta",
+      "cozy_core:dye_purple_terracotta",
+      "cozy_core:dye_blue_terracotta",
+      "cozy_core:dye_brown_terracotta",
+      "cozy_core:dye_green_terracotta",
+      "cozy_core:dye_red_terracotta",
+      "cozy_core:dye_black_terracotta"
+    ]
+  }
+}

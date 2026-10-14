@@ -1,0 +1,58 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_items": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:acacia_slab",
+              "minecraft:bamboo_slab",
+              "minecraft:birch_slab",
+              "minecraft:cherry_slab",
+              "minecraft:crimson_slab",
+              "minecraft:dark_oak_slab",
+              "minecraft:jungle_slab",
+              "minecraft:mangrove_slab",
+              "minecraft:oak_slab",
+              "minecraft:pale_oak_slab",
+              "minecraft:poplar_slab",
+              "minecraft:spruce_slab",
+              "minecraft:warped_slab"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipes": "cozy_core:acacia_planks_from_slabs"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_items"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "cozy_core:acacia_planks_from_slabs",
+      "cozy_core:bamboo_planks_from_slabs",
+      "cozy_core:birch_planks_from_slabs",
+      "cozy_core:cherry_planks_from_slabs",
+      "cozy_core:crimson_planks_from_slabs",
+      "cozy_core:dark_oak_planks_from_slabs",
+      "cozy_core:jungle_planks_from_slabs",
+      "cozy_core:mangrove_planks_from_slabs",
+      "cozy_core:oak_planks_from_slabs",
+      "cozy_core:pale_oak_planks_from_slabs",
+      "cozy_core:poplar_planks_from_slabs",
+      "cozy_core:spruce_planks_from_slabs",
+      "cozy_core:warped_planks_from_slabs"
+    ]
+  }
+}

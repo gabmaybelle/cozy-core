@@ -1,0 +1,24 @@
+{
+  "values": [
+    {
+      "id": "cozy_core:wandering_trader/emerald_azalea",
+      "required": false
+    },
+    {
+      "id": "cozy_core:wandering_trader/emerald_flowering_azalea",
+      "required": false
+    },
+    {
+      "id": "cozy_core:wandering_trader/emerald_crimson_fungus",
+      "required": false
+    },
+    {
+      "id": "cozy_core:wandering_trader/emerald_warped_fungus",
+      "required": false
+    },
+    {
+      "id": "cozy_core:wandering_trader/emerald_calcite",
+      "required": false
+    }
+  ]
+}
