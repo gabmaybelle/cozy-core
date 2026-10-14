@@ -2,9 +2,10 @@
 
 *Put the kettle on and build.*
 
-Small, thoughtful recipes and trades that take the grind out of decorating, for Minecraft 26.3.
-There's nothing new to learn and nothing running in the background: just fewer trips back to the
-crafting table, and a few blocks that were a pain to find.
+Small, thoughtful recipes and trades that take the grind out of decorating, for Minecraft 26.3,
+and a few kind rules so the things you build stay built. There's nothing new to learn and
+nothing running in the background: just fewer trips back to the crafting table, a few blocks that
+were a pain to find, and a lantern that keeps the night quiet.
 
 ## What it adds
 
@@ -49,6 +50,24 @@ log makes four. Picture frames still need wool, so they stay at the crafting tab
 
 New recipes show up in your recipe book as you pick up what they need, like vanilla's.
 
+**The Hearth Lantern** (in the Fabric and NeoForge version only). A lantern with four amethyst
+shards around it makes one. No monster spawns naturally within 32 blocks of it, at any height,
+so a build site or a village stays quiet at night without a torch on every block. It hangs,
+stands and shines like a lantern. Spawners, raids and patrols carry on as usual, and you can
+change how far it reaches with `/gamerule cozy_core:hearth_lantern_radius` (0 switches the
+lanterns off).
+
+**Kind rules** (in the Fabric and NeoForge version only). Every one is an ordinary game rule:
+it's on in new worlds, shows in the Game Rules screen when you make a world, and can be set back
+to vanilla with `/gamerule` whenever you like.
+
+| Rule | What it does |
+|---|---|
+| `cozy_core:mob_explosions_break_blocks` (off) | Creeper and ghast explosions still hurt, but break nothing. TNT and the wither are vanilla. |
+| `cozy_core:endermen_take_blocks` (off) | Endermen leave your blocks where they are. |
+| `cozy_core:fire_burns_blocks` (off) | Fire still appears and goes out, but never catches a block alight or burns one away. A lightning strike on a wooden roof is harmless. |
+| `spawn_phantoms` (vanilla's, off for new worlds) | No phantoms. Worlds you already have keep their setting. |
+
 ## Two ways to install
 
 | | The data pack (`.zip`) | The mod (`.jar`, Fabric or NeoForge) |
@@ -57,21 +76,23 @@ New recipes show up in your recipe book as you pick up what they need, like vani
 | Trades | No | Yes |
 | Wood from other mods | No | Biomes O' Plenty, Ecologics, Promenade and Wilder Wild |
 | Decorations from other mods | No | Beautify |
+| The Hearth Lantern and the kind rules | No | Yes |
 | Install | Into a world's `datapacks` folder; `/reload` and it works straight away | Into your `mods` folder (Fabric needs [Fabric API](https://modrinth.com/mod/fabric-api)) |
 
 The data pack is recipes only so it can go into a world you're already playing, with no restart
 and no "Experimental Settings" warning. Trades in a data pack would bring that warning up on
-every load, so they're in the mod version instead.
+every load, and the lantern and the rules need a little code, so they're in the mod version instead.
 
 The wood-mod recipes only switch on when that mod is installed, so the mod version is safe with
 or without them.
 
 ## Requirements
 
-Minecraft 26.3. The mod version runs on Fabric (with Fabric API) or NeoForge.
+Minecraft 26.3. The mod version runs on Fabric (with Fabric API) or NeoForge; download the file
+for your loader.
 
 ## Licence
 
 [MIT](LICENSE).
 
-Cozy Core is made by Gabby with help from Claude, an AI assistant. The icon is Gabby's own pixel art: `art/icon.ase` is the source, and `art/icon.png` is it at 512 pixels, each pixel kept sharp.
+Cozy Core is made by Gabby with help from Claude, an AI assistant. The icon is Gabby's own pixel art: `art/icon.ase` is the source, and `art/icon.png` is it at 512 pixels, each pixel kept sharp. The Hearth Lantern's textures are drawn by `tools/generate-art.js`.

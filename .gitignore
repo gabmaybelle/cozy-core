@@ -1,8 +1,17 @@
 tools/.vanilla-*/
 tools/.mods-*/
+tools/.cache/
 build/
 dist/
-tools/.cache/
-gametest/build/
-gametest/.gradle/
-gametest/run/
+
+# gradle and loader run folders
+.gradle/
+run/
+runs/
+out/
+.idea/
+*.iml
+
+# build and test logs
+*.log
+hs_err_*.log

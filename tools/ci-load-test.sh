@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 # CI server load tests. Each one starts a real dedicated server with Cozy Core and fails unless the
 # world loads with no data errors.
-#   tools/ci-load-test.sh fabric   [none|A|B|C] <wood mods folder> the mod on Fabric (+ Fabric API)
-#   tools/ci-load-test.sh neoforge [none|A|B]                      the mod on NeoForge
+#   tools/ci-load-test.sh fabric   [none|A|B|C] <wood mods folder> the Fabric jar (+ Fabric API)
+#   tools/ci-load-test.sh neoforge [none|A|B]                      the NeoForge jar
 #   tools/ci-load-test.sh vanilla                                  the data pack zip on plain vanilla
 # The Fabric groups are tools/group-jars.sh's: A and B wood mods, C the decoration mod (Beautify).
 # On NeoForge, Ecologics is in B; there is no C yet: Beautify ReFoxed 2.0.0 crashes on NeoForge
 # 26.3's release builds by itself (ModConfig$Type.SERVER, 2026-10-13).
-# Expects dist/ (node tools/build.js) and, for vanilla, ~/mc/server-bundler.jar (the CI build job).
+# Expects dist/ (node tools/build.js, ./gradlew build, node tools/build.js --jars) and, for vanilla, ~/mc/server-bundler.jar (the CI build job).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 LOADER=$1 GROUP=${2:-none} WOOD=${3:-}
 MC=26.3 FABRIC_LOADER=0.19.5 FABRIC_INSTALLER=1.1.2
-JAR=$(ls dist/cozy-core-*-fabric-neoforge.jar | head -1)
+FABRIC_JAR=$(ls dist/cozy-core-*-fabric.jar | head -1)
+NEOFORGE_JAR=$(ls dist/cozy-core-*-neoforge.jar | head -1)
 ZIP=$(ls dist/cozy-core-*[0-9].zip | head -1)
 RUN=$(mktemp -d)
 
@@ -34,7 +35,7 @@ case $LOADER in
 		mkdir -p "$RUN/mods"
 		curl -fsSL -o "$RUN/server.jar" "https://meta.fabricmc.net/v2/versions/loader/$MC/$FABRIC_LOADER/$FABRIC_INSTALLER/server/jar"
 		modrinth_jar fabric-api fabric "$RUN/mods"
-		cp "$JAR" "$RUN/mods/"
+		cp "$FABRIC_JAR" "$RUN/mods/"
 		for j in $(bash tools/group-jars.sh "$GROUP" "$WOOD"); do cp "$WOOD/$j" "$RUN/mods/"; done
 		# FrozenLib (group B) logs harmless config-entry errors on a first start. On Fabric the lines
 		# come from the "main" logger and don't name FrozenLib.
@@ -60,7 +61,7 @@ case $LOADER in
 		curl -fsSL -o "$RUN/installer.jar" "https://maven.neoforged.net/releases/net/neoforged/neoforge/$NEOFORGE/neoforge-$NEOFORGE-installer.jar"
 		(cd "$RUN" && java -jar installer.jar --install-server . > /dev/null)
 		mkdir -p "$RUN/mods"
-		cp "$JAR" "$RUN/mods/"
+		cp "$NEOFORGE_JAR" "$RUN/mods/"
 		# NeoForge groups (as tested): A = Biomes O' Plenty with GlitchCore and TerraBlender;
 		# B = Ecologics, Wilder Wild with FrozenLib, and Promenade.
 		case $GROUP in

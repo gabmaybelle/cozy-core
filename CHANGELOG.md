@@ -1,9 +1,26 @@
 # Changelog
 
-## Unreleased
+## 0.2.0
 
+The mod version grows a little code, for the things a data pack can't do. The data pack is the
+same recipes as before.
+
+- **The Hearth Lantern.** A lantern with four amethyst shards around it makes one. No monster
+  spawns naturally within 32 blocks of it, at any height, so a build site or a village stays
+  quiet at night without a single torch line. It hangs, stands and shines like a lantern. The
+  reach is the game rule `cozy_core:hearth_lantern_radius` (0 switches the lanterns off).
+  Spawners, raids and patrols aren't affected.
+- **Kind rules, on by default in new worlds.** Each is an ordinary game rule, so it shows in the
+  Game Rules screen when you make a world and can be set with `/gamerule` any time:
+  - creeper and ghast explosions still hurt, but break nothing (`cozy_core:mob_explosions_break_blocks`);
+  - endermen leave your blocks where they are (`cozy_core:endermen_take_blocks`);
+  - fire still appears and goes out, but never catches a block alight or burns one away, so a
+    lightning strike on a wooden roof is harmless (`cozy_core:fire_burns_blocks`);
+  - phantoms are off for new worlds (vanilla's own `spawn_phantoms`; worlds you already have keep
+    their setting).
 - In the mod version: Beautify's blinds and trellises go in the stonecutter at the same rate as
   vanilla's wooden pieces: one per plank, four per log.
+- The mod is now two files, one for Fabric and one for NeoForge, instead of one for both.
 
 ## 0.1.0
 

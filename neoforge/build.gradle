@@ -1,0 +1,46 @@
+plugins {
+	id 'net.neoforged.moddev' version "${moddev_version}"
+}
+
+// The common sources and the generated data pack (pack/) are compiled straight into this jar,
+// the same as the Fabric side.
+sourceSets.main {
+	java.srcDir project(':common').file('src/main/java')
+	resources.srcDir project(':common').file('src/main/resources')
+	resources.srcDir rootProject.file('pack')
+}
+
+neoForge {
+	version = project.neoforge_version
+
+	mods {
+		"cozy_core" {
+			sourceSet sourceSets.main
+		}
+	}
+
+	runs {
+		client {
+			client()
+		}
+		server {
+			server()
+			programArgument '--nogui'
+		}
+	}
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+	// The mod icon is Gabby's own sprite (art/icon.ase exported at 512x512); the jar carries it as icon.png.
+	from(rootProject.file('art/icon.png'))
+
+	filesMatching("META-INF/neoforge.mods.toml") {
+		expand "version": version
+	}
+}
+
+// cozy-core-<version>-neoforge.jar, the name players download (tools/ci-load-test.sh looks for it in dist/).
+tasks.named('jar') { archiveFileName = "${rootProject.name}-${project.version}-neoforge.jar" }
+tasks.named('sourcesJar') { archiveFileName = "${rootProject.name}-${project.version}-neoforge-sources.jar" }

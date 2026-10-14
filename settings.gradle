@@ -1,0 +1,21 @@
+pluginManagement {
+	repositories {
+		maven {
+			name = 'Fabric'
+			url = 'https://maven.fabricmc.net/'
+		}
+		maven {
+			name = 'NeoForged'
+			url = 'https://maven.neoforged.net/releases/'
+		}
+		mavenCentral()
+		gradlePluginPortal()
+	}
+}
+
+rootProject.name = 'cozy-core'
+
+// `common` holds the code and data that don't care which loader they run on. `fabric` and
+// `neoforge` compile those sources (and the generated data pack in pack/) straight into their
+// own jars, so there is one codebase and two mod files.
+include 'common', 'fabric', 'neoforge'

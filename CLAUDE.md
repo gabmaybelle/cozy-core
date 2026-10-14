@@ -3,8 +3,12 @@
 A data pack for Minecraft 26.3 (namespace `cozy_core`) with small building helpers: wood in the
 stonecutter at cheap rates (1 plank -> 1 fence, door, sign...; 1 log -> 4), two wooden slabs ->
 one plank, re-dyeing terracotta, glass, panes and concrete powder, a few hard-to-get block
-recipes, and builder trades (wandering trader, mason). Nothing runs on a timer:
-there are no functions, only recipes, tags, trades and recipe-book advancements.
+recipes, and builder trades (wandering trader, mason). The mod version (Fabric and NeoForge jars
+from one codebase) adds the little code a data pack can't: four `cozy_core:` game rules (mob
+explosions, endermen and fire spare blocks; the Hearth Lantern's reach), phantoms off by default
+for new worlds, and the Hearth Lantern block, near which no monster spawns naturally. Nothing
+runs on a timer: the rules are hooks, and the lantern is a block entity that only reports where
+it is.
 
 ## Branches
 
@@ -17,17 +21,36 @@ there are no functions, only recipes, tags, trades and recipe-book advancements.
 - `tools/generate.js` writes everything in `pack/` from the vanilla 26.3 data (and the wood
   mods' jars), then checks for recipe clashes and block-making loops. **Don't edit `pack/` by
   hand**: change the generator and re-run it.
-- `tools/build.js` regenerates `pack/` and builds two downloads: `dist/cozy-core-<version>.zip`
-  (the data pack: recipes only, vanilla wood) and `dist/cozy-core-<version>-fabric-neoforge.jar`
-  (everything as a code-free Fabric/NeoForge mod: recipes, trades and `compat/`). The jar requires
-  Fabric API on Fabric; its neoforge.mods.toml has no modLoader/loaderVersion (NeoForge's advice
-  for data-only mods; "lowcodefml" is deprecated). The build stops if a mod-only file would reach the zip.
+- `tools/build.js` regenerates `pack/` and builds the data pack, `dist/cozy-core-<version>.zip`
+  (recipes only, vanilla wood). The build stops if a mod-only file would reach the zip.
+- **The mods are Gradle's.** `./gradlew build` makes `fabric/build/libs/cozy-core-<version>-fabric.jar`
+  and `neoforge/build/libs/cozy-core-<version>-neoforge.jar`; `node tools/build.js --jars` copies
+  them into `dist/`. Layout (the same as Beyond the Dragon's): `common/` holds the code, mixins,
+  assets and the mod-only data (the lantern recipe and its unlock, the `explosions_spare_blocks`
+  entity tag); `fabric/` and `neoforge/` compile `common/`'s sources and `pack/` straight into their
+  jars, with their own entrypoint, `Platform` implementation and metadata. Common code reaches the
+  loader through `platform/Platform` (`Services.PLATFORM`): registering, creative tabs. The jars
+  require Fabric API on Fabric (resource conditions) and NeoForge on NeoForge.
+- **Rules are game rules** (`Rules.java`): registered into vanilla's game-rule registry under the
+  `cozy_core` category, so they show in the create-world screen, work with `/gamerule`, save with
+  the world and need no settings file or sync. Each rule's code is one mixin in `common/.../mixin/`:
+  `ServerExplosionMixin` (creeper/ghast blasts clear their block list; the `cozy_core:explosions_spare_blocks`
+  tag says which mobs), `EndermanTakeBlockGoalMixin`, `FireBlockMixin` (ignite and burn odds read
+  as 0 while the rule is off, so fire ages out like on stone), `NaturalSpawnerMixin` (the lantern).
+  `GameRuleAccessor` flips vanilla `spawn_phantoms`' default to false; saved worlds keep their value.
+- **The Hearth Lantern** (`HearthLantern*.java`): a `LanternBlock` with a block entity that does
+  nothing but tell `HearthLanterns` (an in-memory set per `ServerLevel`) when it's in a loaded chunk
+  (`clearRemoved`) and when it isn't (`setRemoved`). The chunk is the only record of where lanterns
+  are: no saved data (26.3's `SavedDataType` needs a non-null `DataFixTypes`, and none fits a mod).
+  `protects(level, pos)` is a horizontal-distance check against that set, any height.
 - `art/icon.ase`: Gabby's own 32x32 sprite; `art/icon.png` is it at 512x512 (nearest-neighbour).
-  The build puts it in the zip as `pack.png` and in the jar as `icon.png` (Fabric `icon`, NeoForge
-  `logoFile`). Never replace it with generated art; re-export from the .ase.
-- `tools/pack-info.js`: the version, Minecraft version and descriptions the generator and the
-  build share. `tools/group-jars.sh`: the wood-mod test groups (A, B, C), used by
-  `ci-load-test.sh` and the workflow, so they're defined once.
+  The build puts it in the zip as `pack.png` and Gradle puts it in the jars as `icon.png` (Fabric
+  `icon`, NeoForge `logoFile`). Never replace it with generated art; re-export from the .ase.
+  `tools/generate-art.js` draws the Hearth Lantern's block and item textures (original pixel art,
+  laid out like vanilla's lantern texture so the vanilla lantern models can be the parents).
+- `tools/pack-info.js`: the Minecraft version and descriptions the generator and the build share;
+  the version comes from `gradle.properties`. `tools/group-jars.sh`: the wood-mod test groups
+  (A, B, C), used by `ci-load-test.sh` and the workflow, so they're defined once.
 - `tools/fetch-test-mods.js "<test folder>"` downloads the supported wood and decoration mods
   (SHA-512 checked).
 - `tools/server-test.js` starts a dedicated server with the pack and prints errors.
@@ -62,13 +85,18 @@ there are no functions, only recipes, tags, trades and recipe-book advancements.
 - NeoForge (and Fabric, and the zip on plain vanilla): `bash tools/ci-load-test.sh neoforge none|A|B`
   installs the newest NeoForge server, adds the jar (and a wood-mod group from Modrinth) and runs
   `tools/server-test.js`, which must end with 0 problem lines. Needs jq and curl (CI has both).
-- The stonecutter screen: `gametest/` (`./gradlew runClientGameTest -Pexpect=../pack`, plus
-  `-PwoodMods=<folder>` per wood-mod group) clicks every stonecutter recipe in the real screen.
+- The game test: `./gradlew :fabric:runClientGameTest -Pexpect=pack` (plus `-PwoodMods=<folder>`
+  per wood-mod group), about three minutes. `RulesTest` checks each rule both ways (kind, then
+  switched to vanilla with its game rule), the Hearth Lantern (placed, listed, guarding a dark
+  room 10 blocks away, not from 40, off at radius 0, hanging above the room) and takes the
+  `hearth_lantern` screenshot; `StonecutterTest` clicks every stonecutter recipe in the real screen.
+  A proof run with the mixins emptied out of `cozy_core.mixins.json` fails the kind-side checks.
 - **CI** (`.github/workflows/build.yml`) runs all of it on every push: the build (vanilla jar from
-  Mojang, wood mods from Modrinth) and a check that the committed `pack/` is what the generator
-  makes; `tools/ci-load-test.sh` on Fabric (alone and with groups A, B and C), NeoForge (alone and
-  with A and B) and plain vanilla with the zip; and the stonecutter test alone and with each group.
-  `node tools/build.js <vanilla server jar> <wood mods folder>` builds from given inputs.
+  Mojang, wood mods from Modrinth, both jars from Gradle) and a check that the committed `pack/`
+  is what the generator makes; `tools/ci-load-test.sh` on Fabric (alone and with groups A, B and
+  C), NeoForge (alone and with A and B) and plain vanilla with the zip; and the game test alone
+  and with each group. `node tools/build.js <vanilla server jar> <wood mods folder>` builds from
+  given inputs.
 
 ## Gotchas
 
@@ -116,8 +144,8 @@ computer and others in the cloud. These rules keep their work fitting together.
 or test names. Check the diff for these before every push.
 
 **Tests.**
-- `node tools/build.js` and the server load test must pass before a commit. The game test opens a
-  real game window for a minute or two.
+- `node tools/build.js`, `./gradlew build` and the server load test must pass before a commit.
+  The game test opens a real game window for a few minutes.
 - A new or changed check should fail with the feature switched off: run it that way once, then
   put the code back. A check that compares against the setting it tests proves nothing.
 - On Linux without a screen, run game tests under `xvfb-run -a`. 26.3 also needs
