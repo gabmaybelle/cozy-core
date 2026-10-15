@@ -53,7 +53,9 @@ it is.
   (A, B, C), used by `ci-load-test.sh` and the workflow, so they're defined once.
 - `tools/fetch-test-mods.js "<test folder>"` downloads the supported wood and decoration mods
   (SHA-512 checked).
-- `tools/server-test.js` starts a dedicated server with the pack and prints errors.
+- `tools/server-test.js` starts a dedicated server with the pack and prints errors. On Gabby's
+  machine it also uses the local toolkit's `game-watch.js` (`GAME_WATCH` points it elsewhere) to
+  stop a server that errors, crashes or hangs while starting and say why; CI runs without it.
 - `tools/crafter-test.js "<test folder>" <player> [mod ids]` crafts every crafting recipe with
   crafter blocks in a running test game (bridge with commands on) and checks the output.
 - `tools/trade-test.js "<test folder>" <n> wandering_trader | villager <profession> <level>`
