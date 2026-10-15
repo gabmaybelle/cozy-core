@@ -33,19 +33,23 @@ function extractVanilla(jar) {
 		path.dirname(path.dirname(VANILLA)));
 }
 
-const readJson = p => JSON.parse(fs.readFileSync(p, 'utf8'));
+// Some mods (Macaw's Windows) save their JSON with a byte-order mark, which JSON.parse refuses.
+const readJson = p => JSON.parse(fs.readFileSync(p, 'utf8').replace(/^﻿/, ''));
 const vanillaJson = rel => readJson(path.join(VANILLA, rel));
 
 // Wood mods with a 26.3 Fabric version (checked on Modrinth 2026-10-13). Their recipes are read
 // from the jars, so their own wood types are covered the same way as vanilla's. Every recipe made
 // for a mod only loads when that mod is installed (Fabric and NeoForge load conditions).
 const WOOD_MODS = ['biomesoplenty', 'ecologics', 'wilderwild', 'promenade'];
-// Decoration mods (Gabby's pick, 2026-10-13): their wooden pieces go in the stonecutter at the same
-// cheap rate as vanilla's (see decorCutting). Beautify's Fabric and NeoForge ports share the mod id
-// and the recipes.
-const DECOR_MODS = ['beautify'];
+// Decoration mods (Gabby's picks: Beautify 2026-10-13, Macaw's 2026-10-15): their wooden pieces go
+// in the stonecutter at the same cheap rate as vanilla's (see decorCutting). Each mod's Fabric and
+// NeoForge versions share the mod id and the recipes. Macaw's Bridges is left out: none of its
+// pieces is wood only.
+const MACAWS = { mcwroofs: 'mcw-roofs', mcwfences: 'mcw-fences', mcwstairs: 'mcw-stairs', mcwwindows: 'mcw-windows',
+	mcwfurnitures: 'mcw-furniture', mcwdoors: 'mcw-doors', mcwtrpdoors: 'mcw-trapdoors' };
+const DECOR_MODS = ['beautify', ...Object.keys(MACAWS)];
 const JAR_PREFIX = { biomesoplenty: 'BiomesOPlenty', ecologics: 'Ecologics', wilderwild: 'WilderWild', promenade: 'promenade',
-	beautify: 'beautify-fabric' };
+	beautify: 'beautify-fabric', ...MACAWS };
 const MOD_CACHE = path.join(__dirname, `.mods-${MC_VERSION}`);
 const DEFAULT_MODS = path.join(ROOT, '..', 'cozy-core-test', 'mods'); // filled by tools/fetch-test-mods.js
 
@@ -213,6 +217,12 @@ function learnWoods(recipes) {
 	}
 }
 
+// Pieces worth more than a log (4 planks: Macaw's desks, big gates, the bigger roofs...) are cut
+// from logs only, one per log: a 10-plank desk at one per plank would be 10 times cheaper than
+// crafting it. Up to a log's worth, the cheap rate holds, so nothing costs more in the stonecutter
+// than at the crafting table (Gabby's calls, 2026-10-15).
+const BIG_PIECE = 4;
+
 function decorCutting(recipes) {
 	let n = 0;
 	for (const r of Object.values(recipes)) {
@@ -224,6 +234,14 @@ function decorCutting(recipes) {
 		if (woods.size !== 1) continue; // one wood type, so the piece matches its log
 		const plank = [...woods][0];
 		const cost = slots.reduce((s, i) => s + (STICKS.has(i) ? 0.5 : woodOf[i].planks), 0) / (r.result.count || 1);
+		if (cost > BIG_PIECE + 1e-9) {
+			for (const { logs, perLog } of logSources[plank] || []) {
+				const count = Math.max(1, Math.floor(perLog / cost));
+				if (perLog / count > cost + 1e-9) continue; // dearer than crafting it
+				if (stonecutting(logs, r.result.id, count)) n++;
+			}
+			continue;
+		}
 		const perPlank = Math.max(1, Math.floor(1 / cost));
 		stonecutting(plank, r.result.id, perPlank); n++;
 		for (const { logs, perLog } of logSources[plank] || []) { stonecutting(logs, r.result.id, perPlank * perLog); n++; }

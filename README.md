@@ -48,6 +48,16 @@ installed). [Beautify](https://modrinth.com/mod/beautify-refabricated)'s blinds 
 cut like vanilla's trapdoors and doors: one plank makes one set of blinds or one trellis, and a
 log makes four. Picture frames still need wool, so they stay at the crafting table.
 
+Macaw's [Roofs](https://modrinth.com/mod/macaws-roofs), [Fences and Walls](https://modrinth.com/mod/macaws-fences-and-walls),
+[Stairs](https://modrinth.com/mod/macaws-stairs), [Windows](https://modrinth.com/mod/macaws-windows),
+[Furniture](https://modrinth.com/mod/macaws-furniture), [Doors](https://modrinth.com/mod/macaws-doors) and
+[Trapdoors](https://modrinth.com/mod/macaws-trapdoors) work the same way for every piece made only of
+one wood: wooden roofs, picket and stockade fences, gates, fancy stairs, blinds, shutters,
+parapets, barn and western doors, counters, desks and ranch trapdoors. A piece worth up to a log
+(four planks) cuts at one per plank and four per log; a bigger one, like a desk or a big gate, is
+one per log, so it's still cheaper than the crafting table but not ten times cheaper. Anything
+with glass, iron, paper or drawers stays at the crafting table.
+
 New recipes show up in your recipe book as you pick up what they need, like vanilla's.
 
 **The Hearth Lantern** (in the Fabric and NeoForge version only). A lantern with four amethyst
@@ -75,7 +85,7 @@ to vanilla with `/gamerule` whenever you like.
 | Recipes | Yes | Yes |
 | Trades | No | Yes |
 | Wood from other mods | No | Biomes O' Plenty, Ecologics, Promenade and Wilder Wild |
-| Decorations from other mods | No | Beautify |
+| Decorations from other mods | No | Beautify, and Macaw's Roofs, Fences and Walls, Stairs, Windows, Furniture, Doors and Trapdoors |
 | The Hearth Lantern and the kind rules | No | Yes |
 | Install | Into a world's `datapacks` folder; `/reload` and it works straight away | Into your `mods` folder (Fabric needs [Fabric API](https://modrinth.com/mod/fabric-api)) |
 

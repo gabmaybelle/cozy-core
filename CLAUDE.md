@@ -53,7 +53,8 @@ it first, and add this session's row before ending.
   laid out like vanilla's lantern texture so the vanilla lantern models can be the parents).
 - `tools/pack-info.js`: the Minecraft version and descriptions the generator and the build share;
   the version comes from `gradle.properties`. `tools/group-jars.sh`: the wood-mod test groups
-  (A, B, C), used by `ci-load-test.sh` and the workflow, so they're defined once.
+  (A, B wood mods, C Beautify, D Macaw's), used by `ci-load-test.sh` and the workflow, so they're
+  defined once.
 - `tools/fetch-test-mods.js "<test folder>"` downloads the supported wood and decoration mods
   (SHA-512 checked).
 - `tools/server-test.js` starts a dedicated server with the pack and prints errors.
@@ -64,15 +65,19 @@ it first, and add this session's row before ending.
   Both talk to the bridge through `mcf.js` from Gabby's local toolkit (`~/mods-dev/tools`, not in
   this repo; `MCF` points them elsewhere), so they're for her machine, not CI.
 - `pack/data/cozy_core/recipe/compat/<modid>/`: wood-mod recipes, each with Fabric and NeoForge
-  load conditions. Decoration mods (`DECOR_MODS`: Beautify; Gabby's pick 2026-10-13) get the same
-  cheap rate as vanilla's pieces (`decorCutting`): a piece made of one vanilla wood (planks, slabs,
-  logs, sticks) is one per plank and four per log, or its own rate per plank if that's cheaper.
-  Pieces needing non-wood items or mixing woods are skipped. They only use vanilla woods, because
+  load conditions. Decoration mods (`DECOR_MODS`: Beautify, Gabby's pick 2026-10-13; seven Macaw's
+  mods, 2026-10-15, Bridges left out as it has no all-wood piece) get the same cheap rate as
+  vanilla's pieces (`decorCutting`): a piece made of one vanilla wood (planks, slabs, logs, sticks)
+  is one per plank and four per log, or its own rate per plank if that's cheaper. A piece worth more
+  than a log (`BIG_PIECE`, 4 planks: Macaw's desks, big gates, the bigger roofs) is one per log
+  only, so nothing is ten times cheaper than crafting it (Gabby's call: the line is a log, not a
+  door's 2.5, so Beautify's 3-plank blinds keep their rate). Pieces needing non-wood items or
+  mixing woods are skipped. Macaw's Windows saves its JSON with a byte-order mark; `readJson`
+  strips it. They only use vanilla woods, because
   a compat recipe's load condition names one mod. Farmer's Delight was tried and dropped (2026-10-13):
   its cabinets are its only all-wood pieces and the rule was decided per mod, not per piece; add it
   back if Gabby wants its cabinets cheap too. Mods Gabby wants later, once they reach 26.3: Let's Do
-  Vinery, Supplementaries, Decorative Blocks, Nature's Spirit, Macaw's (declined for Espresso, so
-  ask first).
+  Vinery, Supplementaries, Decorative Blocks, Nature's Spirit (none had a 26.3 build on 2026-10-15).
 - Beautify ReFoxed 2.0.0 (the NeoForge port) crashes by itself on NeoForge 26.3 release builds
   (`ModConfig$Type.SERVER`, 2026-10-13), so CI has no NeoForge decoration group until it's fixed.
 
@@ -85,7 +90,7 @@ it first, and add this session's row before ending.
   recipe id unlocks with `recipe give`, and opening the world shows no experimental warning.
   Note `recipe give *` undercounts: unlocking one recipe of a group completes its recipe-book
   advancement, which hands out the rest of the group first.
-- NeoForge (and Fabric, and the zip on plain vanilla): `bash tools/ci-load-test.sh neoforge none|A|B`
+- NeoForge (and Fabric, and the zip on plain vanilla): `bash tools/ci-load-test.sh neoforge none|A|B|D`
   installs the newest NeoForge server, adds the jar (and a wood-mod group from Modrinth) and runs
   `tools/server-test.js`, which must end with 0 problem lines. Needs jq and curl (CI has both).
 - The game test: `./gradlew :fabric:runClientGameTest -Pexpect=pack` (plus `-PwoodMods=<folder>`
@@ -109,8 +114,8 @@ it first, and add this session's row before ending.
   and moves the spawn point for its duration. A failing check exits the run non-zero.
 - **CI** (`.github/workflows/build.yml`) runs all of it on every push: the build (vanilla jar from
   Mojang, wood mods from Modrinth, both jars from Gradle) and a check that the committed `pack/`
-  is what the generator makes; `tools/ci-load-test.sh` on Fabric (alone and with groups A, B and
-  C), NeoForge (alone and with A and B) and plain vanilla with the zip; the game test alone
+  is what the generator makes; `tools/ci-load-test.sh` on Fabric (alone and with groups A, B, C
+  and D), NeoForge (alone and with A, B and D) and plain vanilla with the zip; the game test alone
   and with each group; and the NeoForge game test. `node tools/build.js <vanilla server jar> <wood mods folder>` builds from
   given inputs.
 

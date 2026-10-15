@@ -5,9 +5,10 @@ const fs = require('fs'), path = require('path'), crypto = require('crypto');
 
 const MC = '26.3';
 // TerraBlender is a BOP requirement Modrinth's dependency list doesn't show (found 2026-10-13).
-// Beautify (Refabricated, the Fabric port) needs Cloth Config.
+// Beautify (Refabricated, the Fabric port) needs Cloth Config. Macaw's mods need only Fabric API.
 const PROJECTS = ['biomes-o-plenty', 'glitchcore', 'terrablender', 'ecologics', 'wilder-wild', 'frozenlib', 'promenade',
-	'beautify-refabricated', 'cloth-config'];
+	'beautify-refabricated', 'cloth-config', 'macaws-roofs', 'macaws-fences-and-walls', 'macaws-stairs', 'macaws-windows',
+	'macaws-furniture', 'macaws-doors', 'macaws-trapdoors'];
 const UA = { 'User-Agent': 'gabmaybelle/cozy-core test setup' };
 
 (async () => {

@@ -1,0 +1,22 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwwindows"
+      ]
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "mcwwindows"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": "#minecraft:oak_logs",
+  "result": {
+    "count": 4,
+    "id": "mcwwindows:oak_log_parapet"
+  }
+}

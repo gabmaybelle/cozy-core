@@ -20,6 +20,9 @@ same recipes as before.
     their setting).
 - In the mod version: Beautify's blinds and trellises go in the stonecutter at the same rate as
   vanilla's wooden pieces: one per plank, four per log.
+- In the mod version: Macaw's Roofs, Fences and Walls, Stairs, Windows, Furniture, Doors and
+  Trapdoors too, for every piece made only of one wood: one per plank and four per log for pieces
+  worth up to a log, and one per log for bigger ones like desks and big gates.
 - The mod is now two files, one for Fabric and one for NeoForge, instead of one for both.
 
 ## 0.1.0

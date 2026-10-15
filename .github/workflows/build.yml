@@ -7,7 +7,7 @@
 #   without the wood mods, must load with no data errors.
 # - game: the in-game test (fabric/src/gametest) plays through the rules and the Hearth Lantern
 #   and clicks every stonecutter recipe in the real screen, with and without the wood mods (and
-#   the decoration mod).
+#   the decoration mods).
 # - game (NeoForge): vanilla's test server runs the NeoForge jar's own checks (neoforge/src/gametest):
 #   the rules both ways, the Hearth Lantern, and every recipe in pack/ being in the game.
 
@@ -87,9 +87,11 @@ jobs:
           - { loader: fabric, group: A, name: 'Fabric with Biomes O'' Plenty and Ecologics' }
           - { loader: fabric, group: B, name: 'Fabric with Wilder Wild and Promenade' }
           - { loader: fabric, group: C, name: 'Fabric with Beautify' }
+          - { loader: fabric, group: D, name: 'Fabric with Macaw''s' }
           - { loader: neoforge, group: none, name: 'NeoForge' }
           - { loader: neoforge, group: A, name: 'NeoForge with Biomes O'' Plenty' }
           - { loader: neoforge, group: B, name: 'NeoForge with Ecologics, Wilder Wild and Promenade' }
+          - { loader: neoforge, group: D, name: 'NeoForge with Macaw''s' }
           - { loader: vanilla, group: none, name: 'vanilla with the data pack' }
     name: load (${{ matrix.name }})
     steps:
@@ -129,6 +131,7 @@ jobs:
           - { group: A, name: 'with Biomes O'' Plenty and Ecologics' }
           - { group: B, name: 'with Wilder Wild and Promenade' }
           - { group: C, name: 'with Beautify' }
+          - { group: D, name: 'with Macaw''s' }
     name: game (${{ matrix.name }})
     steps:
       - name: checkout repository
@@ -157,7 +160,8 @@ jobs:
         # at startup. Mesa's EGL can; SDL uses it with this set.
         env:
           SDL_VIDEO_FORCE_EGL: '1'
-        timeout-minutes: 25
+        # The Macaw's group clicks about 1,600 recipes, about 6 minutes on a desktop.
+        timeout-minutes: 40
         run: |
           chmod +x ./gradlew
           args="-Pexpect=$GITHUB_WORKSPACE/pack"

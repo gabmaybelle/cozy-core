@@ -1,0 +1,21 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwwindows"
+      ]
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "mcwwindows"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:cherry_planks",
+  "result": {
+    "id": "mcwwindows:cherry_curtain_rod"
+  }
+}

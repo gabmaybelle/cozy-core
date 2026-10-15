@@ -1,0 +1,22 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwfences"
+      ]
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "mcwfences"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": "#minecraft:cherry_logs",
+  "result": {
+    "count": 4,
+    "id": "mcwfences:cherry_curved_gate"
+  }
+}

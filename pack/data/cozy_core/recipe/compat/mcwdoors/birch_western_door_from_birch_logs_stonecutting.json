@@ -1,0 +1,22 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwdoors"
+      ]
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "mcwdoors"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": "#minecraft:birch_logs",
+  "result": {
+    "count": 4,
+    "id": "mcwdoors:birch_western_door"
+  }
+}

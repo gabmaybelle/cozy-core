@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # CI server load tests. Each one starts a real dedicated server with Cozy Core and fails unless the
 # world loads with no data errors.
-#   tools/ci-load-test.sh fabric   [none|A|B|C] <wood mods folder> the Fabric jar (+ Fabric API)
-#   tools/ci-load-test.sh neoforge [none|A|B]                      the NeoForge jar
+#   tools/ci-load-test.sh fabric   [none|A|B|C|D] <wood mods folder> the Fabric jar (+ Fabric API)
+#   tools/ci-load-test.sh neoforge [none|A|B|D]                      the NeoForge jar
 #   tools/ci-load-test.sh vanilla                                  the data pack zip on plain vanilla
-# The Fabric groups are tools/group-jars.sh's: A and B wood mods, C the decoration mod (Beautify).
-# On NeoForge, Ecologics is in B; there is no C yet: Beautify ReFoxed 2.0.0 crashes on NeoForge
+# The Fabric groups are tools/group-jars.sh's: A and B wood mods, C Beautify, D Macaw's.
+# On NeoForge, Ecologics is in B, and D is Macaw's NeoForge versions; there is no C yet: Beautify ReFoxed 2.0.0 crashes on NeoForge
 # 26.3's release builds by itself (ModConfig$Type.SERVER, 2026-10-13).
 # Expects dist/ (node tools/build.js, ./gradlew build, node tools/build.js --jars) and, for vanilla, ~/mc/server-bundler.jar (the CI build job).
 set -euo pipefail
@@ -63,10 +63,11 @@ case $LOADER in
 		mkdir -p "$RUN/mods"
 		cp "$NEOFORGE_JAR" "$RUN/mods/"
 		# NeoForge groups (as tested): A = Biomes O' Plenty with GlitchCore and TerraBlender;
-		# B = Ecologics, Wilder Wild with FrozenLib, and Promenade.
+		# B = Ecologics, Wilder Wild with FrozenLib, and Promenade; D = the seven Macaw's mods.
 		case $GROUP in
 			A) slugs="biomes-o-plenty glitchcore terrablender" ;;
 			B) slugs="ecologics wilder-wild frozenlib promenade"; export IGNORE='FrozenLib.*Unable to read config' ;;
+			D) slugs="macaws-roofs macaws-fences-and-walls macaws-stairs macaws-windows macaws-furniture macaws-doors macaws-trapdoors" ;;
 			*) slugs="" ;;
 		esac
 		for s in $slugs; do modrinth_jar "$s" neoforge "$RUN/mods"; done
@@ -74,5 +75,5 @@ case $LOADER in
 		echo "NeoForge $NEOFORGE, group $GROUP: $(ls "$RUN/mods" | tr '\n' ' ')"
 		node tools/server-test.js "$RUN" java "@libraries/net/neoforged/neoforge/$NEOFORGE/unix_args.txt" "datapack list enabled"
 		;;
-	*) echo "usage: tools/ci-load-test.sh fabric|neoforge|vanilla [none|A|B|C] [wood folder]"; exit 2 ;;
+	*) echo "usage: tools/ci-load-test.sh fabric|neoforge|vanilla [none|A|B|C|D] [wood folder]"; exit 2 ;;
 esac
