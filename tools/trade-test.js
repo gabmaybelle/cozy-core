@@ -3,12 +3,16 @@
 // the offers and removes it. Prints how often each item was offered.
 //   node tools/trade-test.js "<test folder>" <times> wandering_trader
 //   node tools/trade-test.js "<test folder>" <times> villager <profession> <level>
-// Needs the bridge's command-line client, mcf.js, from Gabby's local toolkit (not in this repo):
-// set MCF to its path if it isn't at ~/mods-dev/tools/mcf.js.
+// Needs a running test game whose MCPFabric bridge has commands on, and the bridge's
+// command-line client, mcf.js: set the MCF environment variable to its path.
 const path = require('path'), { execFileSync } = require('child_process');
 
 const [folder, times = '20', kind = 'wandering_trader', profession, level] = process.argv.slice(2);
-const MCF = process.env.MCF || path.join(process.env.USERPROFILE, 'mods-dev', 'tools', 'mcf.js');
+const MCF = process.env.MCF;
+if (!MCF) {
+	console.error('set MCF to the path of the MCPFabric bridge command-line client (mcf.js)');
+	process.exit(1);
+}
 const call = (method, params = {}) => execFileSync(process.execPath, [MCF, folder, method, JSON.stringify(params)], { encoding: 'utf8' });
 const run = command => call('command.run', { command });
 const pause = ms => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);

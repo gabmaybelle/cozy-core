@@ -66,8 +66,8 @@ it first, and add this session's row before ending.
   crafter blocks in a running test game (bridge with commands on) and checks the output.
 - `tools/trade-test.js "<test folder>" <n> wandering_trader | villager <profession> <level>`
   opens merchants through the bridge and counts their offers.
-  Both talk to the bridge through `mcf.js` from Gabby's local toolkit (`~/mods-dev/tools`, not in
-  this repo; `MCF` points them elsewhere), so they're for her machine, not CI.
+  Both need the MCPFabric bridge's command-line client (set `MCF` to its path), so they're for a
+  machine with a test game open, not CI.
 - `pack/data/cozy_core/recipe/compat/<modid>/`: wood-mod recipes, each with Fabric and NeoForge
   load conditions. Decoration mods (`DECOR_MODS`: Beautify, Gabby's pick 2026-10-13; seven Macaw's
   mods, 2026-10-15, Bridges left out as it has no all-wood piece) get the same cheap rate as
@@ -90,7 +90,7 @@ it first, and add this session's row before ending.
 - `node tools/build.js` must print "No recipe clashes or block-making loops found."
 - Server load test: the zip on a plain vanilla server, the jar on a Fabric server with and
   without the wood mods; each must reach "Done" with no `Errors in element` lines.
-- In a test game (`new-test-world.js --mcp --commands`): crafter-test and trade-test pass, every
+- In a test game with the bridge's commands on: crafter-test and trade-test pass, every
   recipe id unlocks with `recipe give`, and opening the world shows no experimental warning.
   Note `recipe give *` undercounts: unlocking one recipe of a group completes its recipe-book
   advancement, which hands out the rest of the group first.

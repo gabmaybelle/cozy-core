@@ -1,9 +1,8 @@
 // Checks the crafting recipes in a running test game by letting crafter blocks craft them:
 // fills a row of crafters, powers them, and reads what each one dropped.
 //   node tools/crafter-test.js "<test folder>" <player name>
-// Needs the test folder's MCPFabric bridge with commands on (new-test-world.js --mcp --commands)
-// and the bridge's command-line client, mcf.js, from Gabby's local toolkit (not in this repo):
-// set MCF to its path if it isn't at ~/mods-dev/tools/mcf.js.
+// Needs a running test game whose MCPFabric bridge has commands on, and the bridge's
+// command-line client, mcf.js: set the MCF environment variable to its path.
 const path = require('path'), { execFileSync } = require('child_process');
 
 const [folder, player] = process.argv.slice(2);
@@ -11,7 +10,11 @@ if (!folder || !player) {
 	console.error('usage: node tools/crafter-test.js "<test folder>" <player name>');
 	process.exit(1);
 }
-const MCF = process.env.MCF || path.join(process.env.USERPROFILE, 'mods-dev', 'tools', 'mcf.js');
+const MCF = process.env.MCF;
+if (!MCF) {
+	console.error('set MCF to the path of the MCPFabric bridge command-line client (mcf.js)');
+	process.exit(1);
+}
 const batch = calls => execFileSync(process.execPath, [MCF, folder, '--batch', JSON.stringify(calls)], { encoding: 'utf8', maxBuffer: 1 << 26 });
 const cmd = c => ['command.run', { command: c }];
 
