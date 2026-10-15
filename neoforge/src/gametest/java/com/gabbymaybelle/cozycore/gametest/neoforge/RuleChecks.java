@@ -211,13 +211,17 @@ final class RuleChecks {
 	}
 
 	/**
-	 * A 7x7 oak-plank floor with fire on every other plank, left 1500 ticks at 200 ticks a second.
-	 * Kind: no plank burns and the fire goes out. Vanilla: planks burn.
+	 * A 7x7 oak-plank floor with fire on every other plank (16 fires), left 1500 ticks at 200 ticks
+	 * a second. Kind: no plank burns and the fires go out, the way fire on stone does. Vanilla:
+	 * planks burn. Fire only ticks near a player in 26.3, so the environment sets
+	 * fire_spread_radius_around_player to -1 (everywhere): the test server has no players.
 	 */
 	static void fire(GameTestHelper helper, boolean kind) {
 		ServerLevel level = helper.getLevel();
 		MinecraftServer server = level.getServer();
 		helper.assertValueEqual(Rules.is(level, Rules.FIRE_BURNS_BLOCKS), !kind, "the fire_burns_blocks rule for this test");
+		helper.assertValueEqual(level.getGameRules().get(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER), -1,
+				"fire_spread_radius_around_player for this test (fire must tick with no player near)");
 		BlockPos at = helper.absolutePos(new BlockPos(4, 1, 4));
 		for (int x = -3; x <= 3; x++) {
 			for (int z = -3; z <= 3; z++) {
@@ -235,9 +239,12 @@ final class RuleChecks {
 			server.tickRateManager().setTickRate(20.0F);
 			int gone = 49 - count(level, at, -3, 0, -3, 3, 0, 3, Blocks.OAK_PLANKS);
 			int fires = count(level, at, -3, 1, -3, 3, 1, 3, Blocks.FIRE);
+			System.out.println("[cozy_core_gametest] fire, " + (kind ? "kind" : "vanilla") + ": " + gone + " of 49 planks gone, " + fires + " of 16 fires left");
 			if (kind) {
 				helper.assertValueEqual(gone, 0, "planks burnt away");
-				helper.assertTrue(fires < 25, "the fire should still go out (" + fires + " of 25 fires left)");
+				// A fire over planks it can't burn ages past 3 and goes out, like fire on stone; each
+				// tick has a 1 in 3 chance of ageing it, so in 1500 ticks a straggler or two is possible.
+				helper.assertTrue(fires <= 2, "the fires should still go out (" + fires + " of 16 fires left)");
 			} else {
 				helper.assertTrue(gone > 0, "with the rule on, fire should burn planks again (" + gone + " of 49 gone)");
 			}

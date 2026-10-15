@@ -116,7 +116,11 @@ it first, and add this session's row before ending.
   `tools/generate-test-structures.js`; each test builds its own scene. Vanilla's test server
   world has `spawn_mobs` off and no players, and natural spawning wants a player (and the spawn
   point) more than 24 blocks away, so the lantern test adds a mock player high above its room
-  and moves the spawn point for its duration. A failing check exits the run non-zero.
+  and moves the spawn point for its duration. Since 26.3 vanilla fire only ticks within
+  `fire_spread_radius_around_player` blocks of a player (128 by default), so both test environments
+  set that rule to -1 (everywhere); without it the fire checks only see fire tick while another
+  test's mock player exists, and pass or fail by luck (2026-10-15). A failing check exits the run
+  non-zero.
 - **CI** (`.github/workflows/build.yml`) runs all of it on every push: the build (vanilla jar from
   Mojang, wood mods from Modrinth, both jars from Gradle) and a check that the committed `pack/`
   is what the generator makes; `tools/ci-load-test.sh` on Fabric (alone and with groups A, B, C

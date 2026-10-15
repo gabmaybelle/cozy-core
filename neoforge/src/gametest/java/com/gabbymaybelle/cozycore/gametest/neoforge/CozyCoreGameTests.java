@@ -13,6 +13,7 @@ import net.minecraft.gametest.framework.TestEnvironmentDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.gamerules.GameRuleMap;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.RegisterGameTestsEvent;
@@ -67,10 +68,18 @@ public final class CozyCoreGameTests {
 
 	/** Test instances and their environments are registered as the test world's data loads. */
 	private static void registerTests(RegisterGameTestsEvent event) {
-		// Kind: nothing changed, so these tests also prove a new world starts with the kind settings.
-		Holder<TestEnvironmentDefinition<?>> kind = event.registerEnvironment(id("kind"), new TestEnvironmentDefinition.AllOf());
+		// Both environments let fire tick everywhere: since 26.3 vanilla's fire only ticks (ages,
+		// burns, spreads) within fire_spread_radius_around_player blocks of a player, 128 by
+		// default, and the test server has no players. Before this the fire checks only saw fire
+		// tick while the lantern test's mock player existed, about 40 ticks, so the vanilla-side
+		// check failed at random and the kind-side check proved nothing.
+		GameRuleMap kindRules = GameRuleMap.of();
+		kindRules.set(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, -1);
+		// Kind: none of Cozy Core's rules changed, so these tests also prove a new world starts with the kind settings.
+		Holder<TestEnvironmentDefinition<?>> kind = event.registerEnvironment(id("kind"), new TestEnvironmentDefinition.SetGameRules(kindRules));
 		// Vanilla: every rule switched to vanilla's behaviour for the length of the test.
 		GameRuleMap vanillaRules = GameRuleMap.of();
+		vanillaRules.set(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, -1);
 		vanillaRules.set(Rules.MOB_EXPLOSIONS_BREAK_BLOCKS, true);
 		vanillaRules.set(Rules.ENDERMEN_TAKE_BLOCKS, true);
 		vanillaRules.set(Rules.FIRE_BURNS_BLOCKS, true);
