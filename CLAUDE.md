@@ -4,11 +4,11 @@ A data pack for Minecraft 26.3 (namespace `cozy_core`) with small building helpe
 stonecutter at cheap rates (1 plank -> 1 fence, door, sign...; 1 log -> 4), two wooden slabs ->
 one plank, re-dyeing terracotta, glass, panes and concrete powder, a few hard-to-get block
 recipes, and builder trades (wandering trader, mason). The mod version (Fabric and NeoForge jars
-from one codebase) adds the little code a data pack can't: four `cozy_core:` game rules (mob
-explosions, endermen and fire spare blocks; the Hearth Lantern's reach), phantoms off by default
-for new worlds, and the Hearth Lantern block, near which no monster spawns naturally. Nothing
-runs on a timer: the rules are hooks, and the lantern is a block entity that only reports where
-it is.
+from one codebase) adds the little code a data pack can't: five `cozy_core:` game rules (mob
+explosions, endermen and fire spare blocks; the Hearth Lantern's reach; keep your hotbar on
+death), phantoms off by default for new worlds, and the Hearth Lantern block, near which no
+monster spawns naturally. Nothing runs on a timer: the rules are hooks, the lantern is a block
+entity that only reports where it is, and keep-on-death is two hooks around dying and respawning.
 
 `PROGRESS.md` says what's done, what's broken and what's next, with a row per session: read
 it first, and add this session's row before ending.
@@ -39,7 +39,11 @@ it first, and add this session's row before ending.
   the world and need no settings file or sync. Each rule's code is one mixin in `common/.../mixin/`:
   `ServerExplosionMixin` (creeper/ghast blasts clear their block list; the `cozy_core:explosions_spare_blocks`
   tag says which mobs), `EndermanTakeBlockGoalMixin`, `FireBlockMixin` (ignite and burn odds read
-  as 0 while the rule is off, so fire ages out like on stone), `NaturalSpawnerMixin` (the lantern).
+  as 0 while the rule is off, so fire ages out like on stone), `NaturalSpawnerMixin` (the lantern),
+  and for keep-on-death two: `DeathLootMixin` (the head of `dropAllDeathLoot` sets the hotbar,
+  armour and off-hand aside, before graves mods see the inventory) and `ServerPlayerMixin` (the
+  set-aside list lives on the dead player, is saved with them, and is handed to the new player at
+  the end of `restoreFrom`); the logic is `KeepOnDeath.java`. Vanilla's `keep_inventory` wins when on.
   `GameRuleAccessor` flips vanilla `spawn_phantoms`' default to false; saved worlds keep their value.
 - **The Hearth Lantern** (`HearthLantern*.java`): a `LanternBlock` with a block entity that does
   nothing but tell `HearthLanterns` (an in-memory set per `ServerLevel`) when it's in a loaded chunk
@@ -96,7 +100,8 @@ it first, and add this session's row before ending.
 - The game test: `./gradlew :fabric:runClientGameTest -Pexpect=pack` (plus `-PwoodMods=<folder>`
   per wood-mod group), about three minutes. `RulesTest` checks each rule both ways (kind, then
   switched to vanilla with its game rule), the Hearth Lantern (placed, listed, guarding a dark
-  room 10 blocks away, not from 40, off at radius 0, hanging above the room) and takes the
+  room 10 blocks away, not from 40, off at radius 0, hanging above the room), keep-on-death (a
+  real death and respawn in survival, both ways) and takes the
   `hearth_lantern` screenshot; `StonecutterTest` clicks every stonecutter recipe in the real screen.
   A proof run with the mixins emptied out of `cozy_core.mixins.json` fails the kind-side checks.
 - The NeoForge game test: `./gradlew :neoforge:runGameTestServer` (about a minute, no window).
@@ -104,8 +109,8 @@ it first, and add this session's row before ending.
   registers one vanilla test instance per check through `RegisterGameTestsEvent`, with the test
   functions in the `TEST_FUNCTION` registry (`RegisterEvent`). Two environments: `kind` (a new
   world's defaults) and `vanilla` (the rules set to vanilla's behaviour), so each rule is checked
-  both ways; the lantern, explosion and fire checks are the Fabric test's, rewritten on
-  `GameTestHelper`; `recipes` checks every recipe in `pack/` (`-Pexpect=<dir>`, default `pack/`)
+  both ways; the lantern, explosion, fire and keep-on-death checks are the Fabric test's, rewritten on
+  `GameTestHelper` (keep-on-death on mock server players: die, save, load, `restoreFrom`); `recipes` checks every recipe in `pack/` (`-Pexpect=<dir>`, default `pack/`)
   is in the game, or isn't when its mod isn't loaded. The templates in
   `neoforge/src/gametest/resources/data/cozy_core_gametest/structure/` are only sizes, made by
   `tools/generate-test-structures.js`; each test builds its own scene. Vanilla's test server
@@ -140,6 +145,26 @@ it first, and add this session's row before ending.
   are usually beyond the 100-chunk search.
 - Vanilla 26.3 data: trades are data-driven (`villager_trade`, `trade_set`, tags under
   `tags/villager_trade`); the pack format is `min_format`/`max_format` 121.
+
+## Gabby's mods: who does what (the same in every repo)
+
+One job per mod, decided 2026-10-15, so nothing is done twice and each repo tells the same story:
+
+- **Cozy Core** (cozy-core): the builder rules, each an ordinary game rule: builds stay built (mob
+  explosions, endermen, fire), no phantoms, keep your hotbar on death, the Hearth Lantern, cheap
+  wood in the stonecutter, re-dyeing and builder trades. Fabric and NeoForge jars, plus a plain
+  data pack of the recipes.
+- **Espresso Flavoured Core** (espresso-flavoured): the café: coffee you grow and brew, mugs,
+  baristas, Bean Coins, the café charms, and Drowsy (coffee's reason to exist). Longer days stay a
+  Core setting for now. The survival rules Cozy Core now covers leave Core in 0.4.0 (its PLAN-0.4.0.md).
+- **Spawn Gazebo** (spawn-gazebo): the gazebo at the world spawn and its starter chest.
+- **Nightfall Clock** (nightfall-clock): the clock above the hotbar and the dusk warning.
+- **Pocket List** (pocket-list): the gathering checklist.
+- **Espresso Flavoured** (espresso-flavoured-pack): the modpack that puts them together. Since
+  2026-10-14 it carries Cozy Core, Spawn Gazebo, Nightfall Clock and Pocket List, not Espresso
+  Flavoured Core.
+
+A new feature goes in the mod whose job it is. If none fits, ask Gabby before adding it anywhere.
 
 ## Working on Gabby's mods (the same in every repo)
 

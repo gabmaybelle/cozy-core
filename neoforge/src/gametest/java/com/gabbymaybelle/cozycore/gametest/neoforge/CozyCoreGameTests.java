@@ -45,6 +45,8 @@ public final class CozyCoreGameTests {
 		FUNCTIONS.put("fire_burns_blocks", helper -> RuleChecks.fire(helper, false));
 		FUNCTIONS.put("lantern_keeps_the_night_quiet", helper -> RuleChecks.lanterns(helper, true));
 		FUNCTIONS.put("lantern_off_at_radius_zero", helper -> RuleChecks.lanterns(helper, false));
+		FUNCTIONS.put("hotbar_kept_on_death", helper -> RuleChecks.keepOnDeath(helper, true));
+		FUNCTIONS.put("hotbar_dropped_on_death", helper -> RuleChecks.keepOnDeath(helper, false));
 	}
 
 	public CozyCoreGameTests(IEventBus modBus) {
@@ -73,6 +75,7 @@ public final class CozyCoreGameTests {
 		vanillaRules.set(Rules.ENDERMEN_TAKE_BLOCKS, true);
 		vanillaRules.set(Rules.FIRE_BURNS_BLOCKS, true);
 		vanillaRules.set(Rules.HEARTH_LANTERN_RADIUS, 0);
+		vanillaRules.set(Rules.KEEP_HOTBAR_ON_DEATH, false);
 		Holder<TestEnvironmentDefinition<?>> vanilla = event.registerEnvironment(id("vanilla"), new TestEnvironmentDefinition.SetGameRules(vanillaRules));
 
 		// The templates (tools/generate-test-structures.js) are only sizes; each test builds its own scene.
@@ -86,6 +89,8 @@ public final class CozyCoreGameTests {
 		test(event, "fire_burns_blocks", vanilla, id("fire"), 2000);
 		test(event, "lantern_keeps_the_night_quiet", kind, id("lanterns"), 400);
 		test(event, "lantern_off_at_radius_zero", vanilla, id("lanterns"), 400);
+		test(event, "hotbar_kept_on_death", kind, id("explosions"), 100);
+		test(event, "hotbar_dropped_on_death", vanilla, id("explosions"), 100);
 	}
 
 	private static void test(RegisterGameTestsEvent event, String name, Holder<TestEnvironmentDefinition<?>> environment, Identifier structure, int maxTicks) {

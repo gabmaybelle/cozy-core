@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -21,10 +22,15 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
@@ -62,6 +68,7 @@ public class RulesTest implements FabricClientGameTest {
 			endermen(server);
 			fire(ctx, server, home.offset(0, 0, 30));
 			lanterns(ctx, server, home.offset(-30, 0, -30));
+			keepOnDeath(ctx, server, home.offset(-30, 0, 30));
 			screenshot(ctx, server, home.offset(0, 0, -6));
 		}
 		if (!failures.isEmpty()) {
@@ -76,6 +83,7 @@ public class RulesTest implements FabricClientGameTest {
 		check(server.computeOnServer(s -> !rules(s).get(Rules.FIRE_BURNS_BLOCKS)), "fire doesn't burn blocks by default");
 		check(server.computeOnServer(s -> rules(s).get(Rules.HEARTH_LANTERN_RADIUS) == 32), "the Hearth Lantern radius defaults to 32");
 		check(server.computeOnServer(s -> !rules(s).get(GameRules.SPAWN_PHANTOMS)), "a new world starts with phantoms off");
+		check(server.computeOnServer(s -> rules(s).get(Rules.KEEP_HOTBAR_ON_DEATH)), "the hotbar is kept on death by default");
 		check(server.computeOnServer(s -> rules(s).availableRules().anyMatch(r -> r.category() == Rules.CATEGORY)), "the rules have the Cozy Core heading");
 		check("cozy_core:fire_burns_blocks".equals(Rules.FIRE_BURNS_BLOCKS.getIdentifier().toString()), "a rule's id is cozy_core:... (got " + Rules.FIRE_BURNS_BLOCKS.getIdentifier() + ")");
 		check(server.computeOnServer(s -> s.getRecipeManager().byKey(ResourceKey.create(Registries.RECIPE, HearthLantern.ID)).isPresent()), "the Hearth Lantern recipe loads");
@@ -333,6 +341,78 @@ public class RulesTest implements FabricClientGameTest {
 					+ ", nearest player " + (level.getNearestPlayer(at.getX(), at.getY(), at.getZ(), -1, false) == null ? "none"
 							: Math.sqrt(level.getNearestPlayer(at.getX(), at.getY(), at.getZ(), -1, false).distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(at))) + " blocks");
 		});
+	}
+
+	/**
+	 * Dying in survival with a pickaxe on the hotbar, cobblestone in the main inventory and a shield
+	 * in the off-hand. Kind: the cobblestone drops where the player fell, the pickaxe doesn't, and
+	 * after respawning the pickaxe and shield are back in their slots while the cobblestone isn't.
+	 * Vanilla (rule off): the pickaxe drops too and nothing comes back.
+	 */
+	private void keepOnDeath(ClientGameTestContext ctx, TestServerContext server, BlockPos at) {
+		server.runOnServer(s -> {
+			ServerLevel level = s.overworld();
+			for (int x = -2; x <= 2; x++) {
+				for (int z = -2; z <= 2; z++) {
+					level.setBlockAndUpdate(at.offset(x, -1, z), Blocks.STONE.defaultBlockState());
+					for (int y = 0; y <= 2; y++) {
+						level.setBlockAndUpdate(at.offset(x, y, z), Blocks.AIR.defaultBlockState());
+					}
+				}
+			}
+		});
+		Death kind = die(ctx, server, at);
+		check(kind.cobbleDropped(), "the cobblestone from the inventory drops where the player fell");
+		check(!kind.pickaxeDropped(), "with the rule on, the hotbar's pickaxe doesn't drop");
+		check(kind.pickaxeBack(), "with the rule on, the pickaxe is back on the hotbar after respawning");
+		check(kind.shieldBack(), "with the rule on, the off-hand shield is back after respawning");
+		check(!kind.cobbleBack(), "the rest of the inventory doesn't come back");
+		set(server, Rules.KEEP_HOTBAR_ON_DEATH, false);
+		Death vanilla = die(ctx, server, at);
+		set(server, Rules.KEEP_HOTBAR_ON_DEATH, true);
+		check(vanilla.pickaxeDropped(), "with the rule off, the pickaxe drops like anything else");
+		check(!vanilla.pickaxeBack() && !vanilla.shieldBack(), "with the rule off, nothing comes back after respawning");
+		server.runCommand("gamemode creative @a");
+	}
+
+	private record Death(boolean cobbleDropped, boolean pickaxeDropped, boolean pickaxeBack, boolean shieldBack, boolean cobbleBack) {
+	}
+
+	/** Kills the player at {@code at} in survival, respawns them, and reports what dropped and what came back. */
+	private static Death die(ClientGameTestContext ctx, TestServerContext server, BlockPos at) {
+		server.runCommand("gamemode survival @a");
+		server.runOnServer(s -> {
+			ServerPlayer player = player(s);
+			player.getInventory().clearContent();
+			player.teleportTo(s.overworld(), at.getX() + 0.5, at.getY(), at.getZ() + 0.5, Set.of(), 0, 0, false);
+			player.getInventory().setItem(0, new ItemStack(Items.DIAMOND_PICKAXE));
+			player.getInventory().setItem(20, new ItemStack(Items.COBBLESTONE, 10));
+			player.getInventory().setItem(Inventory.SLOT_OFFHAND, new ItemStack(Items.SHIELD));
+		});
+		ctx.waitTicks(5);
+		server.runCommand("kill @a");
+		ctx.waitForScreen(DeathScreen.class);
+		boolean cobbleDropped = dropped(server, at, Items.COBBLESTONE);
+		boolean pickaxeDropped = dropped(server, at, Items.DIAMOND_PICKAXE);
+		ctx.runOnClient(mc -> mc.player.respawn());
+		ctx.waitForScreen(null);
+		for (int i = 0; i < 200 && !server.computeOnServer(s -> player(s).isAlive()); i++) {
+			ctx.waitTicks(1);
+		}
+		ctx.waitTicks(5);
+		Death death = server.computeOnServer(s -> {
+			Inventory inventory = player(s).getInventory();
+			return new Death(cobbleDropped, pickaxeDropped, inventory.getItem(0).is(Items.DIAMOND_PICKAXE),
+					inventory.getItem(Inventory.SLOT_OFFHAND).is(Items.SHIELD), inventory.contains(new ItemStack(Items.COBBLESTONE)));
+		});
+		server.runCommand("kill @e[type=minecraft:item]");
+		server.runCommand("kill @e[type=minecraft:experience_orb]");
+		return death;
+	}
+
+	/** Whether an item of that kind is lying within 4 blocks of {@code at}. */
+	private static boolean dropped(TestServerContext server, BlockPos at, Item item) {
+		return server.computeOnServer(s -> !s.overworld().getEntitiesOfClass(ItemEntity.class, new AABB(at).inflate(4), e -> e.getItem().is(item)).isEmpty());
 	}
 
 	/** Two lanterns, one standing and one hanging, for the screenshot. */

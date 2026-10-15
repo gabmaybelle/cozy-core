@@ -77,6 +77,7 @@ to vanilla with `/gamerule` whenever you like.
 | `cozy_core:endermen_take_blocks` (off) | Endermen leave your blocks where they are. |
 | `cozy_core:fire_burns_blocks` (off) | Fire still appears and goes out, but never catches a block alight or burns one away. A lightning strike on a wooden roof is harmless. |
 | `spawn_phantoms` (vanilla's, off for new worlds) | No phantoms. Worlds you already have keep their setting. |
+| `cozy_core:keep_hotbar_on_death` (on) | Your hotbar, armour and off-hand stay with you when you die. Everything else drops where you fell (into a grave, with a graves mod), so there's still a trip back. Curse of Vanishing still vanishes, and vanilla's `keepInventory` keeps everything when it's on. |
 
 ## Two ways to install
 

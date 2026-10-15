@@ -31,6 +31,8 @@ public final class Rules {
 	public static final GameRule<Boolean> FIRE_BURNS_BLOCKS = bool("fire_burns_blocks", false);
 	/** How far around a Hearth Lantern monsters don't spawn naturally (any height). 0 turns the lanterns off. */
 	public static final GameRule<Integer> HEARTH_LANTERN_RADIUS = integer("hearth_lantern_radius", 32, 0, 128);
+	/** The hotbar, armour and off-hand stay with a player who dies; the rest drops. Vanilla's {@code keep_inventory} keeps everything and wins when it's on. */
+	public static final GameRule<Boolean> KEEP_HOTBAR_ON_DEATH = bool("keep_hotbar_on_death", true);
 
 	private Rules() {
 	}

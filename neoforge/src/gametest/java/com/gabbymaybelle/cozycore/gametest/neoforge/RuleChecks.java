@@ -2,6 +2,7 @@ package com.gabbymaybelle.cozycore.gametest.neoforge;
 
 import com.gabbymaybelle.cozycore.HearthLantern;
 import com.gabbymaybelle.cozycore.HearthLanterns;
+import com.gabbymaybelle.cozycore.KeepOnDeath;
 import com.gabbymaybelle.cozycore.Rules;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -17,20 +18,28 @@ import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.NaturalSpawner;
@@ -39,6 +48,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
@@ -61,6 +72,7 @@ final class RuleChecks {
 		helper.assertFalse(rules.get(Rules.FIRE_BURNS_BLOCKS), "fire shouldn't burn blocks by default");
 		helper.assertValueEqual(rules.get(Rules.HEARTH_LANTERN_RADIUS), 32, "the Hearth Lantern radius");
 		helper.assertFalse(rules.get(GameRules.SPAWN_PHANTOMS), "a new world should start with phantoms off");
+		helper.assertTrue(rules.get(Rules.KEEP_HOTBAR_ON_DEATH), "the hotbar should be kept on death by default");
 		helper.assertTrue(rules.availableRules().anyMatch(rule -> rule.category() == Rules.CATEGORY), "the rules should have the Cozy Core heading");
 		helper.assertValueEqual(Rules.FIRE_BURNS_BLOCKS.getIdentifier().toString(), "cozy_core:fire_burns_blocks", "a rule's id");
 		helper.assertTrue(helper.getLevel().getServer().getRecipeManager().byKey(ResourceKey.create(Registries.RECIPE, HearthLantern.ID)).isPresent(),
@@ -300,6 +312,67 @@ final class RuleChecks {
 				});
 			});
 		});
+	}
+
+	/**
+	 * A survival player dies with a pickaxe on the hotbar, cobblestone in the main inventory and a
+	 * shield in the off-hand, is saved and loaded as if they'd logged out while dead, and respawns.
+	 * Kind: the cobblestone drops, the pickaxe doesn't, the kept items are in the saved data, and the
+	 * pickaxe and shield are back in their slots after respawning. Vanilla (rule off): the pickaxe
+	 * drops like anything else and nothing comes back.
+	 */
+	@SuppressWarnings("removal") // makeMockServerPlayerInLevel: the only way to get a real ServerPlayer in a test
+	static void keepOnDeath(GameTestHelper helper, boolean kind) {
+		ServerLevel level = helper.getLevel();
+		helper.assertValueEqual(Rules.is(level, Rules.KEEP_HOTBAR_ON_DEATH), kind, "the keep_hotbar_on_death rule for this test");
+		BlockPos at = helper.absolutePos(new BlockPos(4, 2, 4));
+		for (int x = -2; x <= 2; x++) {
+			for (int z = -2; z <= 2; z++) {
+				level.setBlockAndUpdate(at.offset(x, -1, z), Blocks.STONE.defaultBlockState());
+			}
+		}
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer loaded = helper.makeMockServerPlayerInLevel();
+		ServerPlayer respawned = helper.makeMockServerPlayerInLevel();
+		boolean loadedListed = true;
+		try {
+			player.setGameMode(GameType.SURVIVAL);
+			player.teleportTo(level, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, Set.of(), 0, 0, false);
+			Inventory inventory = player.getInventory();
+			inventory.setItem(0, new ItemStack(Items.DIAMOND_PICKAXE));
+			inventory.setItem(20, new ItemStack(Items.COBBLESTONE, 10));
+			inventory.setItem(Inventory.SLOT_OFFHAND, new ItemStack(Items.SHIELD));
+			player.die(level.damageSources().genericKill());
+			helper.assertTrue(dropped(level, at, Items.COBBLESTONE), "the cobblestone should drop where the player fell");
+			helper.assertValueEqual(dropped(level, at, Items.DIAMOND_PICKAXE), !kind, "whether the hotbar's pickaxe dropped");
+			// Saved and loaded, as when a player logs out while dead and comes back later.
+			TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+			player.saveWithoutId(output);
+			CompoundTag saved = output.buildResult();
+			helper.assertValueEqual(saved.contains(KeepOnDeath.SAVE_KEY), kind, "whether the kept items are in the player's saved data");
+			// The loaded player takes on the dead one's identity, so it leaves the player list first.
+			level.getServer().getPlayerList().remove(loaded);
+			loadedListed = false;
+			loaded.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+			respawned.restoreFrom(loaded, false);
+			Inventory after = respawned.getInventory();
+			helper.assertValueEqual(after.getItem(0).is(Items.DIAMOND_PICKAXE), kind, "whether the pickaxe is back on the hotbar after respawning");
+			helper.assertValueEqual(after.getItem(Inventory.SLOT_OFFHAND).is(Items.SHIELD), kind, "whether the off-hand shield is back after respawning");
+			helper.assertFalse(after.contains(new ItemStack(Items.COBBLESTONE)), "the rest of the inventory shouldn't come back");
+		} finally {
+			level.getEntitiesOfClass(ItemEntity.class, new AABB(at).inflate(6)).forEach(ItemEntity::discard);
+			level.getServer().getPlayerList().remove(player);
+			if (loadedListed) {
+				level.getServer().getPlayerList().remove(loaded);
+			}
+			level.getServer().getPlayerList().remove(respawned);
+		}
+		helper.succeed();
+	}
+
+	/** Whether an item of that kind is lying within 4 blocks of {@code at}. */
+	private static boolean dropped(ServerLevel level, BlockPos at, Item item) {
+		return !level.getEntitiesOfClass(ItemEntity.class, new AABB(at).inflate(4), e -> e.getItem().is(item)).isEmpty();
 	}
 
 	/** Asks vanilla's natural spawner for monsters at the room's centre 80 times, then counts (and removes) what appeared. */
