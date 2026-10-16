@@ -46,12 +46,23 @@ neoForge {
 		// (a flat world, no window) and runs the checks in src/gametest: the rules both ways, the
 		// Hearth Lantern, and that every recipe in pack/ is in the game. It exits non-zero if one fails.
 		//   -Pexpect=<pack dir>  take the expected recipes from another pack folder (default: pack/)
+		//   -PwoodMods=<folder>  also load every jar in that folder (a group from tools/neoforge-group.sh)
+		//   -PexpectMods=<ids>   comma-separated mod ids that must be loaded, so a group whose jars
+		//                        didn't load fails instead of passing with its recipes "waiting"
 		gameTestServer {
 			type = 'gameTestServer'
 			loadedMods = [mods.cozy_core, mods.cozy_core_gametest]
 			programArguments.addAll('--tests', 'cozy_core_gametest:*')
 			systemProperty 'cozy.expect', rootProject.file(project.hasProperty('expect') ? project.expect : 'pack').absolutePath
+			systemProperty 'cozy.expectMods', project.findProperty('expectMods') ?: ''
 		}
+	}
+}
+
+// `-PwoodMods=<folder>`: the wood mods' jars (and their libraries) join the game test's run.
+if (project.hasProperty('woodMods')) {
+	dependencies {
+		runtimeOnly fileTree(project.woodMods) { include '*.jar' }
 	}
 }
 

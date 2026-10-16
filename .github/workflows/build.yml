@@ -9,7 +9,8 @@
 #   and clicks every stonecutter recipe in the real screen, with and without the wood mods (and
 #   the decoration mods).
 # - game (NeoForge): vanilla's test server runs the NeoForge jar's own checks (neoforge/src/gametest):
-#   the rules both ways, the Hearth Lantern, and every recipe in pack/ being in the game.
+#   the rules both ways, the Hearth Lantern, and every recipe in pack/ being in the game, with and
+#   without the wood mods (tools/neoforge-group.sh's groups).
 
 name: build
 on: [pull_request, push]
@@ -178,7 +179,15 @@ jobs:
   game-neoforge:
     needs: build
     runs-on: ubuntu-24.04
-    name: game (NeoForge)
+    name: game (NeoForge, ${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { group: none, name: 'vanilla wood' }
+          - { group: A, name: 'with Biomes O'' Plenty' }
+          - { group: B, name: 'with Ecologics, Wilder Wild and Promenade' }
+          - { group: D, name: 'with Macaw''s' }
     steps:
       - name: checkout repository
         uses: actions/checkout@v6
@@ -189,9 +198,19 @@ jobs:
           distribution: 'microsoft'
       - name: setup gradle (with caching)
         uses: gradle/actions/setup-gradle@v6
+      - name: this group's wood mods
+        if: matrix.group != 'none'
+        run: |
+          bash tools/neoforge-group.sh ${{ matrix.group }} ~/group
+          ls ~/group
       - name: game test
-        # A dedicated test server: no window, so no virtual display needed.
+        # A dedicated test server: no window, so no virtual display needed. With a group, its mods
+        # must load (-PexpectMods) and their recipes must be in the game.
         timeout-minutes: 20
         run: |
           chmod +x ./gradlew
-          ./gradlew :neoforge:runGameTestServer -Pexpect=pack
+          args="-Pexpect=pack"
+          if [ "${{ matrix.group }}" != none ]; then
+            args="$args -PwoodMods=$HOME/group -PexpectMods=$(bash tools/neoforge-group.sh ${{ matrix.group }} --ids)"
+          fi
+          ./gradlew :neoforge:runGameTestServer $args

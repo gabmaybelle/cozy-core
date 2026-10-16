@@ -58,7 +58,9 @@ it first, and add this session's row before ending.
 - `tools/pack-info.js`: the Minecraft version and descriptions the generator and the build share;
   the version comes from `gradle.properties`. `tools/group-jars.sh`: the wood-mod test groups
   (A, B wood mods, C Beautify, D Macaw's), used by `ci-load-test.sh` and the workflow, so they're
-  defined once.
+  defined once. `tools/neoforge-group.sh` does the same for NeoForge (A BOP; B Ecologics, Wilder Wild,
+  Promenade; D Macaw's; no C): it downloads a group's jars and, with `--ids`, names its mod ids. It
+  needs curl and jq, so it's for CI or a machine that has jq.
 - `tools/fetch-test-mods.js "<test folder>"` downloads the supported wood and decoration mods
   (SHA-512 checked).
 - `tools/server-test.js` starts a dedicated server with the pack and prints errors.
@@ -111,7 +113,9 @@ it first, and add this session's row before ending.
   world's defaults) and `vanilla` (the rules set to vanilla's behaviour), so each rule is checked
   both ways; the lantern, explosion, fire and keep-on-death checks are the Fabric test's, rewritten on
   `GameTestHelper` (keep-on-death on mock server players: die, save, load, `restoreFrom`); `recipes` checks every recipe in `pack/` (`-Pexpect=<dir>`, default `pack/`)
-  is in the game, or isn't when its mod isn't loaded. The templates in
+  is in the game, or isn't when its mod isn't loaded. `-PwoodMods=<folder>` adds a group's jars to the
+  run and `-PexpectMods=<ids>` (from `neoforge-group.sh <group> --ids`) makes `recipes` fail if one of
+  them didn't load, so a group whose jars were skipped can't pass with its recipes "waiting". The templates in
   `neoforge/src/gametest/resources/data/cozy_core_gametest/structure/` are only sizes, made by
   `tools/generate-test-structures.js`; each test builds its own scene. Vanilla's test server
   world has `spawn_mobs` off and no players, and natural spawning wants a player (and the spawn
@@ -125,7 +129,7 @@ it first, and add this session's row before ending.
   Mojang, wood mods from Modrinth, both jars from Gradle) and a check that the committed `pack/`
   is what the generator makes; `tools/ci-load-test.sh` on Fabric (alone and with groups A, B, C
   and D), NeoForge (alone and with A, B and D) and plain vanilla with the zip; the game test alone
-  and with each group; and the NeoForge game test. `node tools/build.js <vanilla server jar> <wood mods folder>` builds from
+  and with each group; and the NeoForge game test alone and with groups A, B and D. `node tools/build.js <vanilla server jar> <wood mods folder>` builds from
   given inputs.
 
 ## Gotchas

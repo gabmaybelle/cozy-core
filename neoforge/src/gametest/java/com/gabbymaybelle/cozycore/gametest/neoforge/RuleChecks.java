@@ -111,6 +111,11 @@ final class RuleChecks {
 			throw new IllegalStateException("couldn't read the recipes in " + recipes, e);
 		}
 		helper.assertTrue(expected > 0, "no recipes expected from " + recipes);
+		// A wood-mod group's run names its mods, so jars that didn't load fail here rather than
+		// leaving all their recipes "waiting" and passing.
+		for (String id : System.getProperty("cozy.expectMods", "").split(",")) {
+			helper.assertTrue(id.isBlank() || ModList.get().isLoaded(id.strip()), "the mod " + id.strip() + " should be loaded for this run");
+		}
 		helper.assertTrue(wrong.isEmpty(), wrong.size() + " recipe(s) wrong: " + String.join(", ", wrong.subList(0, Math.min(wrong.size(), 10))));
 		System.out.println("[cozy_core_gametest] " + expected + " recipes in the game, " + waiting + " waiting on mods that aren't here");
 		helper.succeed();

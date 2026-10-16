@@ -5,8 +5,7 @@
 #   tools/ci-load-test.sh neoforge [none|A|B|D]                      the NeoForge jar
 #   tools/ci-load-test.sh vanilla                                  the data pack zip on plain vanilla
 # The Fabric groups are tools/group-jars.sh's: A and B wood mods, C Beautify, D Macaw's.
-# On NeoForge, Ecologics is in B, and D is Macaw's NeoForge versions; there is no C yet: Beautify ReFoxed 2.0.0 crashes on NeoForge
-# 26.3's release builds by itself (ModConfig$Type.SERVER, 2026-10-13).
+# The NeoForge groups are tools/neoforge-group.sh's (Ecologics is in B there, and there is no C).
 # Expects dist/ (node tools/build.js, ./gradlew build, node tools/build.js --jars) and, for vanilla, ~/mc/server-bundler.jar (the CI build job).
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -62,15 +61,9 @@ case $LOADER in
 		(cd "$RUN" && java -jar installer.jar --install-server . > /dev/null)
 		mkdir -p "$RUN/mods"
 		cp "$NEOFORGE_JAR" "$RUN/mods/"
-		# NeoForge groups (as tested): A = Biomes O' Plenty with GlitchCore and TerraBlender;
-		# B = Ecologics, Wilder Wild with FrozenLib, and Promenade; D = the seven Macaw's mods.
-		case $GROUP in
-			A) slugs="biomes-o-plenty glitchcore terrablender" ;;
-			B) slugs="ecologics wilder-wild frozenlib promenade"; export IGNORE='FrozenLib.*Unable to read config' ;;
-			D) slugs="macaws-roofs macaws-fences-and-walls macaws-stairs macaws-windows macaws-furniture macaws-doors macaws-trapdoors" ;;
-			*) slugs="" ;;
-		esac
-		for s in $slugs; do modrinth_jar "$s" neoforge "$RUN/mods"; done
+		# The groups are tools/neoforge-group.sh's (shared with the NeoForge game test).
+		bash tools/neoforge-group.sh "$GROUP" "$RUN/mods"
+		if [ "$GROUP" = B ]; then export IGNORE='FrozenLib.*Unable to read config'; fi
 		server_files
 		echo "NeoForge $NEOFORGE, group $GROUP: $(ls "$RUN/mods" | tr '\n' ' ')"
 		node tools/server-test.js "$RUN" java "@libraries/net/neoforged/neoforge/$NEOFORGE/unix_args.txt" "datapack list enabled"
