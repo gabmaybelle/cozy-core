@@ -6,8 +6,7 @@
   armour and off-hand stay with you when you die, so a death isn't a trip back for your tools;
   everything else drops where you fell (into a grave, with a graves mod). Curse of Vanishing
   still vanishes, vanilla's `keepInventory` still keeps everything when it's on, and logging out
-  while dead loses nothing. The rule moved here from Espresso Flavoured Core, so the kind rules
-  live in one place.
+  while dead loses nothing.
 
 ## 0.2.0
 

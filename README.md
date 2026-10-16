@@ -53,8 +53,6 @@ Each rule is an ordinary game rule: it shows in the Game Rules screen when you m
 
 With the mod version, wood from Biomes O' Plenty, Ecologics, Promenade and Wilder Wild works in the stonecutter like vanilla wood. Pieces from [Beautify](https://modrinth.com/mod/beautify-refabricated) and Macaw's [Roofs](https://modrinth.com/mod/macaws-roofs), [Fences and Walls](https://modrinth.com/mod/macaws-fences-and-walls), [Stairs](https://modrinth.com/mod/macaws-stairs), [Windows](https://modrinth.com/mod/macaws-windows), [Furniture](https://modrinth.com/mod/macaws-furniture), [Doors](https://modrinth.com/mod/macaws-doors) and [Trapdoors](https://modrinth.com/mod/macaws-trapdoors) go in too, when they're made of a single wood. Small pieces cost one plank; big ones, like desks and big gates, cost a log. Anything with glass, iron or paper stays at the crafting table. These recipes only switch on when that mod is installed.
 
-For a café to go with your builds, try [Espresso Flavoured Core](https://github.com/gabmaybelle/espresso-flavoured): coffee you grow and brew, mugs, baristas and charms.
-
 ## Requirements
 
 Minecraft 26.3. The mod version runs on Fabric (with Fabric API) or NeoForge; download the file
