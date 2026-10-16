@@ -191,14 +191,16 @@ public class RulesTest implements FabricClientGameTest {
 	private void fire(ClientGameTestContext ctx, TestServerContext server, BlockPos at) {
 		int[] kind = burn(ctx, server, at);
 		check(kind[0] == 0, "with the rule off, fire burns no planks (" + kind[0] + " of 49 gone)");
-		check(kind[1] < 25, "with the rule off, fire still goes out (" + kind[1] + " of 25 fires left)");
+		// A fire over planks it can't burn ages past 3 and goes out, like fire on stone; each tick has
+		// a 1 in 3 chance of ageing it, so in 1500 ticks a straggler or two is possible.
+		check(kind[1] <= 2, "with the rule off, fire still goes out (" + kind[1] + " of 16 fires left)");
 		set(server, Rules.FIRE_BURNS_BLOCKS, true);
 		int[] vanilla = burn(ctx, server, at);
 		set(server, Rules.FIRE_BURNS_BLOCKS, false);
 		check(vanilla[0] > 0, "with the rule on, fire burns planks again (" + vanilla[0] + " of 49 gone)");
 	}
 
-	/** A 7x7 oak plank floor with fire on every other plank, left to burn for 1500 ticks (at 200 ticks a second). Returns {planks gone, fires left}. */
+	/** A 7x7 oak plank floor with fire on every other plank (16 fires), left to burn for 1500 ticks (at 200 ticks a second). Returns {planks gone, fires left}. */
 	private static int[] burn(ClientGameTestContext ctx, TestServerContext server, BlockPos at) {
 		server.runOnServer(s -> {
 			ServerLevel level = s.overworld();
