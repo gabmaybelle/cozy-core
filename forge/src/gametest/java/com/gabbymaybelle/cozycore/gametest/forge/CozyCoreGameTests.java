@@ -47,6 +47,11 @@ public final class CozyCoreGameTests {
 		RuleChecks.recipes(helper);
 	}
 
+	@GameTest(template = "empty", batch = KIND)
+	public static void advancements(GameTestHelper helper) {
+		RuleChecks.advancements(helper);
+	}
+
 	@GameTest(template = "explosions", batch = KIND)
 	public static void explosions_spare_blocks(GameTestHelper helper) {
 		RuleChecks.explosions(helper, true);

@@ -1,0 +1,36 @@
+{
+  "parent": "cozy_core:cozy/root",
+  "criteria": {
+    "bought": {
+      "trigger": "minecraft:villager_trade",
+      "conditions": {
+        "item": {
+          "items": [
+            "minecraft:azalea",
+            "minecraft:flowering_azalea",
+            "minecraft:crimson_fungus",
+            "minecraft:warped_fungus"
+          ]
+        }
+      }
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.cozy_core.cozy.far_flung_flowers.description",
+      "fallback": "Buy an azalea or a fungus from a wandering trader"
+    },
+    "icon": {
+      "item": "minecraft:flowering_azalea"
+    },
+    "title": {
+      "translate": "advancements.cozy_core.cozy.far_flung_flowers.title",
+      "fallback": "Far-flung flowers"
+    }
+  },
+  "requirements": [
+    [
+      "bought"
+    ]
+  ]
+}

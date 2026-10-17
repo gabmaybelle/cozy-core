@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0+1.20.1
+
+- **A Cozy Core advancements tab.** It opens when you pick up planks, with six steps: craft a
+  Hearth Lantern, cut wood in a stonecutter, re-dye blocks, craft moss or glow lichen, and buy
+  from the wandering trader and a mason. No rewards. The data pack has the three steps that
+  don't need the mod.
+
 ## 0.3.0+1.20.1
 
 Cozy Core for Minecraft 1.20.1, on Fabric and Forge, plus the data pack: the same as 0.3.0 for
