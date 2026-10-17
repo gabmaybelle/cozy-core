@@ -343,9 +343,14 @@ final class RuleChecks {
 		level.setDefaultSpawnPos(room.offset(1000, 0, 0), 0);
 		ServerPlayer watcher = helper.makeMockServerPlayerInLevel();
 		watcher.teleportTo(level, room.getX() + 0.5, room.getY() + 40, room.getZ() + 0.5, Set.of(), 0, 90);
+		// Every lantern this test places goes again at the end: one left standing would guard the other
+		// lantern test's room in the same run (and in later runs, which reuse the world).
 		Runnable tidy = () -> {
 			level.getServer().getPlayerList().remove(watcher);
 			level.setDefaultSpawnPos(spawnPoint, spawnAngle);
+			for (BlockPos placed : List.of(near, far, above)) {
+				level.setBlockAndUpdate(placed, Blocks.AIR.defaultBlockState());
+			}
 		};
 		// Let the light engine catch up with the new roof: the room has to read as dark.
 		helper.runAfterDelay(40, () -> {
