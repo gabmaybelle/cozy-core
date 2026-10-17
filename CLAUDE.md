@@ -131,6 +131,10 @@ it first, and add this session's row before ending.
   and D), NeoForge (alone and with A, B and D) and plain vanilla with the zip; the game test alone
   and with each group; and the NeoForge game test alone and with groups A, B and D. `node tools/build.js <vanilla server jar> <wood mods folder>` builds from
   given inputs.
+- **Each game test removes what it builds** (blocks, lanterns, entities, stand-in players) before it
+  succeeds. Tests in a batch share one world, and a run can reuse the last run's world, so anything
+  left behind can change another test's result: a Hearth Lantern left standing by the radius-0 check
+  once guarded the other lantern check's room (found on 1.20.1, 2026-10-17).
 
 ## Gotchas
 
