@@ -32,6 +32,23 @@ dependencies {
 	// in the game test, so their recipes are tested too.
 	if (project.hasProperty("woodMods")) {
 		modLocalRuntime fileTree(project.woodMods) { include "*.jar" }
+		// A dev run doesn't open the jars a mod carries inside it (Promenade carries Biolith,
+		// TerraBlender and Ecologics their config libraries), so they're unpacked beside it, two
+		// levels deep. One copy per file name, so a library two mods carry loads once.
+		def nested = layout.buildDirectory.dir("woodModsNested").get().asFile
+		def unpack = { Collection<File> jars ->
+			jars.each { jar ->
+				copy {
+					from(zipTree(jar)) { include "META-INF/jars/*.jar"; eachFile { it.path = it.name } }
+					into nested
+					includeEmptyDirs = false
+				}
+			}
+		}
+		delete nested
+		unpack(fileTree(project.woodMods) { include "*.jar" }.files)
+		unpack(fileTree(nested) { include "*.jar" }.files)
+		modLocalRuntime fileTree(nested) { include "*.jar" }
 	}
 }
 

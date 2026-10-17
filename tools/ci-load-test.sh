@@ -63,8 +63,8 @@ case $LOADER in
 		cp "$NEOFORGE_JAR" "$RUN/mods/"
 		# The groups are tools/neoforge-group.sh's (shared with the NeoForge game test).
 		bash tools/neoforge-group.sh "$GROUP" "$RUN/mods"
-		# Beautify's NeoForge build for 1.21.1 logs errors about its own trellis loot tables.
-		if [ "$GROUP" = C ]; then export IGNORE='beautify:blocks/[a-z_]*trellis'; fi
+		# Beautify's NeoForge build for 1.21.1 logs errors about its own loot tables (trellises, lamp jar, hanging pot).
+		if [ "$GROUP" = C ]; then export IGNORE='LootDataType.*beautify:blocks/'; fi
 		server_files
 		echo "NeoForge $NEOFORGE, group $GROUP: $(ls "$RUN/mods" | tr '\n' ' ')"
 		node tools/server-test.js "$RUN" java "@libraries/net/neoforged/neoforge/$NEOFORGE/unix_args.txt" "datapack list enabled"

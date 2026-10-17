@@ -172,7 +172,7 @@ What differs from 26.3, and why (2026-10-17):
   log tags too (2 planks by their own recipe, 4 by the tag), which made clashing stonecutter recipes.
 - **Wood mods on 1.21.1** (Modrinth, 2026-10-16): Fabric has all of them; NeoForge has BOP,
   Ecologics, Promenade, Beautify and Macaw's, but no Wilder Wild. NeoForge groups: A BOP; B
-  Ecologics and Promenade; C Beautify (its own trellis loot tables log errors, ignored in the load
+  Ecologics and Promenade; C Beautify (its own loot tables log errors, ignored in the load
   test); D Macaw's.
 - **Tests.** The Fabric game test runs on its own harness (`fabric/src/gametest/.../harness`, the
   same as Spawn Gazebo's and Pocket List's 1.21.1 branches: Fabric has no client game test API on

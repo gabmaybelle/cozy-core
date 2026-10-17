@@ -352,9 +352,14 @@ public class RulesTest implements ClientGameTest {
 		});
 		ctx.waitTicks(2);
 		return server.computeOnServer(s -> {
-			List<Monster> monsters = s.overworld().getEntitiesOfClass(Monster.class, new AABB(room).inflate(8));
-			monsters.forEach(m -> m.discard());
-			return monsters.size();
+			// Only monsters that appeared during these few ticks count: one that walked in from farther
+			// than the lantern reaches (natural spawning is on in this world) isn't the spawner's doing.
+			List<Monster> all = s.overworld().getEntitiesOfClass(Monster.class, new AABB(room).inflate(8));
+			List<Monster> fresh = all.stream().filter(m -> m.tickCount <= 5).toList();
+			all.stream().filter(m -> m.tickCount > 5).forEach(m -> System.out.println("[cozy_core_gametest] not counted: "
+					+ EntityType.getKey(m.getType()) + " at " + m.blockPosition() + ", " + m.tickCount + " ticks old (room " + room + ")"));
+			all.forEach(m -> m.discard());
+			return fresh.size();
 		});
 	}
 
