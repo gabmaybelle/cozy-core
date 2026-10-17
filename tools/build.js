@@ -47,7 +47,8 @@ if (process.argv[2] === '--jars') {
 execFileSync(process.execPath, [path.join(__dirname, 'generate.js'), ...process.argv.slice(2)], { stdio: 'inherit' });
 fs.rmSync(STAGE, { recursive: true, force: true });
 fs.mkdirSync(DIST, { recursive: true });
-const MOD_ONLY = /^data\/(cozy_core\/(recipe|advancement\/recipes)\/compat|cozy_core\/villager_trade|minecraft\/trade_set|minecraft\/tags\/villager_trade)(\/|$)/;
+// The advancements tab's Hearth Lantern and trade steps are mod-only too (tools/generate.js, section 6b).
+const MOD_ONLY = /^data\/(cozy_core\/(recipe|advancement\/recipes)\/compat|cozy_core\/villager_trade|minecraft\/trade_set|minecraft\/tags\/villager_trade|cozy_core\/advancement\/cozy\/(the_kettles_on|far_flung_flowers|built_to_last)\.json$)(\/|$)/;
 const isModOnly = rel => MOD_ONLY.test(rel.split(path.sep).join('/'));
 
 // The data pack, with its own description (it has no trades).
@@ -56,6 +57,11 @@ fs.cpSync(PACK, datapack, { recursive: true, filter: src => !isModOnly(path.rela
 const mcmeta = JSON.parse(fs.readFileSync(path.join(datapack, 'pack.mcmeta'), 'utf8'));
 mcmeta.pack.description.text = DATAPACK_DESCRIPTION;
 fs.writeFileSync(path.join(datapack, 'pack.mcmeta'), JSON.stringify(mcmeta, null, 2) + '\n');
+// The data pack has no Hearth Lantern, so its advancements tab shows a vanilla lantern instead.
+const tabRoot = path.join(datapack, 'data', 'cozy_core', 'advancement', 'cozy', 'root.json');
+const root = JSON.parse(fs.readFileSync(tabRoot, 'utf8'));
+root.display.icon.id = 'minecraft:lantern';
+fs.writeFileSync(tabRoot, JSON.stringify(root, null, 2) + '\n');
 fs.copyFileSync(path.join(ROOT, 'LICENSE'), path.join(datapack, 'LICENSE'));
 fs.copyFileSync(ICON, path.join(datapack, 'pack.png'));
 

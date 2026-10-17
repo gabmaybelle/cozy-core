@@ -38,6 +38,7 @@ public final class CozyCoreGameTests {
 	static {
 		FUNCTIONS.put("defaults", RuleChecks::defaults);
 		FUNCTIONS.put("recipes", RuleChecks::recipes);
+		FUNCTIONS.put("advancements", RuleChecks::advancements);
 		FUNCTIONS.put("explosions_spare_blocks", helper -> RuleChecks.explosions(helper, true));
 		FUNCTIONS.put("explosions_break_blocks", helper -> RuleChecks.explosions(helper, false));
 		FUNCTIONS.put("endermen_leave_blocks", helper -> RuleChecks.endermen(helper, true));
@@ -90,6 +91,7 @@ public final class CozyCoreGameTests {
 		// The templates (tools/generate-test-structures.js) are only sizes; each test builds its own scene.
 		test(event, "defaults", kind, EMPTY, 20);
 		test(event, "recipes", kind, EMPTY, 20);
+		test(event, "advancements", kind, EMPTY, 20);
 		test(event, "explosions_spare_blocks", kind, id("explosions"), 100);
 		test(event, "explosions_break_blocks", vanilla, id("explosions"), 100);
 		test(event, "endermen_leave_blocks", kind, EMPTY, 20);
