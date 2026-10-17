@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwstairs"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mcwstairs"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "mcwstairs:dark_oak_skyline_stairs"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "minecraft:dark_oak_planks"
+  },
+  "result": "mcwstairs:dark_oak_skyline_stairs",
+  "count": 1
+}

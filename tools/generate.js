@@ -1,5 +1,5 @@
 // Writes the whole Cozy Core data pack into pack/ (deleted and rebuilt each run).
-//   node tools/generate.js [path to a 1.21.1 server or client jar] [folder of wood-mod jars]
+//   node tools/generate.js [path to a 1.20.1 server or client jar] [folder of wood-mod jars]
 // Wood types, dye colours and recipe clashes are read from the vanilla data, so new wood
 // types in a later version are picked up by re-running this against the new jar.
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
@@ -10,8 +10,9 @@ const NS = 'cozy_core';
 const ROOT = path.join(__dirname, '..');
 const OUT = path.join(ROOT, 'pack');
 const VANILLA = path.join(__dirname, `.vanilla-${MC_VERSION}`, 'data', 'minecraft');
-const DEFAULT_JAR = path.join(process.env.USERPROFILE || '', 'mods-dev', 'tools', '.cache', 'fabric-server',
-	`${MC_VERSION}-0.19.5`, 'versions', MC_VERSION, `server-${MC_VERSION}.jar`);
+const SERVER_CACHE = path.join(process.env.USERPROFILE || '', 'mods-dev', 'tools', '.cache', 'fabric-server');
+const DEFAULT_JAR = path.join(SERVER_CACHE, (fs.existsSync(SERVER_CACHE) && fs.readdirSync(SERVER_CACHE).find(d => d.startsWith(`${MC_VERSION}-`))) || '',
+	'versions', MC_VERSION, `server-${MC_VERSION}.jar`);
 
 // ---------- vanilla data ----------
 // unzip some patterns from a jar. Info-ZIP exits 11 when a pattern matches nothing (vanilla has no
@@ -25,17 +26,18 @@ function unzipSome(jar, patterns, dest) {
 }
 
 function extractVanilla(jar) {
-	if (fs.existsSync(path.join(VANILLA, 'recipe'))) return;
+	if (fs.existsSync(path.join(VANILLA, 'recipes'))) return;
 	if (!fs.existsSync(jar)) throw new Error(`No vanilla data cached and no jar at ${jar}`);
 	// Git Bash's unzip doesn't match '/' with '*', so sub-folders get their own '*/*' pattern.
-	unzipSome(jar, ['data/minecraft/recipe/*', 'data/minecraft/tags/item/*', 'data/minecraft/tags/item/*/*'],
+	// 1.20.1's folder names are plural (recipes, tags/items); 1.21 made them singular.
+	unzipSome(jar, ['data/minecraft/recipes/*', 'data/minecraft/tags/items/*', 'data/minecraft/tags/items/*/*'],
 		path.dirname(path.dirname(VANILLA)));
 }
 
 // Some mods (Macaw's Windows) save their JSON with a byte-order mark, which JSON.parse refuses.
 const readJson = p => JSON.parse(fs.readFileSync(p, 'utf8').replace(/^﻿/, ''));
 
-// Wood mods with a 1.21.1 Fabric version (checked on Modrinth 2026-10-16). Their recipes are read
+// Wood mods with a 1.20.1 Fabric version (checked on Modrinth 2026-10-17). Their recipes are read
 // from the jars, so their own wood types are covered the same way as vanilla's. Every recipe made
 // for a mod only loads when that mod is installed (Fabric and NeoForge load conditions).
 const WOOD_MODS = ['biomesoplenty', 'ecologics', 'wilderwild', 'promenade'];
@@ -46,7 +48,7 @@ const WOOD_MODS = ['biomesoplenty', 'ecologics', 'wilderwild', 'promenade'];
 const MACAWS = { mcwroofs: 'mcw-roofs', mcwfences: 'mcw-fences', mcwstairs: 'mcw-stairs', mcwwindows: 'mcw-windows',
 	mcwfurnitures: 'mcw-furniture', mcwdoors: 'mcw-doors', mcwtrpdoors: 'mcw-trapdoors' };
 const DECOR_MODS = ['beautify', ...Object.keys(MACAWS)];
-// The start of each mod's 1.21.1 Fabric jar name (tools/fetch-test-mods.js gets them from Modrinth).
+// The start of each mod's 1.20.1 Fabric jar name (tools/fetch-test-mods.js gets them from Modrinth).
 const JAR_PREFIX = { biomesoplenty: 'BiomesOPlenty', ecologics: 'ecologics', wilderwild: 'WilderWild', promenade: 'promenade',
 	beautify: 'beautify', mcwroofs: 'mcw-roofs', mcwfences: 'mcw-mcwfences', mcwstairs: 'mcw-mcwstairs', mcwwindows: 'mcw-mcwwindows',
 	mcwfurnitures: 'mcw-furniture', mcwdoors: 'mcw-doors', mcwtrpdoors: 'mcw-trapdoors' };
@@ -61,7 +63,9 @@ function extractMods(modsDir) {
 		const jar = fs.existsSync(modsDir) && fs.readdirSync(modsDir).find(f => f.startsWith(JAR_PREFIX[modid]) && f.endsWith('.jar'));
 		if (!jar) throw new Error(`No ${modid} jar in ${modsDir}: run node tools/fetch-test-mods.js "<test folder>" first`);
 		const out = path.join(MOD_CACHE, jar.slice(0, -4));
-		unzipSome(path.join(modsDir, jar), ['data/*/recipe/*', 'data/*/tags/item/*', 'data/*/tags/item/*/*'], out);
+		// Some mods keep recipes in sub-folders (Promenade 4.1.1: recipes/crafting/palm/...).
+		unzipSome(path.join(modsDir, jar), ['data/*/recipes/*', 'data/*/recipes/*/*', 'data/*/recipes/*/*/*', 'data/*/recipes/*/*/*/*',
+			'data/*/tags/items/*', 'data/*/tags/items/*/*'], out);
 		roots[modid] = path.join(out, 'data');
 	}
 	return roots;
@@ -70,15 +74,19 @@ function extractMods(modsDir) {
 // Every data folder whose tags count: vanilla's plus each mod's (tags with one name merge, as in game).
 const dataRoots = [path.dirname(VANILLA)];
 
-function loadRecipes(dataRoot, ns) { // the recipes in <dataRoot>/<ns>/recipe/, by id
-	const dir = path.join(dataRoot, ns, 'recipe'), out = {};
+function loadRecipes(dataRoot, ns) { // the recipes in <dataRoot>/<ns>/recipes/, by id
+	const dir = path.join(dataRoot, ns, 'recipes'), out = {};
 	if (!fs.existsSync(dir)) return out;
-	for (const f of fs.readdirSync(dir)) if (f.endsWith('.json')) out[`${ns}:${f.slice(0, -5)}`] = readRecipe(readJson(path.join(dir, f)));
+	for (const f of fs.readdirSync(dir, { recursive: true })) {
+		if (f.endsWith('.json')) out[`${ns}:${f.slice(0, -5).split(path.sep).join('/')}`] = readRecipe(readJson(path.join(dir, f)));
+	}
 	return out;
 }
 
-// 1.21.1 writes an ingredient as { item } or { tag } (or a list of them). This script works in the
-// short form, an id or '#tag' (or a list), and writes 1.21.1's form back out (writeRecipe).
+// 1.20.1 writes an ingredient as { item } or { tag } (or a list of them), a crafting result as
+// { item, count } and a stonecutting result as an id with a "count" beside it. This script works in
+// the short form (an id or '#tag', or a list; results as { id, count }) and writes 1.20.1's back out
+// (writeRecipe).
 // Anything else (a mod's own ingredient type) is left as it is, so the recipe is skipped where it's read.
 function fromIngredient(ing) {
 	if (Array.isArray(ing)) { const all = ing.map(fromIngredient); return all.every(i => typeof i === 'string') ? all : ing; }
@@ -98,15 +106,19 @@ function readRecipe(r) {
 	if (r.key && typeof r.key === 'object') out.key = Object.fromEntries(Object.entries(r.key).map(([k, v]) => [k, fromIngredient(v)]));
 	if (Array.isArray(r.ingredients)) out.ingredients = r.ingredients.map(fromIngredient);
 	if (r.ingredient !== undefined) out.ingredient = fromIngredient(r.ingredient);
+	if (typeof r.result === 'string') { out.result = { id: r.result, count: r.count || 1 }; delete out.count; }
+	else if (r.result && typeof r.result.item === 'string') out.result = { id: r.result.item, count: r.result.count || 1 };
 	return out;
 }
-// The same recipe as 1.21.1 reads it: every ingredient in its long form, and a count on every result.
+// The same recipe as 1.20.1 reads it: every ingredient in its long form, and the result as that
+// kind of recipe wants it.
 function writeRecipe(r) {
 	const out = { ...r };
 	if (r.key) out.key = Object.fromEntries(Object.entries(r.key).map(([k, v]) => [k, toIngredient(v)]));
 	if (r.ingredients) out.ingredients = r.ingredients.map(toIngredient);
 	if (r.ingredient !== undefined) out.ingredient = toIngredient(r.ingredient);
-	if (r.result) out.result = { count: r.result.count || 1, id: r.result.id };
+	if (r.result && r.type === 'minecraft:stonecutting') { out.result = r.result.id; out.count = r.result.count || 1; }
+	else if (r.result) out.result = { count: r.result.count || 1, item: r.result.id };
 	return out;
 }
 
@@ -121,7 +133,7 @@ function itemTag(id) { // '#minecraft:oak_logs' -> Set of item ids (nested tags 
 	const [ns, p] = name.split(':');
 	let values = ns === NS ? ownItemTags[p] : LOADER_TAGS[name];
 	if (!values) {
-		const files = dataRoots.map(r => path.join(r, ns, 'tags', 'item', `${p}.json`)).filter(f => fs.existsSync(f));
+		const files = dataRoots.map(r => path.join(r, ns, 'tags', 'items', `${p}.json`)).filter(f => fs.existsSync(f));
 		if (files.length) values = files.flatMap(f => readJson(f).values);
 	}
 	if (!values) throw new Error(`Unknown item tag ${id}`);
@@ -158,14 +170,14 @@ const unlocks = []; // { name, items (ingredient), recipes: [ids] }
 
 // Fabric and NeoForge skip a file whose mod isn't installed. Plain vanilla doesn't know these
 // keys, which is why mod recipes live in their own folder (see the README's vanilla note).
-// A recipe also names the item it makes, and loads only if the game has it: on 1.21.1 a mod's
-// Fabric and NeoForge builds can differ (Beautify's NeoForge build has no cherry blinds), and a
-// recipe for an item that isn't there would be an error in the log.
+// On Forge a recipe also names the item it makes, and loads only if the game has it: a mod's Fabric
+// and Forge builds can differ, and a recipe for an item that isn't there would be an error in the
+// log. Fabric needs no such check (the recipes are made from the Fabric builds), and Fabric API on
+// 1.20.1 has no condition for it.
 const modCondition = (modid, result) => ({
-	'fabric:load_conditions': [{ condition: 'fabric:all_mods_loaded', values: [modid] },
-		...(result ? [{ condition: 'fabric:registry_contains', values: [result] }] : [])],
-	'neoforge:conditions': [{ type: 'neoforge:mod_loaded', modid },
-		...(result ? [{ type: 'neoforge:item_exists', item: result }] : [])],
+	'fabric:load_conditions': [{ condition: 'fabric:all_mods_loaded', values: [modid] }],
+	conditions: [{ type: 'forge:mod_loaded', modid },
+		...(result ? [{ type: 'forge:item_exists', item: result }] : [])],
 });
 
 let currentMod = null; // set while generating one mod's recipes
@@ -177,7 +189,7 @@ function recipe(name, obj) {
 		throw new Error(`Two different recipes named ${id}`);
 	}
 	ownRecipes[id] = obj;
-	write(`data/${NS}/recipe/${full}.json`, currentMod ? { ...modCondition(currentMod, obj.result.id), ...writeRecipe(obj) } : writeRecipe(obj));
+	write(`data/${NS}/recipes/${full}.json`, currentMod ? { ...modCondition(currentMod, obj.result.id), ...writeRecipe(obj) } : writeRecipe(obj));
 	return id;
 }
 
@@ -322,7 +334,11 @@ function slabsToPlanks(recipes, planks, unlockName) {
 		ids.push(recipe(`${item(plank).replace(`${currentMod}_`, '')}_from_slabs`, obj));
 		slabs.push(slab);
 	}
-	if (ids.length) unlocks.push({ name: unlockName, items: slabs, recipes: ids, mod: currentMod });
+	// A mod's slabs each get their own unlock, which on Forge loads only if that slab exists: a mod's
+	// Forge build can lack some of its Fabric build's woods (Biomes O' Plenty 18 has no empyreal wood),
+	// and one unlock naming a missing slab would fail to load, all of them with it.
+	if (currentMod) slabs.forEach((slab, i) => unlocks.push({ name: `${unlockName}/${item(slab).replace(`${currentMod}_`, '')}`, items: [slab], recipes: [ids[i]], mod: currentMod, check: slab }));
+	else if (ids.length) unlocks.push({ name: unlockName, items: slabs, recipes: ids });
 	return ids.length;
 }
 
@@ -342,7 +358,7 @@ function redye() {
 	for (const f of REDYE) {
 		const ids = [];
 		ownItemTags[`dyed_${f.family}`] = COLOURS.map(f.id);
-		write(`data/${NS}/tags/item/dyed_${f.family}.json`, { values: COLOURS.map(f.id) });
+		write(`data/${NS}/tags/items/dyed_${f.family}.json`, { values: COLOURS.map(f.id) });
 		for (const c of COLOURS) {
 			// Like vanilla's re-dye wool recipes: the other 15 colours (never plain, which vanilla
 			// already dyes, and never the colour itself, which would just eat the dye).
@@ -391,12 +407,16 @@ function hardBlocks() {
 
 // ---------- 5. recipe book unlocks (same shape as vanilla's recipes/ advancements) ----------
 
+// 1.20.1's item predicate: { tag } for a tag, else { items: [ids] }.
+const itemPredicate = items => typeof items === 'string' && items.startsWith('#') ? { tag: items.slice(1) }
+	: { items: Array.isArray(items) ? items : [items] };
+
 function recipeUnlocks() {
-	for (const u of unlocks) write(`data/${NS}/advancement/recipes/${u.mod ? `compat/${u.mod}/` : ''}${u.name}.json`, {
-		...(u.mod ? modCondition(u.mod) : {}),
+	for (const u of unlocks) write(`data/${NS}/advancements/recipes/${u.mod ? `compat/${u.mod}/` : ''}${u.name}.json`, {
+		...(u.mod ? modCondition(u.mod, u.check) : {}),
 		parent: 'minecraft:recipes/root',
 		criteria: {
-			has_items: { trigger: 'minecraft:inventory_changed', conditions: { items: [{ items: u.items }] } },
+			has_items: { trigger: 'minecraft:inventory_changed', conditions: { items: [itemPredicate(u.items)] } },
 			has_the_recipe: { trigger: 'minecraft:recipe_unlocked', conditions: { recipe: u.recipes[0] } },
 		},
 		requirements: [['has_the_recipe', 'has_items']],
@@ -405,7 +425,7 @@ function recipeUnlocks() {
 }
 
 // ---------- 6. trades ----------
-// In 1.21.1 villager trades are code, not data: they're in common/.../Trades.java.
+// Before Minecraft 26.x villager trades are code, not data: they're in common/.../Trades.java.
 
 // ---------- 7. checks ----------
 

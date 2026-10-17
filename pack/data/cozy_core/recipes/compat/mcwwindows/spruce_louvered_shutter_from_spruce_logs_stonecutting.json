@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwwindows"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mcwwindows"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "mcwwindows:spruce_louvered_shutter"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "minecraft:spruce_logs"
+  },
+  "result": "mcwwindows:spruce_louvered_shutter",
+  "count": 8
+}

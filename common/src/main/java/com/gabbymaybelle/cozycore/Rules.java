@@ -8,7 +8,7 @@ import net.minecraft.world.level.GameRules;
 
 /**
  * The builder-kind rules, as ordinary game rules: they show in the Game Rules screen when a world
- * is made (under a "Cozy Core" heading on Fabric; with vanilla's own headings on NeoForge, which
+ * is made (under a "Cozy Core" heading on Fabric; with vanilla's own headings on Forge, which
  * has no way to add one), are set with {@code /gamerule cozy_core:...}, and are saved with the
  * world, so there is no settings file and nothing to sync. Every rule defaults to the kind
  * setting. The code that applies each one is in {@code mixin/}.
@@ -30,7 +30,7 @@ public final class Rules {
 	public static final GameRules.Key<GameRules.BooleanValue> KEEP_HOTBAR_ON_DEATH =
 			Services.PLATFORM.booleanRule(name("keep_hotbar_on_death"), GameRules.Category.PLAYER, true);
 
-	/** The lowest and highest {@link #HEARTH_LANTERN_RADIUS} counts; NeoForge's rules have no bounds, so a value outside is read as the nearest end. */
+	/** The lowest and highest {@link #HEARTH_LANTERN_RADIUS} counts; Forge's rules have no bounds, so a value outside is read as the nearest end. */
 	public static final int MIN_RADIUS = 0, MAX_RADIUS = 128;
 
 	private Rules() {
@@ -50,7 +50,7 @@ public final class Rules {
 
 	public static int get(ServerLevel level, GameRules.Key<GameRules.IntegerValue> rule) {
 		int value = level.getGameRules().getInt(rule);
-		return rule == HEARTH_LANTERN_RADIUS ? Math.clamp(value, MIN_RADIUS, MAX_RADIUS) : value;
+		return rule == HEARTH_LANTERN_RADIUS ? Math.max(MIN_RADIUS, Math.min(MAX_RADIUS, value)) : value;
 	}
 
 	/** Rule ids are {@code cozy_core:<name>}, the same as on Minecraft 26.x. */

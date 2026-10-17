@@ -1,0 +1,18 @@
+# Cozy Core's Forge game tests. Only `./gradlew :forge:runGameTestServer` loads this mod;
+# nothing here ships in the jar.
+modLoader = "javafml"
+loaderVersion = "[47,)"
+license = "MIT"
+
+[[mods]]
+modId = "cozy_core_gametest"
+version = "1.0.0"
+displayName = "Cozy Core game tests"
+description = '''The checks behind Cozy Core's rules and the Hearth Lantern, for vanilla's test framework.'''
+
+[[dependencies.cozy_core_gametest]]
+modId = "cozy_core"
+mandatory = true
+versionRange = "[0,)"
+ordering = "AFTER"
+side = "BOTH"

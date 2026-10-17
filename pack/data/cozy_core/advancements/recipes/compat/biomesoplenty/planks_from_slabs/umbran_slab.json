@@ -1,0 +1,52 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "biomesoplenty"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "biomesoplenty"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "biomesoplenty:umbran_slab"
+    }
+  ],
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_items": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "biomesoplenty:umbran_slab"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "cozy_core:compat/biomesoplenty/umbran_planks_from_slabs"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_items"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "cozy_core:compat/biomesoplenty/umbran_planks_from_slabs"
+    ]
+  }
+}

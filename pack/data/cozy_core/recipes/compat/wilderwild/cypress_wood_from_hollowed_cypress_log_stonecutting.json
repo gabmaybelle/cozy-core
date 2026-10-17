@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "wilderwild"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "wilderwild"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "wilderwild:cypress_wood"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "wilderwild:hollowed_cypress_log"
+  },
+  "result": "wilderwild:cypress_wood",
+  "count": 1
+}

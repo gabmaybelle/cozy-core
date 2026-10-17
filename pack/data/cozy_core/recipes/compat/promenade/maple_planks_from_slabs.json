@@ -1,0 +1,35 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "promenade"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "promenade"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "promenade:maple_planks"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks_from_slabs",
+  "ingredients": [
+    {
+      "item": "promenade:maple_slab"
+    },
+    {
+      "item": "promenade:maple_slab"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "item": "promenade:maple_planks"
+  }
+}

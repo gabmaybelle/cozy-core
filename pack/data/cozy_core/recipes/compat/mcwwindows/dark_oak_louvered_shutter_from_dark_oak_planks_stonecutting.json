@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwwindows"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mcwwindows"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "mcwwindows:dark_oak_louvered_shutter"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "minecraft:dark_oak_planks"
+  },
+  "result": "mcwwindows:dark_oak_louvered_shutter",
+  "count": 2
+}

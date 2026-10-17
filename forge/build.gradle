@@ -1,0 +1,112 @@
+plugins {
+	id 'net.neoforged.moddev.legacyforge' version "${moddev_version}"
+}
+
+repositories {
+	maven { url = 'https://maven.minecraftforge.net' }
+}
+
+// The common sources and the generated data pack (pack/) are compiled straight into this jar,
+// the same as the Fabric side.
+sourceSets.main {
+	java.srcDir project(':common').file('src/main/java')
+	resources.srcDir project(':common').file('src/main/resources')
+	resources.srcDir rootProject.file('pack')
+}
+
+// The game tests (src/gametest) are a mod of their own, loaded only by runGameTestServer below;
+// nothing in them ships in the jar.
+sourceSets {
+	gametest {
+		compileClasspath += sourceSets.main.output
+		runtimeClasspath += sourceSets.main.output
+	}
+}
+
+legacyForge {
+	version = "${project.minecraft_version}-${project.forge_version}"
+	addModdingDependenciesTo sourceSets.gametest
+
+	mods {
+		"cozy_core" {
+			sourceSet sourceSets.main
+		}
+		"cozy_core_gametest" {
+			sourceSet sourceSets.gametest
+		}
+	}
+
+	runs {
+		client {
+			client()
+			loadedMods = [mods.cozy_core]
+		}
+		server {
+			server()
+			programArgument '--nogui'
+			loadedMods = [mods.cozy_core]
+		}
+		// Server game tests: `./gradlew :forge:runGameTestServer` starts vanilla's test server
+		// (a flat world, no window) and runs the checks in src/gametest: the rules both ways, the
+		// Hearth Lantern, the trades, and that every recipe in pack/ is in the game. It exits
+		// non-zero if one fails.
+		//   -Pexpect=<pack dir>  take the expected recipes from another pack folder (default: pack/)
+		// No wood mods here: their Forge 1.20.1 builds don't start in a dev run (Ecologics' mixins
+		// name the game's obfuscated methods directly, TerraBlender's and the others' fail as they
+		// load), so on Forge they're tested on a real server instead (tools/ci-load-test.sh forge).
+		gameTestServer {
+			type = 'gameTestServer'
+			loadedMods = [mods.cozy_core, mods.cozy_core_gametest]
+			systemProperty 'forge.enabledGameTestNamespaces', 'cozy_core_gametest'
+			systemProperty 'cozy.expect', rootProject.file(project.hasProperty('expect') ? project.expect : 'pack').absolutePath
+			systemProperty 'cozy.expectMods', project.findProperty('expectMods') ?: ''
+		}
+	}
+}
+
+dependencies {
+	annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+mixin {
+	add sourceSets.main, 'cozy_core.refmap.json'
+	config 'cozy_core.mixins.json'
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+	// The mod icon is Gabby's own sprite (art/icon.ase exported at 512x512); the jar carries it as icon.png.
+	from(rootProject.file('art/icon.png'))
+
+	filesMatching("META-INF/mods.toml") {
+		expand "version": version
+	}
+	// Forge reads the mixin refmap by name from the config; Fabric's Loom adds its own, so only
+	// this jar's copy of the shared mixin config names one.
+	filesMatching("cozy_core.mixins.json") {
+		filter { it.replace('"required": true,', '"required": true,\n\t"refmap": "cozy_core.refmap.json",') }
+	}
+}
+
+// Forge's tools run on Java 17, which Gradle must be able to find (see CLAUDE.md); the code itself is
+// compiled by the newer JDK for Java 17 (release 17 in the root build.gradle).
+java {
+	toolchain.languageVersion = JavaLanguageVersion.of(25)
+}
+
+jar {
+	manifest.attributes(["MixinConfigs": "cozy_core.mixins.json"])
+}
+
+// cozy-core-<version>-forge.jar, the name players download (tools/ci-load-test.sh looks for it in dist/).
+// The jar players get is reobfJar's (the game's own names put back), named the same way.
+tasks.named('jar') { archiveFileName = "${rootProject.name}-${project.version}-forge-dev.jar" }
+tasks.named('reobfJar') { archiveFileName = "${rootProject.name}-${project.version}-forge.jar" }
+tasks.named('sourcesJar') { archiveFileName = "${rootProject.name}-${project.version}-forge-sources.jar" }
+
+// The game runs (dev client, game tests) use Java 17, as players' 1.20.1 does: the Mixin of 1.20.1's
+// loaders can't read the classes of a newer Java.
+tasks.withType(JavaExec).configureEach {
+	javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
+}

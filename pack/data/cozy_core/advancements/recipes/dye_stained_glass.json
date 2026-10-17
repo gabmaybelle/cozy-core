@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_items": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "cozy_core:dyed_stained_glass"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "cozy_core:dye_white_stained_glass"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_items"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "cozy_core:dye_white_stained_glass",
+      "cozy_core:dye_orange_stained_glass",
+      "cozy_core:dye_magenta_stained_glass",
+      "cozy_core:dye_light_blue_stained_glass",
+      "cozy_core:dye_yellow_stained_glass",
+      "cozy_core:dye_lime_stained_glass",
+      "cozy_core:dye_pink_stained_glass",
+      "cozy_core:dye_gray_stained_glass",
+      "cozy_core:dye_light_gray_stained_glass",
+      "cozy_core:dye_cyan_stained_glass",
+      "cozy_core:dye_purple_stained_glass",
+      "cozy_core:dye_blue_stained_glass",
+      "cozy_core:dye_brown_stained_glass",
+      "cozy_core:dye_green_stained_glass",
+      "cozy_core:dye_red_stained_glass",
+      "cozy_core:dye_black_stained_glass"
+    ]
+  }
+}

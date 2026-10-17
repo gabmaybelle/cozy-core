@@ -2,12 +2,12 @@
 # The jars of one Fabric test group, from a folder holding all the test mods (tools/fetch-test-mods.js):
 #   tools/group-jars.sh A|B|C|D|none <folder>
 # A = Biomes O' Plenty (with GlitchCore and TerraBlender) and Ecologics; B = Wilder Wild (with
-# FrozenLib) and Promenade; C = Beautify (with Cloth Config); D = Macaw's Roofs, Fences, Stairs,
+# FrozenLib) and Promenade (with Dawn API and Cloth Config on 1.20.1); C = Beautify (with Cloth Config); D = Macaw's Roofs, Fences, Stairs,
 # Windows, Furniture, Doors and Trapdoors. Biolith, bundled in Wilder Wild and
 # Promenade, crashes with TerraBlender, so A and B never share a game. Prints one file name per line.
 case $1 in
 	A) ls "$2" | grep -E '^(BiomesOPlenty|GlitchCore|TerraBlender|[Ee]cologics)' ;;
-	B) ls "$2" | grep -E '^(WilderWild|FrozenLib|promenade)' ;;
+	B) ls "$2" | grep -E '^(WilderWild|FrozenLib|promenade|dawn|cloth-config)' ;;
 	C) ls "$2" | grep -E '^(beautify|cloth-config)' ;;
 	D) ls "$2" | grep -E '^mcw-' ;;
 	none) true ;;

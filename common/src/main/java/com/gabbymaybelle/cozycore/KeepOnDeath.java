@@ -1,17 +1,13 @@
 package com.gabbymaybelle.cozycore;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 
@@ -32,9 +28,6 @@ public final class KeepOnDeath {
 
 	/** A set-aside stack and the slot it came from. */
 	public record Kept(int slot, ItemStack stack) {
-		public static final Codec<Kept> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				Codec.INT.fieldOf("slot").forGetter(Kept::slot),
-				ItemStack.CODEC.fieldOf("stack").forGetter(Kept::stack)).apply(instance, Kept::new));
 	}
 
 	/** What a {@link ServerPlayer} carries between dying and respawning; the mixin implements it. */
@@ -60,7 +53,7 @@ public final class KeepOnDeath {
 		Inventory inventory = player.getInventory();
 		for (int slot : KEPT_SLOTS) {
 			ItemStack stack = inventory.getItem(slot);
-			if (stack.isEmpty() || EnchantmentHelper.has(stack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
+			if (stack.isEmpty() || EnchantmentHelper.hasVanishingCurse(stack)) {
 				continue;
 			}
 			kept.add(new Kept(slot, stack.copy()));
@@ -88,17 +81,25 @@ public final class KeepOnDeath {
 	public static void save(ServerPlayer player, CompoundTag output) {
 		List<Kept> kept = kept(player);
 		if (!kept.isEmpty()) {
-			RegistryOps<Tag> ops = player.registryAccess().createSerializationContext(NbtOps.INSTANCE);
-			Kept.CODEC.listOf().encodeStart(ops, kept).ifSuccess(list -> output.put(SAVE_KEY, list));
+			ListTag list = new ListTag();
+			for (Kept item : kept) {
+				CompoundTag entry = item.stack().save(new CompoundTag());
+				entry.putInt("cozy_core:slot", item.slot());
+				list.add(entry);
+			}
+			output.put(SAVE_KEY, list);
 		}
 	}
 
 	public static void load(ServerPlayer player, CompoundTag input) {
 		List<Kept> kept = kept(player);
 		kept.clear();
-		if (input.contains(SAVE_KEY)) {
-			RegistryOps<Tag> ops = player.registryAccess().createSerializationContext(NbtOps.INSTANCE);
-			Kept.CODEC.listOf().parse(ops, input.get(SAVE_KEY)).ifSuccess(kept::addAll);
+		for (Tag tag : input.getList(SAVE_KEY, Tag.TAG_COMPOUND)) {
+			CompoundTag entry = (CompoundTag) tag;
+			ItemStack stack = ItemStack.of(entry);
+			if (!stack.isEmpty()) {
+				kept.add(new Kept(entry.getInt("cozy_core:slot"), stack));
+			}
 		}
 	}
 }

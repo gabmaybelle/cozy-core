@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwtrpdoors"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mcwtrpdoors"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "mcwtrpdoors:warped_ranch_trapdoor"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "minecraft:warped_stems"
+  },
+  "result": "mcwtrpdoors:warped_ranch_trapdoor",
+  "count": 1
+}

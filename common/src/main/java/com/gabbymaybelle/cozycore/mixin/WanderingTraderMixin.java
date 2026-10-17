@@ -8,8 +8,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 /**
  * One more common offer from a wandering trader (six instead of five), so Cozy Core's plants and
- * calcite join the pool without pushing vanilla's trades out. (With the experimental trade
- * rebalance switched on, vanilla picks the offers another way and this changes nothing.)
+ * calcite join the pool without pushing vanilla's trades out.
  */
 @Mixin(WanderingTrader.class)
 public abstract class WanderingTraderMixin {

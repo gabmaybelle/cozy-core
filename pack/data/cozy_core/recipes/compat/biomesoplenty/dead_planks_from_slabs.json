@@ -1,0 +1,35 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "biomesoplenty"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "biomesoplenty"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "biomesoplenty:dead_planks"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks_from_slabs",
+  "ingredients": [
+    {
+      "item": "biomesoplenty:dead_slab"
+    },
+    {
+      "item": "biomesoplenty:dead_slab"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "item": "biomesoplenty:dead_planks"
+  }
+}

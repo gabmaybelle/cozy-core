@@ -24,7 +24,7 @@ public final class HearthLantern {
 	public static final ResourceKey<Item> ITEM_KEY = ResourceKey.create(Registries.ITEM, ID);
 
 	public static final Supplier<Block> BLOCK = Services.PLATFORM.register(Registries.BLOCK, ID,
-			() -> new HearthLanternBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.LANTERN)));
+			() -> new HearthLanternBlock(BlockBehaviour.Properties.copy(Blocks.LANTERN)));
 	public static final Supplier<Item> ITEM = Services.PLATFORM.register(Registries.ITEM, ID,
 			() -> new BlockItem(BLOCK.get(), new Item.Properties()));
 	/** The block entity does nothing but tell {@link HearthLanterns} when a lantern is in a loaded chunk. */
@@ -36,7 +36,7 @@ public final class HearthLantern {
 
 	/** Touching the class registers the block; this puts it in the creative menu next to the lanterns. */
 	public static void register() {
-		ResourceKey<CreativeModeTab> tab = ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.withDefaultNamespace("functional_blocks"));
+		ResourceKey<CreativeModeTab> tab = ResourceKey.create(Registries.CREATIVE_MODE_TAB, new ResourceLocation("functional_blocks"));
 		Services.PLATFORM.addToCreativeTab(tab, ITEM);
 	}
 }

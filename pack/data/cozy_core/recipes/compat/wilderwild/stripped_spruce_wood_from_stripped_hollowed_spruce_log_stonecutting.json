@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "wilderwild"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "wilderwild"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "minecraft:stripped_spruce_wood"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "wilderwild:stripped_hollowed_spruce_log"
+  },
+  "result": "minecraft:stripped_spruce_wood",
+  "count": 1
+}

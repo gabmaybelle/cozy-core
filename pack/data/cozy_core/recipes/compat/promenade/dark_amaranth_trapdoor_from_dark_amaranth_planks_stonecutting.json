@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "promenade"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "promenade"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "promenade:dark_amaranth_trapdoor"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "promenade:dark_amaranth_planks"
+  },
+  "result": "promenade:dark_amaranth_trapdoor",
+  "count": 1
+}

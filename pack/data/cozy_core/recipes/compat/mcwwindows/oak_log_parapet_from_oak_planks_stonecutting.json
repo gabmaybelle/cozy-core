@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwwindows"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mcwwindows"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "mcwwindows:oak_log_parapet"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "minecraft:oak_planks"
+  },
+  "result": "mcwwindows:oak_log_parapet",
+  "count": 1
+}

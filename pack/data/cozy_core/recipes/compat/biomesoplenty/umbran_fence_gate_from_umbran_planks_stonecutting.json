@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "biomesoplenty"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "biomesoplenty"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "biomesoplenty:umbran_fence_gate"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "biomesoplenty:umbran_planks"
+  },
+  "result": "biomesoplenty:umbran_fence_gate",
+  "count": 1
+}

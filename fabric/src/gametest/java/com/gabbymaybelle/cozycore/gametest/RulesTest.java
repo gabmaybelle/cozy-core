@@ -124,7 +124,7 @@ public class RulesTest implements ClientGameTest {
 		float hurt = server.computeOnServer(s -> {
 			ServerLevel level = s.overworld();
 			List<Zombie> zombies = level.getEntitiesOfClass(Zombie.class, new AABB(at).inflate(6));
-			float health = zombies.isEmpty() ? -1 : zombies.getFirst().getHealth();
+			float health = zombies.isEmpty() ? -1 : zombies.get(0).getHealth();
 			zombies.forEach(z -> z.discard());
 			return health;
 		});
@@ -226,7 +226,7 @@ public class RulesTest implements ClientGameTest {
 		check(vanilla[0] > 0, "with the rule on, fire burns planks again (" + vanilla[0] + " of 49 gone)");
 	}
 
-	/** A 7x7 oak plank floor with fire on every other plank (16 fires), left to burn for 1500 ticks (at 200 ticks a second). Returns {planks gone, fires left}. */
+	/** A 7x7 oak plank floor with fire on every other plank (16 fires), left to burn for 1500 ticks (1.20.1 has no faster tick rate). Returns {planks gone, fires left}. */
 	private static int[] burn(ClientGameTestContext ctx, TestServerContext server, BlockPos at) {
 		server.runOnServer(s -> {
 			ServerLevel level = s.overworld();
@@ -250,9 +250,7 @@ public class RulesTest implements ClientGameTest {
 				}
 			}
 		});
-		server.runCommand("tick rate 200");
 		ctx.waitTicks(1500);
-		server.runCommand("tick rate 20");
 		int[] result = server.computeOnServer(s -> {
 			ServerLevel level = s.overworld();
 			int planks = 0;
@@ -480,7 +478,7 @@ public class RulesTest implements ClientGameTest {
 	}
 
 	private static ServerPlayer player(MinecraftServer server) {
-		return server.getPlayerList().getPlayers().getFirst();
+		return server.getPlayerList().getPlayers().get(0);
 	}
 
 	private void check(boolean ok, String what) {

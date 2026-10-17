@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "ecologics"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "ecologics"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "ecologics:azalea_pressure_plate"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "ecologics:azalea_planks"
+  },
+  "result": "ecologics:azalea_pressure_plate",
+  "count": 1
+}

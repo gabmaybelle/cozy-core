@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwfences"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mcwfences"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "mcwfences:bamboo_pyramid_gate"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "minecraft:bamboo_blocks"
+  },
+  "result": "mcwfences:bamboo_pyramid_gate",
+  "count": 1
+}

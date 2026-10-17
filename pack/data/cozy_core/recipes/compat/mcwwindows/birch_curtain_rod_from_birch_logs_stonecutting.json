@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwwindows"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mcwwindows"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "mcwwindows:birch_curtain_rod"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "minecraft:birch_logs"
+  },
+  "result": "mcwwindows:birch_curtain_rod",
+  "count": 4
+}

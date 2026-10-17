@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "beautify"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "beautify"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "beautify:mangrove_blinds"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "minecraft:mangrove_planks"
+  },
+  "result": "beautify:mangrove_blinds",
+  "count": 1
+}

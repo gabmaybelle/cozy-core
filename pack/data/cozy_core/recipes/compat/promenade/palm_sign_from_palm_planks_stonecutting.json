@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "promenade"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "promenade"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "promenade:palm_sign"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "promenade:palm_planks"
+  },
+  "result": "promenade:palm_sign",
+  "count": 1
+}

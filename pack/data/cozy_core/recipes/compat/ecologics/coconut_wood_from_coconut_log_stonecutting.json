@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "ecologics"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "ecologics"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "ecologics:coconut_wood"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "ecologics:coconut_log"
+  },
+  "result": "ecologics:coconut_wood",
+  "count": 1
+}

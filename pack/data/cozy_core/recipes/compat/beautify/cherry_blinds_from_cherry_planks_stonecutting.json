@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "beautify"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "beautify"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "beautify:cherry_blinds"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "minecraft:cherry_planks"
+  },
+  "result": "beautify:cherry_blinds",
+  "count": 1
+}

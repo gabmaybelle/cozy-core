@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwdoors"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mcwdoors"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "mcwdoors:mangrove_barn_door"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "minecraft:mangrove_logs"
+  },
+  "result": "mcwdoors:mangrove_barn_door",
+  "count": 4
+}

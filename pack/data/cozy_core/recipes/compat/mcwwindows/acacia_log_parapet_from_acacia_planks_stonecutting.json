@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwwindows"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mcwwindows"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "mcwwindows:acacia_log_parapet"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "minecraft:acacia_planks"
+  },
+  "result": "mcwwindows:acacia_log_parapet",
+  "count": 1
+}

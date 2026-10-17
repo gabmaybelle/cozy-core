@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwstairs"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mcwstairs"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "mcwstairs:mangrove_platform"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "minecraft:mangrove_planks"
+  },
+  "result": "mcwstairs:mangrove_platform",
+  "count": 1
+}

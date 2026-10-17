@@ -1,0 +1,52 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "ecologics"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "ecologics"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "ecologics:flowering_azalea_slab"
+    }
+  ],
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_items": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "ecologics:flowering_azalea_slab"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "cozy_core:compat/ecologics/flowering_azalea_planks_from_slabs"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_items"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "cozy_core:compat/ecologics/flowering_azalea_planks_from_slabs"
+    ]
+  }
+}

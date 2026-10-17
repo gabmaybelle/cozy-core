@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwroofs"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mcwroofs"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "mcwroofs:birch_roof"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "minecraft:birch_logs"
+  },
+  "result": "mcwroofs:birch_roof",
+  "count": 1
+}

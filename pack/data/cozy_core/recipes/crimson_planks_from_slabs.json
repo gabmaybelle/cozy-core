@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks_from_slabs",
+  "ingredients": [
+    {
+      "item": "minecraft:crimson_slab"
+    },
+    {
+      "item": "minecraft:crimson_slab"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "item": "minecraft:crimson_planks"
+  }
+}

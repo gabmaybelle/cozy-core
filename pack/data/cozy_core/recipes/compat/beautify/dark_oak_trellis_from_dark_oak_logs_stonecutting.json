@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "beautify"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "beautify"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "beautify:dark_oak_trellis"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "minecraft:dark_oak_logs"
+  },
+  "result": "beautify:dark_oak_trellis",
+  "count": 4
+}

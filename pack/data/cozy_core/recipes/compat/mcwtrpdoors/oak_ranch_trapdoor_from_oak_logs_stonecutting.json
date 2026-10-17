@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwtrpdoors"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mcwtrpdoors"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "mcwtrpdoors:oak_ranch_trapdoor"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "minecraft:oak_logs"
+  },
+  "result": "mcwtrpdoors:oak_ranch_trapdoor",
+  "count": 1
+}

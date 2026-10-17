@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.0+1.20.1
+
+Cozy Core for Minecraft 1.20.1, on Fabric and Forge, plus the data pack: the same as 0.3.0 for
+26.3. Builds stay built (creepers, ghasts, endermen and fire), phantoms are off in new worlds, you
+keep your hotbar when you die, the Hearth Lantern keeps the night quiet, wood goes in the
+stonecutter (with the wood and decoration mods that have a 1.20.1 version), slabs go back into
+planks, and the re-dyeing, the hard-to-find blocks and the builder trades are all there. What's
+different on 1.20.1, all down to the game itself or to the other mods' 1.20.1 versions:
+
+- No pale oak wood or shelves in the stonecutter: they came after 1.20.1.
+- On Forge the rules sit under vanilla's own headings in the Game Rules screen, not a "Cozy Core"
+  heading. Phantoms are vanilla's `doInsomnia` rule.
+- Wilder Wild and Promenade have no Forge version for 1.20.1, so their wood is Fabric only, and
+  Biomes O' Plenty's Forge version has no empyreal wood.
+
 ## 0.3.0+1.21.1
 
 Cozy Core for Minecraft 1.21.1, on Fabric and NeoForge, plus the data pack: the same as 0.3.0 for

@@ -1,0 +1,35 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "ecologics"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "ecologics"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "ecologics:walnut_planks"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks_from_slabs",
+  "ingredients": [
+    {
+      "item": "ecologics:walnut_slab"
+    },
+    {
+      "item": "ecologics:walnut_slab"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "item": "ecologics:walnut_planks"
+  }
+}

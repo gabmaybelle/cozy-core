@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwstairs"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mcwstairs"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "mcwstairs:crimson_bulk_stairs"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "minecraft:crimson_planks"
+  },
+  "result": "mcwstairs:crimson_bulk_stairs",
+  "count": 1
+}

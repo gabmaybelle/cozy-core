@@ -1,14 +1,14 @@
 // Regenerates pack/ and builds the data pack download:
 //   dist/cozy-core-<version>.zip   the data pack: the recipes (vanilla wood only)
-// The mods, dist/cozy-core-<version>-fabric.jar and -neoforge.jar, are built by Gradle from the
+// The mods, dist/cozy-core-<version>-fabric.jar and -forge.jar, are built by Gradle from the
 // same pack/ plus the code in common/ (`./gradlew build` after this, then `node tools/build.js
 // --jars` or CI copies them here). Two things are mod-only:
 // - compat/ recipes: plain vanilla can't skip them (it doesn't know load conditions) and refuses
 //   to load the world.
-// - the trades, the rules and the Hearth Lantern: code in 1.21.1 (villager trades aren't data
+// - the trades, the rules and the Hearth Lantern: code in 1.20.1 (villager trades aren't data
 //   until later versions), so they live in common/ and never touch pack/. The zip reloads live
 //   with /reload.
-//   node tools/build.js [vanilla 1.21.1 server jar] [folder of wood-mod jars]
+//   node tools/build.js [vanilla 1.20.1 server jar] [folder of wood-mod jars]
 //   node tools/build.js --jars      only copy Gradle's two jars into dist/
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
 const zipDir = require('./zip');
@@ -26,7 +26,7 @@ const ICON = path.join(ROOT, 'art', 'icon.png');
 function copyJars() {
 	fs.mkdirSync(DIST, { recursive: true });
 	let found = 0;
-	for (const loader of ['fabric', 'neoforge']) {
+	for (const loader of ['fabric', 'forge']) {
 		const jar = path.join(ROOT, loader, 'build', 'libs', `cozy-core-${VERSION}-${loader}.jar`);
 		if (!fs.existsSync(jar)) continue;
 		fs.copyFileSync(jar, path.join(DIST, path.basename(jar)));
@@ -45,7 +45,7 @@ if (process.argv[2] === '--jars') {
 execFileSync(process.execPath, [path.join(__dirname, 'generate.js'), ...process.argv.slice(2)], { stdio: 'inherit' });
 fs.rmSync(STAGE, { recursive: true, force: true });
 fs.mkdirSync(DIST, { recursive: true });
-const MOD_ONLY = /^data\/(cozy_core\/(recipe|advancement\/recipes)\/compat|cozy_core\/villager_trade|minecraft\/trade_set|minecraft\/tags\/villager_trade)(\/|$)/;
+const MOD_ONLY = /^data\/(cozy_core\/(recipes|advancements\/recipes)\/compat|cozy_core\/villager_trade|minecraft\/trade_set|minecraft\/tags\/villager_trade)(\/|$)/;
 const isModOnly = rel => MOD_ONLY.test(rel.split(path.sep).join('/'));
 
 // The data pack, with its own description (it has no trades).

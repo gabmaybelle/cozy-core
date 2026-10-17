@@ -1,0 +1,27 @@
+modLoader = "javafml"
+loaderVersion = "[47,)"
+license = "MIT"
+issueTrackerURL = "https://github.com/gabmaybelle/cozy-core/issues"
+
+[[mods]]
+modId = "cozy_core"
+version = "${version}"
+displayName = "Cozy Core"
+logoFile = "icon.png"
+authors = "Gabby"
+description = '''Put the kettle on and build. Thoughtful recipes, trades and rules that take the grind out of decorating, and a lantern that keeps the night quiet.'''
+displayURL = "https://github.com/gabmaybelle/cozy-core"
+
+[[dependencies.cozy_core]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.cozy_core]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.1,1.20.2)"
+ordering = "NONE"
+side = "BOTH"

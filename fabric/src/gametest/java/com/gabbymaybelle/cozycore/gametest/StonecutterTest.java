@@ -35,7 +35,6 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.StonecutterMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
@@ -66,7 +65,7 @@ public class StonecutterTest implements ClientGameTest {
 			world.waitForChunksRender();
 			TestServerContext server = world.getServer();
 			server.runCommand("gamemode survival @a");
-			BlockPos cutter = server.computeOnServer(s -> s.getPlayerList().getPlayers().getFirst().blockPosition().offset(2, 0, 0));
+			BlockPos cutter = server.computeOnServer(s -> s.getPlayerList().getPlayers().get(0).blockPosition().offset(2, 0, 0));
 			server.runCommand("setblock " + cutter.getX() + " " + cutter.getY() + " " + cutter.getZ() + " minecraft:stonecutter");
 			ctx.waitTicks(2);
 			ctx.runOnClient(mc -> mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND,
@@ -199,8 +198,8 @@ public class StonecutterTest implements ClientGameTest {
 	private static List<ResourceLocation> offered(Minecraft mc) {
 		StonecutterMenu menu = (StonecutterMenu) mc.player.containerMenu;
 		List<ResourceLocation> out = new ArrayList<>();
-		for (RecipeHolder<StonecutterRecipe> recipe : menu.getRecipes()) {
-			ItemStack stack = recipe.value().getResultItem(mc.level.registryAccess());
+		for (StonecutterRecipe recipe : menu.getRecipes()) {
+			ItemStack stack = recipe.getResultItem(mc.level.registryAccess());
 			out.add(BuiltInRegistries.ITEM.getKey(stack.getItem()));
 		}
 		return out;
@@ -208,18 +207,18 @@ public class StonecutterTest implements ClientGameTest {
 
 	private static Item firstItem(Minecraft mc, String input) {
 		if (!input.startsWith("#")) {
-			ResourceLocation id = ResourceLocation.parse(input);
+			ResourceLocation id = new ResourceLocation(input);
 			return BuiltInRegistries.ITEM.containsKey(id) ? BuiltInRegistries.ITEM.get(id) : null;
 		}
-		TagKey<Item> tag = TagKey.create(Registries.ITEM, ResourceLocation.parse(input.substring(1)));
+		TagKey<Item> tag = TagKey.create(Registries.ITEM, new ResourceLocation(input.substring(1)));
 		return BuiltInRegistries.ITEM.getTag(tag).flatMap(set -> set.stream().findFirst()).map(Holder::value).orElse(null);
 	}
 
 	private static boolean accepts(Minecraft mc, String input, Item item) {
 		if (!input.startsWith("#")) {
-			return BuiltInRegistries.ITEM.getKey(item).equals(ResourceLocation.parse(input));
+			return BuiltInRegistries.ITEM.getKey(item).equals(new ResourceLocation(input));
 		}
-		TagKey<Item> tag = TagKey.create(Registries.ITEM, ResourceLocation.parse(input.substring(1)));
+		TagKey<Item> tag = TagKey.create(Registries.ITEM, new ResourceLocation(input.substring(1)));
 		return item.builtInRegistryHolder().is(tag);
 	}
 
@@ -232,7 +231,7 @@ public class StonecutterTest implements ClientGameTest {
 				: FabricLoader.getInstance().getModContainer("cozy_core").orElseThrow().getRootPaths();
 		System.out.println("[cozy_core_gametest] expected recipes from " + (expect != null ? expect : "the Cozy Core jar"));
 		for (Path root : roots) {
-			Path recipes = root.resolve("data/cozy_core/recipe");
+			Path recipes = root.resolve("data/cozy_core/recipes");
 			if (!Files.isDirectory(recipes)) {
 				continue;
 			}
@@ -242,14 +241,15 @@ public class StonecutterTest implements ClientGameTest {
 					if (!"minecraft:stonecutting".equals(json.get("type").getAsString()) || !conditionsMet(json)) {
 						continue;
 					}
-					// 1.21.1 writes an ingredient as {"item": id} or {"tag": id}, or a list of them.
+					// 1.20.1 writes an ingredient as {"item": id} or {"tag": id}, or a list of them.
 					JsonElement ingredient = json.get("ingredient");
 					JsonObject first = ingredient.isJsonArray() ? ingredient.getAsJsonArray().get(0).getAsJsonObject() : ingredient.getAsJsonObject();
 					String input = first.has("tag") ? "#" + first.get("tag").getAsString() : first.get("item").getAsString();
-					JsonObject result = json.getAsJsonObject("result");
-					int count = result.has("count") ? result.get("count").getAsInt() : 1;
+					// 1.20.1's stonecutting result is the item's id, with its count beside it.
+					String result = json.get("result").getAsString();
+					int count = json.has("count") ? json.get("count").getAsInt() : 1;
 					String name = recipes.relativize(file).toString().replace('\\', '/').replace(".json", "");
-					out.add(new Expected("cozy_core:" + name, input, ResourceLocation.parse(result.get("id").getAsString()), count));
+					out.add(new Expected("cozy_core:" + name, input, new ResourceLocation(result), count));
 				}
 			} catch (IOException e) {
 				throw new AssertionError("couldn't read Cozy Core's recipes", e);
@@ -272,7 +272,7 @@ public class StonecutterTest implements ClientGameTest {
 			boolean met = switch (type) {
 				case "fabric:all_mods_loaded" -> mods.stream().allMatch(FabricLoader.getInstance()::isModLoaded);
 				case "fabric:any_mods_loaded" -> mods.stream().anyMatch(FabricLoader.getInstance()::isModLoaded);
-				case "fabric:registry_contains" -> !condition.has("registry") && mods.stream().allMatch(id -> BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(id)));
+				case "fabric:registry_contains" -> !condition.has("registry") && mods.stream().allMatch(id -> BuiltInRegistries.ITEM.containsKey(new ResourceLocation(id)));
 				default -> throw new AssertionError("the test doesn't know the load condition " + type);
 			};
 			if (!met) {
@@ -283,7 +283,7 @@ public class StonecutterTest implements ClientGameTest {
 	}
 
 	private static ServerPlayer player(net.minecraft.server.MinecraftServer server) {
-		return server.getPlayerList().getPlayers().getFirst();
+		return server.getPlayerList().getPlayers().get(0);
 	}
 
 	private static int field(Object screen, String name) {

@@ -1,6 +1,6 @@
 # Cozy Core
 
-A data pack for Minecraft 26.3, and on the `1.21.1` branch for 1.21.1 (namespace `cozy_core`) with small building helpers: wood in the
+A data pack for Minecraft 26.3, and on the `1.21.1` and `1.20.1` branches for those versions (namespace `cozy_core`) with small building helpers: wood in the
 stonecutter at cheap rates (1 plank -> 1 fence, door, sign...; 1 log -> 4), two wooden slabs ->
 one plank, re-dyeing terracotta, glass, panes and concrete powder, a few hard-to-get block
 recipes, and builder trades (wandering trader, mason). The mod version (Fabric and NeoForge jars
@@ -19,6 +19,9 @@ it first, and add this session's row before ending.
   (2026-10-13). Work here. It is pushed to the remote's `main` (Minecraft 26.x).
 - **`1.21.1`** is Minecraft 1.21.1 (Fabric and NeoForge, Java 21), cut from `main` at 0.3.0 and
   pushed as `1.21.1`; versions there are `<version>+1.21.1`. See "On the 1.21.1 branch" below.
+- **`1.20.1`** is Minecraft 1.20.1 (Fabric and Forge, Java 17; NeoForge starts at 1.20.2), cut from
+  `1.21.1` at 0.3.0+1.21.1 and pushed as `1.20.1`; versions `<version>+1.20.1`. See "On the 1.20.1
+  branch" below; the 1.21.1 notes apply here too unless it says otherwise.
 - **`main`** keeps the earlier local history, which has a personal detail in it. Never push `main`.
 
 ## Layout
@@ -185,6 +188,43 @@ What differs from 26.3, and why (2026-10-17):
   loads as air), plus an `empty` one. 1.21.1 logs "No data fixer registered for" a mod's mobs and
   boats; `server-test.js` ignores it.
 
+## On the 1.20.1 branch
+
+What differs from the 1.21.1 branch, and why (2026-10-17):
+
+- **Forge instead of NeoForge.** `forge/` is built with ModDevGradle's legacy mode (Forge 47.4.10);
+  `ForgePlatform` and `CozyCoreForge` are the NeoForge classes on Forge's events (`RegisterEvent`,
+  `BuildCreativeModeTabContentsEvent`, `VillagerTradesEvent`, `WandererTradesEvent`). The Forge jar
+  is `reobfJar`'s (named `cozy-core-<v>-forge.jar`), with `cozy_core.refmap.json` named in Forge's
+  copy of the mixin config and `MixinConfigs` in the manifest; the mixin config has a `minVersion`.
+- **Java 17.** Gradle runs on 25 but Forge's tools and every game or server run on 17: pass
+  `-Dorg.gradle.java.installations.paths=<Java 17>` (CI: `-Dorg.gradle.java.installations.fromEnv=JAVA_HOME_17_X64`).
+  No `List.getFirst()` or `Math.clamp`.
+- **Game code:** `ResourceLocation` constructors (Fabric's 1.20.1 has no `fromNamespaceAndPath`),
+  `Properties.copy`, `dropAllDeathLoot(DamageSource)`, `MerchantOffer(ItemStack, ItemStack, ...)`,
+  `EnchantmentHelper.hasVanishingCurse`, and keep-on-death saved as a plain `ListTag` of
+  `ItemStack.save` entries. No trade rebalance on 1.20.1.
+- **Data:** plural folders (`recipes`, `advancements`, `tags/items`, `tags/entity_types`,
+  `structures`), `pack_format` 15, crafting results `{item, count}`, stonecutting results an id with
+  `count` beside it, item predicates `{items: [ids]}` or `{tag}`. Forge's conditions are the
+  top-level `conditions` key (`forge:mod_loaded`, `forge:item_exists`); Fabric API 0.92 has no
+  item-exists condition and needs none (the recipes are made from the Fabric jars). A mod's slabs
+  each get their own recipe-book unlock with that check, since Biomes O' Plenty's Forge 18 lacks
+  the empyreal wood its Fabric 19 has. The generator reads recipes in sub-folders (Promenade 4.1.1).
+- **Wood mods on 1.20.1** (Modrinth, 2026-10-17): Fabric has all of them (Promenade 4.1.1 needs
+  Dawn API and Cloth Config, so they're in group B); Forge has BOP, Ecologics, Beautify and Macaw's.
+  Forge groups (`tools/forge-group.sh`): A BOP; B Ecologics; C Beautify (its own advancement error
+  is ignored in the load test); D Macaw's. They're tested only on a real Forge server: their
+  Forge builds don't start in a dev run (Ecologics' mixins name obfuscated methods directly,
+  TerraBlender and the others fail while loading), so the Forge game test has no `-PwoodMods`.
+- **Tests.** The Fabric harness is Pocket List's 1.20.1 one. The Forge game test needs a
+  `pack.mcmeta` in the test mod (Forge skips a mod's data without one), its own stand-in player
+  with an in-memory channel (`RuleChecks.mockPlayer`: 1.20.1's mock player has none and Forge's
+  networking stops at it), and `/fillbiome` plains round the lantern room (Forge's test server
+  makes an ordinary world, and the room can land in the Deep Dark, where nothing spawns). The
+  lantern test removes its lanterns at the end, or one would guard the other lantern test's room.
+  1.20.1 has no tick-rate command, so the fire checks run 1500 ordinary ticks.
+
 ## Gotchas
 
 - **Plain vanilla can't load the compat recipes.** In 26.x recipes are a registry and a recipe
@@ -278,6 +318,6 @@ or test names. Check the diff for these before every push.
 - Keep the credit line: "made by Gabby with help from Claude, an AI assistant".
 - Gabby publishes on Modrinth herself. Don't upload anything there.
 
-**Minecraft.** Fabric on Minecraft 26.3 (Mojang names; Loom 1.18.4, Java 25); the `1.21.1` branch is 1.21.1 (Java 21, see above). Vanilla names
+**Minecraft.** Fabric on Minecraft 26.3 (Mojang names; Loom 1.18.4, Java 25); the `1.21.1` branch is 1.21.1 (Java 21) and `1.20.1` is 1.20.1 (Java 17), see above. Vanilla names
 changed a lot in 26.x: check the merged jar rather than older docs (for example `iron_chain`,
 `pink_petals[flower_amount=N]`, timelines instead of `time query daytime`).

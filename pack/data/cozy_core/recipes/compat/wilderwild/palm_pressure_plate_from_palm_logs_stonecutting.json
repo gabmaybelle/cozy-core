@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "wilderwild"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "wilderwild"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "wilderwild:palm_pressure_plate"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "wilderwild:palm_logs"
+  },
+  "result": "wilderwild:palm_pressure_plate",
+  "count": 4
+}

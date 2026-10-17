@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "wilderwild"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "wilderwild"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "wilderwild:maple_sign"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "wilderwild:maple_planks"
+  },
+  "result": "wilderwild:maple_sign",
+  "count": 1
+}

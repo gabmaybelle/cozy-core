@@ -11,11 +11,7 @@ import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.network.chat.contents.TranslatableContents;
 
 /** The test's handle on the game: work on the client thread, waits measured in client ticks, screens and screenshots. */
@@ -125,18 +121,5 @@ public final class ClientGameTestContext {
 
 	public TestWorldBuilder worldBuilder() {
 		return new TestWorldBuilder(this);
-	}
-
-	/**
-	 * Joins a multiplayer server (one already running, in offline mode, such as a dedicated test
-	 * server) the way the multiplayer screen does, and waits until the player is in its world.
-	 * Closing the result leaves for the title screen. It has no server of this game's own to
-	 * reach, so {@link TestSingleplayerContext#getServer} is null.
-	 */
-	public TestSingleplayerContext connect(String address) {
-		runOnClient(mc -> ConnectScreen.startConnecting(new TitleScreen(), mc, ServerAddress.parseString(address),
-				new ServerData("Cozy Core test server", address, ServerData.Type.OTHER), false, null));
-		waitFor(mc -> mc.level != null && mc.player != null && mc.screen == null, 2400);
-		return new TestSingleplayerContext(this, null);
 	}
 }

@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mcwdoors"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mcwdoors"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "mcwdoors:crimson_barn_door"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "minecraft:crimson_stems"
+  },
+  "result": "mcwdoors:crimson_barn_door",
+  "count": 4
+}

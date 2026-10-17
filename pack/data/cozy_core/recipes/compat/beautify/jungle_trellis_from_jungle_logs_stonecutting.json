@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "beautify"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "beautify"
+    },
+    {
+      "type": "forge:item_exists",
+      "item": "beautify:jungle_trellis"
+    }
+  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "minecraft:jungle_logs"
+  },
+  "result": "beautify:jungle_trellis",
+  "count": 4
+}
