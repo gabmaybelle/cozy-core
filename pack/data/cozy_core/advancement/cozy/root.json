@@ -1,0 +1,35 @@
+{
+  "criteria": {
+    "planks": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#minecraft:planks"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "background": "minecraft:gui/advancements/backgrounds/stone",
+    "description": {
+      "translate": "advancements.cozy_core.cozy.root.description",
+      "fallback": "Pick up some planks and start building"
+    },
+    "icon": {
+      "id": "cozy_core:hearth_lantern"
+    },
+    "show_toast": false,
+    "title": {
+      "translate": "advancements.cozy_core.cozy.root.title",
+      "fallback": "Cozy Core"
+    }
+  },
+  "requirements": [
+    [
+      "planks"
+    ]
+  ]
+}

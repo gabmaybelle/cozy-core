@@ -1,0 +1,94 @@
+{
+  "parent": "cozy_core:cozy/root",
+  "criteria": {
+    "a_fresh_coat": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipes": [
+          "cozy_core:dye_white_terracotta",
+          "cozy_core:dye_orange_terracotta",
+          "cozy_core:dye_magenta_terracotta",
+          "cozy_core:dye_light_blue_terracotta",
+          "cozy_core:dye_yellow_terracotta",
+          "cozy_core:dye_lime_terracotta",
+          "cozy_core:dye_pink_terracotta",
+          "cozy_core:dye_gray_terracotta",
+          "cozy_core:dye_light_gray_terracotta",
+          "cozy_core:dye_cyan_terracotta",
+          "cozy_core:dye_purple_terracotta",
+          "cozy_core:dye_blue_terracotta",
+          "cozy_core:dye_brown_terracotta",
+          "cozy_core:dye_green_terracotta",
+          "cozy_core:dye_red_terracotta",
+          "cozy_core:dye_black_terracotta",
+          "cozy_core:dye_white_stained_glass",
+          "cozy_core:dye_orange_stained_glass",
+          "cozy_core:dye_magenta_stained_glass",
+          "cozy_core:dye_light_blue_stained_glass",
+          "cozy_core:dye_yellow_stained_glass",
+          "cozy_core:dye_lime_stained_glass",
+          "cozy_core:dye_pink_stained_glass",
+          "cozy_core:dye_gray_stained_glass",
+          "cozy_core:dye_light_gray_stained_glass",
+          "cozy_core:dye_cyan_stained_glass",
+          "cozy_core:dye_purple_stained_glass",
+          "cozy_core:dye_blue_stained_glass",
+          "cozy_core:dye_brown_stained_glass",
+          "cozy_core:dye_green_stained_glass",
+          "cozy_core:dye_red_stained_glass",
+          "cozy_core:dye_black_stained_glass",
+          "cozy_core:dye_white_stained_glass_pane",
+          "cozy_core:dye_orange_stained_glass_pane",
+          "cozy_core:dye_magenta_stained_glass_pane",
+          "cozy_core:dye_light_blue_stained_glass_pane",
+          "cozy_core:dye_yellow_stained_glass_pane",
+          "cozy_core:dye_lime_stained_glass_pane",
+          "cozy_core:dye_pink_stained_glass_pane",
+          "cozy_core:dye_gray_stained_glass_pane",
+          "cozy_core:dye_light_gray_stained_glass_pane",
+          "cozy_core:dye_cyan_stained_glass_pane",
+          "cozy_core:dye_purple_stained_glass_pane",
+          "cozy_core:dye_blue_stained_glass_pane",
+          "cozy_core:dye_brown_stained_glass_pane",
+          "cozy_core:dye_green_stained_glass_pane",
+          "cozy_core:dye_red_stained_glass_pane",
+          "cozy_core:dye_black_stained_glass_pane",
+          "cozy_core:dye_white_concrete_powder",
+          "cozy_core:dye_orange_concrete_powder",
+          "cozy_core:dye_magenta_concrete_powder",
+          "cozy_core:dye_light_blue_concrete_powder",
+          "cozy_core:dye_yellow_concrete_powder",
+          "cozy_core:dye_lime_concrete_powder",
+          "cozy_core:dye_pink_concrete_powder",
+          "cozy_core:dye_gray_concrete_powder",
+          "cozy_core:dye_light_gray_concrete_powder",
+          "cozy_core:dye_cyan_concrete_powder",
+          "cozy_core:dye_purple_concrete_powder",
+          "cozy_core:dye_blue_concrete_powder",
+          "cozy_core:dye_brown_concrete_powder",
+          "cozy_core:dye_green_concrete_powder",
+          "cozy_core:dye_red_concrete_powder",
+          "cozy_core:dye_black_concrete_powder"
+        ]
+      }
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.cozy_core.cozy.a_fresh_coat.description",
+      "fallback": "Re-dye terracotta, stained glass, panes or concrete powder"
+    },
+    "icon": {
+      "id": "minecraft:magenta_glazed_terracotta"
+    },
+    "title": {
+      "translate": "advancements.cozy_core.cozy.a_fresh_coat.title",
+      "fallback": "A fresh coat"
+    }
+  },
+  "requirements": [
+    [
+      "a_fresh_coat"
+    ]
+  ]
+}

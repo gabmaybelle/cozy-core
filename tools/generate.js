@@ -402,6 +402,64 @@ function trades() {
 	}
 }
 
+// ---------- 6b. the Cozy Core advancements tab ----------
+// Gabby's picks (2026-10-17): a "Cozy Core" tab that opens on picking up planks, with six steps.
+// The Hearth Lantern and the trades are mod-only, so those three steps (MOD_ONLY_ADVANCEMENTS) stay
+// out of the data pack, and tools/build.js gives the data pack's tab a vanilla lantern for its icon.
+// No rewards. Each title and description has its English text as the fallback, so the data pack
+// (which has no language file) reads properly too; the mod's en_us.json carries the same text.
+const TAB = 'cozy';
+const MOD_ONLY_ADVANCEMENTS = ['the_kettles_on', 'far_flung_flowers', 'built_to_last'];
+const ADVANCEMENT_TEXT = {
+	root: ['Cozy Core', 'Pick up some planks and start building'],
+	the_kettles_on: ["The kettle's on", 'Craft a Hearth Lantern'],
+	plank_to_porch: ['Plank to porch', 'Cut wood in a stonecutter'],
+	a_fresh_coat: ['A fresh coat', 'Re-dye terracotta, stained glass, panes or concrete powder'],
+	green_thumb: ['Green thumb', 'Craft moss from leaves, or glow lichen from vines'],
+	far_flung_flowers: ['Far-flung flowers', 'Buy an azalea or a fungus from a wandering trader'],
+	built_to_last: ['Built to last', 'Buy tuff or mud bricks from a mason'],
+};
+const advancementKey = (name, part) => `advancements.${NS}.${TAB}.${name}.${part}`;
+const text = (name, part) => ({ translate: advancementKey(name, part), fallback: ADVANCEMENT_TEXT[name][part === 'title' ? 0 : 1] });
+
+function advancementsTab() {
+	const ours = id => { if (!ownRecipes[id] && id !== `${NS}:hearth_lantern`) throw new Error(`The advancements tab names a recipe that isn't there: ${id}`); return id; };
+	const ids = filter => Object.keys(ownRecipes).filter(id => !id.startsWith(`${NS}:compat/`) && filter(id, ownRecipes[id])).map(ours);
+	const crafted = recipes => ({ trigger: 'minecraft:recipe_crafted', conditions: { recipes } });
+	const traded = items => ({ trigger: 'minecraft:villager_trade', conditions: { item: { items } } });
+	const steps = {
+		the_kettles_on: { icon: `${NS}:hearth_lantern`, criterion: crafted([`${NS}:hearth_lantern`]) },
+		plank_to_porch: { icon: 'minecraft:stonecutter', criterion: crafted(ids((id, r) => r.type === 'minecraft:stonecutting')) },
+		a_fresh_coat: { icon: 'minecraft:magenta_glazed_terracotta', criterion: crafted(ids(id => /^cozy_core:dye_/.test(id))) },
+		green_thumb: { icon: 'minecraft:moss_block', criterion: crafted([ours(`${NS}:moss_block_from_leaves`), ours(`${NS}:glow_lichen`)]) },
+		far_flung_flowers: { icon: 'minecraft:flowering_azalea', criterion: traded(['minecraft:azalea', 'minecraft:flowering_azalea', 'minecraft:crimson_fungus', 'minecraft:warped_fungus']) },
+		built_to_last: { icon: 'minecraft:mud_bricks', criterion: traded(['minecraft:tuff', 'minecraft:mud_bricks']) },
+	};
+	for (const [name, step] of Object.entries(steps)) {
+		if (step.criterion.conditions.recipes?.length === 0) throw new Error(`The advancement ${name} names no recipes`);
+	}
+	// The mod's language file must say the same as the fallbacks here.
+	const lang = readJson(path.join(ROOT, 'common', 'src', 'main', 'resources', 'assets', NS, 'lang', 'en_us.json'));
+	for (const name of Object.keys(ADVANCEMENT_TEXT)) for (const part of ['title', 'description']) {
+		if (lang[advancementKey(name, part)] !== text(name, part).fallback) throw new Error(`en_us.json's ${advancementKey(name, part)} doesn't match the generator's text`);
+	}
+	write(`data/${NS}/advancement/${TAB}/root.json`, {
+		criteria: { planks: { trigger: 'minecraft:inventory_changed', conditions: { items: [{ items: '#minecraft:planks' }] } } },
+		display: {
+			announce_to_chat: false, background: 'minecraft:gui/advancements/backgrounds/stone',
+			description: text('root', 'description'), icon: { id: `${NS}:hearth_lantern` }, show_toast: false, title: text('root', 'title'),
+		},
+		requirements: [['planks']],
+	});
+	for (const [name, step] of Object.entries(steps)) write(`data/${NS}/advancement/${TAB}/${name}.json`, {
+		parent: `${NS}:${TAB}/root`,
+		criteria: { [name]: step.criterion },
+		display: { description: text(name, 'description'), icon: { id: step.icon }, title: text(name, 'title') },
+		requirements: [[name]],
+	});
+	return Object.keys(steps).length + 1;
+}
+
 // ---------- 7. checks ----------
 
 // Two crafting recipes clash when one grid can match both; the game then picks one silently.
@@ -495,6 +553,7 @@ for (const [modid, root] of Object.entries(modRoots)) {
 }
 currentMod = null;
 recipeUnlocks();
+counts.advancements = advancementsTab();
 trades();
 
 const problems = check(allRecipes);
