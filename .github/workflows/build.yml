@@ -161,8 +161,9 @@ jobs:
         # at startup. Mesa's EGL can; SDL uses it with this set.
         env:
           SDL_VIDEO_FORCE_EGL: '1'
-        # The Macaw's group clicks about 1,600 recipes, about 6 minutes on a desktop.
-        timeout-minutes: 40
+        # The Macaw's group clicks about 1,600 recipes, about 6 minutes on a desktop. The big groups have
+        # taken over 30 minutes on CI and once ran out at 40 on a slow runner (2026-10-17).
+        timeout-minutes: 60
         run: |
           chmod +x ./gradlew
           args="-Pexpect=$GITHUB_WORKSPACE/pack"
