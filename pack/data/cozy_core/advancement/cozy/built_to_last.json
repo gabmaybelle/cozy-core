@@ -1,0 +1,34 @@
+{
+  "parent": "cozy_core:cozy/root",
+  "criteria": {
+    "bought": {
+      "trigger": "minecraft:villager_trade",
+      "conditions": {
+        "item": {
+          "items": [
+            "minecraft:tuff",
+            "minecraft:mud_bricks"
+          ]
+        }
+      }
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.cozy_core.cozy.built_to_last.description",
+      "fallback": "Buy tuff or mud bricks from a mason"
+    },
+    "icon": {
+      "id": "minecraft:mud_bricks"
+    },
+    "title": {
+      "translate": "advancements.cozy_core.cozy.built_to_last.title",
+      "fallback": "Built to last"
+    }
+  },
+  "requirements": [
+    [
+      "bought"
+    ]
+  ]
+}

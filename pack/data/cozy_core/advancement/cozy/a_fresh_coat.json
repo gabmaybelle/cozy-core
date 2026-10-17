@@ -1,0 +1,470 @@
+{
+  "parent": "cozy_core:cozy/root",
+  "criteria": {
+    "dye_white_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_white_terracotta"
+      }
+    },
+    "dye_orange_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_orange_terracotta"
+      }
+    },
+    "dye_magenta_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_magenta_terracotta"
+      }
+    },
+    "dye_light_blue_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_light_blue_terracotta"
+      }
+    },
+    "dye_yellow_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_yellow_terracotta"
+      }
+    },
+    "dye_lime_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_lime_terracotta"
+      }
+    },
+    "dye_pink_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_pink_terracotta"
+      }
+    },
+    "dye_gray_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_gray_terracotta"
+      }
+    },
+    "dye_light_gray_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_light_gray_terracotta"
+      }
+    },
+    "dye_cyan_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_cyan_terracotta"
+      }
+    },
+    "dye_purple_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_purple_terracotta"
+      }
+    },
+    "dye_blue_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_blue_terracotta"
+      }
+    },
+    "dye_brown_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_brown_terracotta"
+      }
+    },
+    "dye_green_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_green_terracotta"
+      }
+    },
+    "dye_red_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_red_terracotta"
+      }
+    },
+    "dye_black_terracotta": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_black_terracotta"
+      }
+    },
+    "dye_white_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_white_stained_glass"
+      }
+    },
+    "dye_orange_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_orange_stained_glass"
+      }
+    },
+    "dye_magenta_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_magenta_stained_glass"
+      }
+    },
+    "dye_light_blue_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_light_blue_stained_glass"
+      }
+    },
+    "dye_yellow_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_yellow_stained_glass"
+      }
+    },
+    "dye_lime_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_lime_stained_glass"
+      }
+    },
+    "dye_pink_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_pink_stained_glass"
+      }
+    },
+    "dye_gray_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_gray_stained_glass"
+      }
+    },
+    "dye_light_gray_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_light_gray_stained_glass"
+      }
+    },
+    "dye_cyan_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_cyan_stained_glass"
+      }
+    },
+    "dye_purple_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_purple_stained_glass"
+      }
+    },
+    "dye_blue_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_blue_stained_glass"
+      }
+    },
+    "dye_brown_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_brown_stained_glass"
+      }
+    },
+    "dye_green_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_green_stained_glass"
+      }
+    },
+    "dye_red_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_red_stained_glass"
+      }
+    },
+    "dye_black_stained_glass": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_black_stained_glass"
+      }
+    },
+    "dye_white_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_white_stained_glass_pane"
+      }
+    },
+    "dye_orange_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_orange_stained_glass_pane"
+      }
+    },
+    "dye_magenta_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_magenta_stained_glass_pane"
+      }
+    },
+    "dye_light_blue_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_light_blue_stained_glass_pane"
+      }
+    },
+    "dye_yellow_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_yellow_stained_glass_pane"
+      }
+    },
+    "dye_lime_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_lime_stained_glass_pane"
+      }
+    },
+    "dye_pink_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_pink_stained_glass_pane"
+      }
+    },
+    "dye_gray_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_gray_stained_glass_pane"
+      }
+    },
+    "dye_light_gray_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_light_gray_stained_glass_pane"
+      }
+    },
+    "dye_cyan_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_cyan_stained_glass_pane"
+      }
+    },
+    "dye_purple_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_purple_stained_glass_pane"
+      }
+    },
+    "dye_blue_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_blue_stained_glass_pane"
+      }
+    },
+    "dye_brown_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_brown_stained_glass_pane"
+      }
+    },
+    "dye_green_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_green_stained_glass_pane"
+      }
+    },
+    "dye_red_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_red_stained_glass_pane"
+      }
+    },
+    "dye_black_stained_glass_pane": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_black_stained_glass_pane"
+      }
+    },
+    "dye_white_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_white_concrete_powder"
+      }
+    },
+    "dye_orange_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_orange_concrete_powder"
+      }
+    },
+    "dye_magenta_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_magenta_concrete_powder"
+      }
+    },
+    "dye_light_blue_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_light_blue_concrete_powder"
+      }
+    },
+    "dye_yellow_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_yellow_concrete_powder"
+      }
+    },
+    "dye_lime_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_lime_concrete_powder"
+      }
+    },
+    "dye_pink_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_pink_concrete_powder"
+      }
+    },
+    "dye_gray_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_gray_concrete_powder"
+      }
+    },
+    "dye_light_gray_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_light_gray_concrete_powder"
+      }
+    },
+    "dye_cyan_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_cyan_concrete_powder"
+      }
+    },
+    "dye_purple_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_purple_concrete_powder"
+      }
+    },
+    "dye_blue_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_blue_concrete_powder"
+      }
+    },
+    "dye_brown_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_brown_concrete_powder"
+      }
+    },
+    "dye_green_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_green_concrete_powder"
+      }
+    },
+    "dye_red_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_red_concrete_powder"
+      }
+    },
+    "dye_black_concrete_powder": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_black_concrete_powder"
+      }
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.cozy_core.cozy.a_fresh_coat.description",
+      "fallback": "Re-dye terracotta, stained glass, panes or concrete powder"
+    },
+    "icon": {
+      "id": "minecraft:magenta_glazed_terracotta"
+    },
+    "title": {
+      "translate": "advancements.cozy_core.cozy.a_fresh_coat.title",
+      "fallback": "A fresh coat"
+    }
+  },
+  "requirements": [
+    [
+      "dye_white_terracotta",
+      "dye_orange_terracotta",
+      "dye_magenta_terracotta",
+      "dye_light_blue_terracotta",
+      "dye_yellow_terracotta",
+      "dye_lime_terracotta",
+      "dye_pink_terracotta",
+      "dye_gray_terracotta",
+      "dye_light_gray_terracotta",
+      "dye_cyan_terracotta",
+      "dye_purple_terracotta",
+      "dye_blue_terracotta",
+      "dye_brown_terracotta",
+      "dye_green_terracotta",
+      "dye_red_terracotta",
+      "dye_black_terracotta",
+      "dye_white_stained_glass",
+      "dye_orange_stained_glass",
+      "dye_magenta_stained_glass",
+      "dye_light_blue_stained_glass",
+      "dye_yellow_stained_glass",
+      "dye_lime_stained_glass",
+      "dye_pink_stained_glass",
+      "dye_gray_stained_glass",
+      "dye_light_gray_stained_glass",
+      "dye_cyan_stained_glass",
+      "dye_purple_stained_glass",
+      "dye_blue_stained_glass",
+      "dye_brown_stained_glass",
+      "dye_green_stained_glass",
+      "dye_red_stained_glass",
+      "dye_black_stained_glass",
+      "dye_white_stained_glass_pane",
+      "dye_orange_stained_glass_pane",
+      "dye_magenta_stained_glass_pane",
+      "dye_light_blue_stained_glass_pane",
+      "dye_yellow_stained_glass_pane",
+      "dye_lime_stained_glass_pane",
+      "dye_pink_stained_glass_pane",
+      "dye_gray_stained_glass_pane",
+      "dye_light_gray_stained_glass_pane",
+      "dye_cyan_stained_glass_pane",
+      "dye_purple_stained_glass_pane",
+      "dye_blue_stained_glass_pane",
+      "dye_brown_stained_glass_pane",
+      "dye_green_stained_glass_pane",
+      "dye_red_stained_glass_pane",
+      "dye_black_stained_glass_pane",
+      "dye_white_concrete_powder",
+      "dye_orange_concrete_powder",
+      "dye_magenta_concrete_powder",
+      "dye_light_blue_concrete_powder",
+      "dye_yellow_concrete_powder",
+      "dye_lime_concrete_powder",
+      "dye_pink_concrete_powder",
+      "dye_gray_concrete_powder",
+      "dye_light_gray_concrete_powder",
+      "dye_cyan_concrete_powder",
+      "dye_purple_concrete_powder",
+      "dye_blue_concrete_powder",
+      "dye_brown_concrete_powder",
+      "dye_green_concrete_powder",
+      "dye_red_concrete_powder",
+      "dye_black_concrete_powder"
+    ]
+  ]
+}
