@@ -1,0 +1,36 @@
+{
+  "parent": "cozy_core:cozy/root",
+  "criteria": {
+    "moss_block_from_leaves": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:moss_block_from_leaves"
+      }
+    },
+    "glow_lichen": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:glow_lichen"
+      }
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.cozy_core.cozy.green_thumb.description",
+      "fallback": "Craft moss from leaves, or glow lichen from vines"
+    },
+    "icon": {
+      "item": "minecraft:moss_block"
+    },
+    "title": {
+      "translate": "advancements.cozy_core.cozy.green_thumb.title",
+      "fallback": "Green thumb"
+    }
+  },
+  "requirements": [
+    [
+      "moss_block_from_leaves",
+      "glow_lichen"
+    ]
+  ]
+}

@@ -220,6 +220,49 @@ final class RuleChecks {
 	}
 
 	/**
+	 * The Cozy Core advancements tab: every advancement file in the pack folder is in the game, and
+	 * every recipe a "craft this" step names (one per criterion) is a recipe the game has.
+	 */
+	static void advancements(GameTestHelper helper) {
+		Path tab = Path.of(System.getProperty("cozy.expect")).resolve("data/cozy_core/advancements/cozy");
+		helper.assertTrue(Files.isDirectory(tab), "no advancements tab at " + tab);
+		var server = helper.getLevel().getServer();
+		RecipeManager manager = server.getRecipeManager();
+		int advancements = 0;
+		int recipes = 0;
+		List<String> wrong = new ArrayList<>();
+		try (Stream<Path> files = Files.list(tab)) {
+			for (Path file : files.filter(p -> p.toString().endsWith(".json")).toList()) {
+				String name = "cozy/" + file.getFileName().toString().replace(".json", "");
+				advancements++;
+				if (server.getAdvancements().getAdvancement(new ResourceLocation("cozy_core", name)) == null) {
+					wrong.add("the advancement cozy_core:" + name + " isn't in the game");
+				}
+				JsonObject json = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
+				for (var criterion : json.getAsJsonObject("criteria").entrySet()) {
+					JsonObject conditions = criterion.getValue().getAsJsonObject().getAsJsonObject("conditions");
+					if (conditions == null || !conditions.has("recipe_id")) {
+						continue;
+					}
+					recipes++;
+					String id = conditions.get("recipe_id").getAsString();
+					if (manager.byKey(new ResourceLocation(id)).isEmpty()) {
+						wrong.add(name + " names the recipe " + id + ", which isn't in the game");
+					}
+				}
+			}
+		} catch (IOException e) {
+			throw new IllegalStateException("couldn't read the advancements in " + tab, e);
+		}
+		if (advancements != 7) {
+			wrong.add(advancements + " advancements in the tab, not 7 (the root and six steps)");
+		}
+		helper.assertTrue(wrong.isEmpty(), wrong.size() + " problem(s): " + String.join(", ", wrong.subList(0, Math.min(wrong.size(), 10))));
+		System.out.println("[cozy_core_gametest] advancements tab: " + advancements + " advancements, " + recipes + " recipes named, all in the game");
+		helper.succeed();
+	}
+
+	/**
 	 * A creeper's blast in a 5x5x5 stone room with a zombie inside. Kind: every block stands and
 	 * the zombie is still hurt. Vanilla: blocks go.
 	 */

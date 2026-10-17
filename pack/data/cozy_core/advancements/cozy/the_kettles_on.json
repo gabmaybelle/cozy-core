@@ -1,0 +1,29 @@
+{
+  "parent": "cozy_core:cozy/root",
+  "criteria": {
+    "hearth_lantern": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:hearth_lantern"
+      }
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.cozy_core.cozy.the_kettles_on.description",
+      "fallback": "Craft a Hearth Lantern"
+    },
+    "icon": {
+      "item": "cozy_core:hearth_lantern"
+    },
+    "title": {
+      "translate": "advancements.cozy_core.cozy.the_kettles_on.title",
+      "fallback": "The kettle's on"
+    }
+  },
+  "requirements": [
+    [
+      "hearth_lantern"
+    ]
+  ]
+}

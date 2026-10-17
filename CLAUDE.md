@@ -60,6 +60,15 @@ it first, and add this session's row before ending.
   `icon`, NeoForge `logoFile`). Never replace it with generated art; re-export from the .ase.
   `tools/generate-art.js` draws the Hearth Lantern's block and item textures (original pixel art,
   laid out like vanilla's lantern texture so the vanilla lantern models can be the parents).
+- **The advancements tab** (`cozy_core:cozy/...`, Gabby's picks and wording, 2026-10-17) is made by
+  `tools/generate.js` (section 6b): a root that opens on picking up planks and six steps. Each
+  title and description has its English as the `fallback`, so the data pack reads properly with no
+  language file; the generator stops if `en_us.json` doesn't say the same. On 1.20.1 the files are
+  in `advancements/`, icons use `item`, the root's predicate is `{tag}`, and a `recipe_crafted`
+  criterion names one `recipe_id`, so the recipe steps have a criterion per recipe and need any
+  one. The Hearth Lantern step and the two trade steps are mod-only (`MOD_ONLY` in
+  `tools/build.js`), and the zip's root shows a vanilla lantern. The Forge game test's
+  `advancements` check loads every one (`getAdvancement`) and every recipe it names.
 - `tools/pack-info.js`: the Minecraft version and descriptions the generator and the build share;
   the version comes from `gradle.properties`. `tools/group-jars.sh`: the wood-mod test groups
   (A, B wood mods, C Beautify, D Macaw's), used by `ci-load-test.sh` and the workflow, so they're
