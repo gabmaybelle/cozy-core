@@ -3,42 +3,46 @@ package com.gabbymaybelle.cozycore.gametest;
 import com.gabbymaybelle.cozycore.HearthLantern;
 import com.gabbymaybelle.cozycore.HearthLanterns;
 import com.gabbymaybelle.cozycore.Rules;
+import com.gabbymaybelle.cozycore.Trades;
+import com.gabbymaybelle.cozycore.fabric.FabricPlatform;
+import com.gabbymaybelle.cozycore.gametest.harness.ClientGameTest;
+import com.gabbymaybelle.cozycore.gametest.harness.ClientGameTestContext;
+import com.gabbymaybelle.cozycore.gametest.harness.TestServerContext;
+import com.gabbymaybelle.cozycore.gametest.harness.TestSingleplayerContext;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
-import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
-import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
-import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.fabricmc.fabric.api.gamerule.v1.CustomGameRuleCategory;
 import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.Enderman;
+import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.VillagerType;
+import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.MerchantOffers;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LanternBlock;
-import net.minecraft.world.level.gamerules.GameRule;
-import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.phys.AABB;
 
 /**
@@ -46,18 +50,18 @@ import net.minecraft.world.phys.AABB;
  * default) and switched back to vanilla with its game rule, so a check that stops working shows
  * up as a failure rather than as a rule that quietly does nothing.
  */
-public class RulesTest implements FabricClientGameTest {
+public class RulesTest implements ClientGameTest {
 	private final List<String> failures = new ArrayList<>();
 
 	@Override
 	public void runTest(ClientGameTestContext ctx) {
 		try (TestSingleplayerContext world = ctx.worldBuilder().create()) {
-			world.getConnection().waitForChunksRender();
+			world.waitForChunksRender();
 			TestServerContext server = world.getServer();
 			server.runCommand("gamemode creative @a");
 			server.runCommand("weather clear");
 			server.runCommand("difficulty normal");
-			server.runCommand("gamerule spawn_monsters true");
+			server.runCommand("gamerule doMobSpawning true");
 			BlockPos home = server.computeOnServer(s -> player(s).blockPosition());
 			// Keep the whole test area loaded: the lantern room and its far lantern sit beyond a
 			// small render distance, and monsters only spawn more than 24 blocks from a player.
@@ -69,6 +73,7 @@ public class RulesTest implements FabricClientGameTest {
 			fire(ctx, server, home.offset(0, 0, 30));
 			lanterns(ctx, server, home.offset(-30, 0, -30));
 			keepOnDeath(ctx, server, home.offset(-30, 0, 30));
+			trades(server);
 			screenshot(ctx, server, home.offset(0, 0, -6));
 		}
 		if (!failures.isEmpty()) {
@@ -78,15 +83,36 @@ public class RulesTest implements FabricClientGameTest {
 
 	/** The rules exist, show under their own heading, and a new world starts kind. */
 	private void defaults(TestServerContext server) {
-		check(server.computeOnServer(s -> !rules(s).get(Rules.MOB_EXPLOSIONS_BREAK_BLOCKS)), "mob explosions spare blocks by default");
-		check(server.computeOnServer(s -> !rules(s).get(Rules.ENDERMEN_TAKE_BLOCKS)), "endermen leave blocks alone by default");
-		check(server.computeOnServer(s -> !rules(s).get(Rules.FIRE_BURNS_BLOCKS)), "fire doesn't burn blocks by default");
-		check(server.computeOnServer(s -> rules(s).get(Rules.HEARTH_LANTERN_RADIUS) == 32), "the Hearth Lantern radius defaults to 32");
-		check(server.computeOnServer(s -> !rules(s).get(GameRules.SPAWN_PHANTOMS)), "a new world starts with phantoms off");
-		check(server.computeOnServer(s -> rules(s).get(Rules.KEEP_HOTBAR_ON_DEATH)), "the hotbar is kept on death by default");
-		check(server.computeOnServer(s -> rules(s).availableRules().anyMatch(r -> r.category() == Rules.CATEGORY)), "the rules have the Cozy Core heading");
-		check("cozy_core:fire_burns_blocks".equals(Rules.FIRE_BURNS_BLOCKS.getIdentifier().toString()), "a rule's id is cozy_core:... (got " + Rules.FIRE_BURNS_BLOCKS.getIdentifier() + ")");
-		check(server.computeOnServer(s -> s.getRecipeManager().byKey(ResourceKey.create(Registries.RECIPE, HearthLantern.ID)).isPresent()), "the Hearth Lantern recipe loads");
+		check(server.computeOnServer(s -> !rules(s).getBoolean(Rules.MOB_EXPLOSIONS_BREAK_BLOCKS)), "mob explosions spare blocks by default");
+		check(server.computeOnServer(s -> !rules(s).getBoolean(Rules.ENDERMEN_TAKE_BLOCKS)), "endermen leave blocks alone by default");
+		check(server.computeOnServer(s -> !rules(s).getBoolean(Rules.FIRE_BURNS_BLOCKS)), "fire doesn't burn blocks by default");
+		check(server.computeOnServer(s -> rules(s).getInt(Rules.HEARTH_LANTERN_RADIUS) == 32), "the Hearth Lantern radius defaults to 32");
+		check(server.computeOnServer(s -> !rules(s).getBoolean(GameRules.RULE_DOINSOMNIA)), "a new world starts with phantoms off");
+		check(server.computeOnServer(s -> rules(s).getBoolean(Rules.KEEP_HOTBAR_ON_DEATH)), "the hotbar is kept on death by default");
+		check(CustomGameRuleCategory.getCategory(Rules.FIRE_BURNS_BLOCKS).orElse(null) == FabricPlatform.CATEGORY, "the rules have the Cozy Core heading");
+		check("cozy_core:fire_burns_blocks".equals(Rules.FIRE_BURNS_BLOCKS.getId()), "a rule's id is cozy_core:... (got " + Rules.FIRE_BURNS_BLOCKS.getId() + ")");
+		check(server.computeOnServer(s -> s.getRecipeManager().byKey(HearthLantern.ID).isPresent()), "the Hearth Lantern recipe loads");
+	}
+
+	/**
+	 * The builder trades, in an ordinary world: a new mason at level 1 and at level 2 offers three
+	 * trades (vanilla two) from a pool of four, so at least one is Cozy Core's builder stone, and a
+	 * new wandering trader offers seven (vanilla six).
+	 */
+	private void trades(TestServerContext server) {
+		for (int tier = 1; tier <= 2; tier++) {
+			int level = tier;
+			MerchantOffers offers = server.computeOnServer(s -> {
+				Villager mason = EntityType.VILLAGER.create(s.overworld());
+				mason.setVillagerData(mason.getVillagerData().setType(VillagerType.PLAINS).setProfession(VillagerProfession.MASON).setLevel(level));
+				return mason.getOffers();
+			});
+			check(offers.size() == 2 + Trades.EXTRA_SLOTS, "a new level-" + tier + " mason offers 3 trades (got " + offers.size() + ")");
+			check(offers.stream().anyMatch(o -> o.getResult().is(Items.TUFF) || o.getResult().is(Items.MUD_BRICKS) || o.getResult().is(Items.CALCITE)
+					|| o.getResult().is(Items.PACKED_MUD)), "a new level-" + tier + " mason offers builder stone");
+		}
+		int wandering = server.computeOnServer(s -> EntityType.WANDERING_TRADER.create(s.overworld()).getOffers().size());
+		check(wandering == 5 + Trades.EXTRA_SLOTS + 1, "a new wandering trader offers 7 trades (got " + wandering + ")");
 	}
 
 	/**
@@ -127,8 +153,8 @@ public class RulesTest implements FabricClientGameTest {
 					}
 				}
 			}
-			Zombie zombie = EntityTypes.ZOMBIE.create(level, EntitySpawnReason.COMMAND);
-			zombie.snapTo(at.getX() + 1.5, at.getY(), at.getZ() + 1.5, 0, 0);
+			Zombie zombie = EntityType.ZOMBIE.create(level);
+			zombie.moveTo(at.getX() + 1.5, at.getY(), at.getZ() + 1.5, 0, 0);
 			zombie.setNoAi(true);
 			level.addFreshEntity(zombie);
 			return placed;
@@ -136,8 +162,8 @@ public class RulesTest implements FabricClientGameTest {
 		ctx.waitTicks(2);
 		server.runOnServer(s -> {
 			ServerLevel level = s.overworld();
-			Creeper creeper = EntityTypes.CREEPER.create(level, EntitySpawnReason.COMMAND);
-			creeper.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0, 0);
+			Creeper creeper = EntityType.CREEPER.create(level);
+			creeper.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0, 0);
 			level.explode(creeper, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 3.0F, Level.ExplosionInteraction.MOB);
 		});
 		ctx.waitTicks(5);
@@ -170,9 +196,9 @@ public class RulesTest implements FabricClientGameTest {
 	/** How many times out of {@code tries} the take-block goal of a fresh enderman says it can start (vanilla: about 1 in 20). */
 	private static int wantsBlocks(MinecraftServer server, int tries) {
 		try {
-			Enderman enderman = EntityTypes.ENDERMAN.create(server.overworld(), EntitySpawnReason.COMMAND);
-			Class<?> type = Class.forName("net.minecraft.world.entity.monster.Enderman$EndermanTakeBlockGoal");
-			Constructor<?> constructor = type.getDeclaredConstructor(Enderman.class);
+			EnderMan enderman = EntityType.ENDERMAN.create(server.overworld());
+			Class<?> type = Class.forName("net.minecraft.world.entity.monster.EnderMan$EndermanTakeBlockGoal");
+			Constructor<?> constructor = type.getDeclaredConstructor(EnderMan.class);
 			constructor.setAccessible(true);
 			Goal goal = (Goal) constructor.newInstance(enderman);
 			int wanted = 0;
@@ -339,7 +365,7 @@ public class RulesTest implements FabricClientGameTest {
 			BlockPos at = room;
 			return "light " + level.getMaxLocalRawBrightness(at) + ", sky " + level.getBrightness(net.minecraft.world.level.LightLayer.SKY, at)
 					+ ", block " + level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, at) + ", floor " + level.getBlockState(at.below())
-					+ ", difficulty " + level.getDifficulty() + ", spawn_monsters " + level.getGameRules().get(GameRules.SPAWN_MONSTERS)
+					+ ", difficulty " + level.getDifficulty()
 					+ ", nearest player " + (level.getNearestPlayer(at.getX(), at.getY(), at.getZ(), -1, false) == null ? "none"
 							: Math.sqrt(level.getNearestPlayer(at.getX(), at.getY(), at.getZ(), -1, false).distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(at))) + " blocks");
 		});
@@ -386,7 +412,7 @@ public class RulesTest implements FabricClientGameTest {
 		server.runOnServer(s -> {
 			ServerPlayer player = player(s);
 			player.getInventory().clearContent();
-			player.teleportTo(s.overworld(), at.getX() + 0.5, at.getY(), at.getZ() + 0.5, Set.of(), 0, 0, false);
+			player.teleportTo(s.overworld(), at.getX() + 0.5, at.getY(), at.getZ() + 0.5, Set.of(), 0, 0);
 			player.getInventory().setItem(0, new ItemStack(Items.DIAMOND_PICKAXE));
 			player.getInventory().setItem(20, new ItemStack(Items.COBBLESTONE, 10));
 			player.getInventory().setItem(Inventory.SLOT_OFFHAND, new ItemStack(Items.SHIELD));
@@ -430,7 +456,7 @@ public class RulesTest implements FabricClientGameTest {
 			level.setBlockAndUpdate(at.offset(4, 1, 0), Blocks.LANTERN.defaultBlockState());
 			ServerPlayer player = player(s);
 			player.setGameMode(GameType.CREATIVE);
-			player.teleportTo(level, at.getX() + 2.5, at.getY() + 1, at.getZ() + 4.5, java.util.Set.of(), 180, 10, false);
+			player.teleportTo(level, at.getX() + 2.5, at.getY() + 1, at.getZ() + 4.5, java.util.Set.of(), 180, 10);
 		});
 		ctx.waitTicks(20);
 		ctx.takeScreenshot("hearth_lantern");
@@ -440,8 +466,12 @@ public class RulesTest implements FabricClientGameTest {
 		return server.overworld().getGameRules();
 	}
 
-	private static <T> void set(TestServerContext server, GameRule<T> rule, T value) {
-		server.runOnServer(s -> rules(s).set(rule, value, s));
+	private static void set(TestServerContext server, GameRules.Key<GameRules.BooleanValue> rule, boolean value) {
+		server.runOnServer(s -> rules(s).getRule(rule).set(value, s));
+	}
+
+	private static void set(TestServerContext server, GameRules.Key<GameRules.IntegerValue> rule, int value) {
+		server.runOnServer(s -> rules(s).getRule(rule).set(value, s));
 	}
 
 	private static ServerPlayer player(MinecraftServer server) {

@@ -5,22 +5,37 @@
       "values": [
         "ecologics"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "ecologics:coconut_planks"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "ecologics"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "ecologics:coconut_planks"
     }
   ],
   "type": "minecraft:crafting_shapeless",
   "category": "building",
   "group": "planks_from_slabs",
   "ingredients": [
-    "ecologics:coconut_slab",
-    "ecologics:coconut_slab"
+    {
+      "item": "ecologics:coconut_slab"
+    },
+    {
+      "item": "ecologics:coconut_slab"
+    }
   ],
   "result": {
+    "count": 1,
     "id": "ecologics:coconut_planks"
   }
 }

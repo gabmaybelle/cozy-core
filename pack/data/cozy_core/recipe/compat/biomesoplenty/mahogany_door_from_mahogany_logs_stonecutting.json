@@ -5,16 +5,28 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:mahogany_door"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:mahogany_door"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#biomesoplenty:mahogany_logs",
+  "ingredient": {
+    "tag": "biomesoplenty:mahogany_logs"
+  },
   "result": {
     "count": 4,
     "id": "biomesoplenty:mahogany_door"

@@ -5,17 +5,30 @@
       "values": [
         "mcwfurnitures"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwfurnitures:stripped_cherry_covered_desk"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwfurnitures"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwfurnitures:stripped_cherry_covered_desk"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:cherry_logs",
+  "ingredient": {
+    "tag": "minecraft:cherry_logs"
+  },
   "result": {
+    "count": 1,
     "id": "mcwfurnitures:stripped_cherry_covered_desk"
   }
 }

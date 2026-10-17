@@ -5,16 +5,28 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:dead_fence"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:dead_fence"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#biomesoplenty:dead_logs",
+  "ingredient": {
+    "tag": "biomesoplenty:dead_logs"
+  },
   "result": {
     "count": 4,
     "id": "biomesoplenty:dead_fence"

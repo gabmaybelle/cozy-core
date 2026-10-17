@@ -5,16 +5,28 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:jacaranda_sign"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:jacaranda_sign"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#biomesoplenty:jacaranda_logs",
+  "ingredient": {
+    "tag": "biomesoplenty:jacaranda_logs"
+  },
   "result": {
     "count": 4,
     "id": "biomesoplenty:jacaranda_sign"

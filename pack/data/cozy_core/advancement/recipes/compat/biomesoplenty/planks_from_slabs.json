@@ -29,7 +29,6 @@
               "biomesoplenty:magic_slab",
               "biomesoplenty:mahogany_slab",
               "biomesoplenty:maple_slab",
-              "biomesoplenty:origin_oak_slab",
               "biomesoplenty:palm_slab",
               "biomesoplenty:pine_slab",
               "biomesoplenty:redwood_slab",
@@ -43,7 +42,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipes": "cozy_core:compat/biomesoplenty/dead_planks_from_slabs"
+        "recipe": "cozy_core:compat/biomesoplenty/dead_planks_from_slabs"
       }
     }
   },
@@ -63,7 +62,6 @@
       "cozy_core:compat/biomesoplenty/magic_planks_from_slabs",
       "cozy_core:compat/biomesoplenty/mahogany_planks_from_slabs",
       "cozy_core:compat/biomesoplenty/maple_planks_from_slabs",
-      "cozy_core:compat/biomesoplenty/origin_oak_planks_from_slabs",
       "cozy_core:compat/biomesoplenty/palm_planks_from_slabs",
       "cozy_core:compat/biomesoplenty/pine_planks_from_slabs",
       "cozy_core:compat/biomesoplenty/redwood_planks_from_slabs",

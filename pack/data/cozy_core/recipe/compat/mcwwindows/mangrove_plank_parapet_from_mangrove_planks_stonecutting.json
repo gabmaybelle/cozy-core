@@ -5,17 +5,30 @@
       "values": [
         "mcwwindows"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwwindows:mangrove_plank_parapet"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwwindows"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwwindows:mangrove_plank_parapet"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:mangrove_planks",
+  "ingredient": {
+    "item": "minecraft:mangrove_planks"
+  },
   "result": {
+    "count": 1,
     "id": "mcwwindows:mangrove_plank_parapet"
   }
 }

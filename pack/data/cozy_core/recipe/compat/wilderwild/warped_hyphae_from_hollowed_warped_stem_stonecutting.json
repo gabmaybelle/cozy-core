@@ -5,17 +5,30 @@
       "values": [
         "wilderwild"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "minecraft:warped_hyphae"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "wilderwild"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "minecraft:warped_hyphae"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "wilderwild:hollowed_warped_stem",
+  "ingredient": {
+    "item": "wilderwild:hollowed_warped_stem"
+  },
   "result": {
+    "count": 1,
     "id": "minecraft:warped_hyphae"
   }
 }

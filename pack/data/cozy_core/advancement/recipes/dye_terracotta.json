@@ -14,7 +14,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipes": "cozy_core:dye_white_terracotta"
+        "recipe": "cozy_core:dye_white_terracotta"
       }
     }
   },

@@ -5,16 +5,28 @@
       "values": [
         "mcwdoors"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwdoors:cherry_barn_door"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwdoors"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwdoors:cherry_barn_door"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:cherry_logs",
+  "ingredient": {
+    "tag": "minecraft:cherry_logs"
+  },
   "result": {
     "count": 4,
     "id": "mcwdoors:cherry_barn_door"

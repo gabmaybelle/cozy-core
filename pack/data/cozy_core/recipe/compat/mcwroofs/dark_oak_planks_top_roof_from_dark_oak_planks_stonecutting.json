@@ -5,17 +5,30 @@
       "values": [
         "mcwroofs"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwroofs:dark_oak_planks_top_roof"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwroofs"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwroofs:dark_oak_planks_top_roof"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:dark_oak_planks",
+  "ingredient": {
+    "item": "minecraft:dark_oak_planks"
+  },
   "result": {
+    "count": 1,
     "id": "mcwroofs:dark_oak_planks_top_roof"
   }
 }

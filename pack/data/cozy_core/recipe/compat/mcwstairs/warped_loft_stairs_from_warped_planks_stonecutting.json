@@ -5,17 +5,30 @@
       "values": [
         "mcwstairs"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwstairs:warped_loft_stairs"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwstairs"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwstairs:warped_loft_stairs"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:warped_planks",
+  "ingredient": {
+    "item": "minecraft:warped_planks"
+  },
   "result": {
+    "count": 1,
     "id": "mcwstairs:warped_loft_stairs"
   }
 }

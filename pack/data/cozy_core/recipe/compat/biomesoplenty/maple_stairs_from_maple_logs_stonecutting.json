@@ -5,16 +5,28 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:maple_stairs"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:maple_stairs"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#biomesoplenty:maple_logs",
+  "ingredient": {
+    "tag": "biomesoplenty:maple_logs"
+  },
   "result": {
     "count": 4,
     "id": "biomesoplenty:maple_stairs"

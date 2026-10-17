@@ -1,9 +1,9 @@
-// Downloads the wood and decoration mods Cozy Core supports (and their libraries) for MC 26.3
+// Downloads the wood and decoration mods Cozy Core supports (and their libraries) for MC 1.21.1
 // Fabric from Modrinth into a test folder's mods/, checking each file's SHA-512 against Modrinth's.
 //   node tools/fetch-test-mods.js "<test folder>"
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
 
-const MC = '26.3';
+const MC = '1.21.1';
 // TerraBlender is a BOP requirement Modrinth's dependency list doesn't show (found 2026-10-13).
 // Beautify (Refabricated, the Fabric port) needs Cloth Config. Macaw's mods need only Fabric API.
 const PROJECTS = ['biomes-o-plenty', 'glitchcore', 'terrablender', 'ecologics', 'wilder-wild', 'frozenlib', 'promenade',

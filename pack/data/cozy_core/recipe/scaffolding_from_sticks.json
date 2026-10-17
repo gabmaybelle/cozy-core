@@ -1,8 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "I": "minecraft:stick",
-    "~": "minecraft:string"
+    "I": {
+      "item": "minecraft:stick"
+    },
+    "~": {
+      "item": "minecraft:string"
+    }
   },
   "pattern": [
     "I~I",

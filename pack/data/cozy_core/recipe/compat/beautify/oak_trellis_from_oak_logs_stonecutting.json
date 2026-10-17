@@ -5,16 +5,28 @@
       "values": [
         "beautify"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "beautify:oak_trellis"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "beautify"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "beautify:oak_trellis"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:oak_logs",
+  "ingredient": {
+    "tag": "minecraft:oak_logs"
+  },
   "result": {
     "count": 4,
     "id": "beautify:oak_trellis"

@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.0+1.21.1
+
+Cozy Core for Minecraft 1.21.1, on Fabric and NeoForge, plus the data pack: the same as 0.3.0 for
+26.3. Builds stay built (creepers, ghasts, endermen and fire), phantoms are off in new worlds, you
+keep your hotbar when you die, the Hearth Lantern keeps the night quiet, wood goes in the
+stonecutter (with the wood and decoration mods that have a 1.21.1 version), slabs go back into
+planks, and the re-dyeing, the hard-to-find blocks and the builder trades are all there. What's
+different on 1.21.1, all down to the game itself or to the other mods' 1.21.1 versions:
+
+- No pale oak wood or shelves in the stonecutter: they came after 1.21.1.
+- On NeoForge the rules sit under vanilla's own headings in the Game Rules screen, not a "Cozy
+  Core" heading. Phantoms are vanilla's `doInsomnia` rule.
+- Wilder Wild's hollowed logs cut like its other logs. Beautify's NeoForge version has no cherry
+  pieces, so those are Fabric only.
+- With the experimental trade rebalance on, the wandering trader doesn't get its extra slot.
+
 ## 0.3.0
 
 - **Keep your hotbar on death** (`cozy_core:keep_hotbar_on_death`, on in new worlds). Your hotbar,

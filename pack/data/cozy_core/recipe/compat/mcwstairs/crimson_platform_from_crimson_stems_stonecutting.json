@@ -5,16 +5,28 @@
       "values": [
         "mcwstairs"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwstairs:crimson_platform"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwstairs"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwstairs:crimson_platform"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:crimson_stems",
+  "ingredient": {
+    "tag": "minecraft:crimson_stems"
+  },
   "result": {
     "count": 4,
     "id": "mcwstairs:crimson_platform"

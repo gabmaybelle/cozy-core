@@ -5,17 +5,30 @@
       "values": [
         "wilderwild"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "wilderwild:willow_wood"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "wilderwild"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "wilderwild:willow_wood"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "wilderwild:hollowed_willow_log",
+  "ingredient": {
+    "item": "wilderwild:hollowed_willow_log"
+  },
   "result": {
+    "count": 1,
     "id": "wilderwild:willow_wood"
   }
 }

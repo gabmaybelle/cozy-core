@@ -5,17 +5,30 @@
       "values": [
         "mcwfences"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwfences:jungle_curved_gate"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwfences"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwfences:jungle_curved_gate"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:jungle_planks",
+  "ingredient": {
+    "item": "minecraft:jungle_planks"
+  },
   "result": {
+    "count": 1,
     "id": "mcwfences:jungle_curved_gate"
   }
 }

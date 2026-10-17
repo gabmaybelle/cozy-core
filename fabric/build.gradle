@@ -1,9 +1,9 @@
 plugins {
-	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+	id 'fabric-loom' version "${loom_version}"
 }
 
 // The common sources and the generated data pack (pack/) are compiled straight into this jar,
-// so the Fabric mod is one file and Loom can add the mixin refmap the common mixins need.
+// so the Fabric mod is one file and Loom can remap the mixins the common code has.
 sourceSets.main {
 	java.srcDir project(':common').file('src/main/java')
 	resources.srcDir project(':common').file('src/main/resources')
@@ -11,6 +11,10 @@ sourceSets.main {
 }
 
 loom {
+	// Named for this mod: the default, fabric-refmap.json, would clash with any other mod built the same way.
+	mixin {
+		defaultRefmapName = "cozy_core-refmap.json"
+	}
 	mods {
 		"cozy_core" {
 			sourceSet sourceSets.main
@@ -20,12 +24,14 @@ loom {
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	// 1.21.1 ships obfuscated: the code is written in the official Mojang names and Loom remaps.
+	mappings loom.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 	// `-PwoodMods=<folder>`: also load every jar in that folder (wood mods and their libraries)
 	// in the game test, so their recipes are tested too.
 	if (project.hasProperty("woodMods")) {
-		runtimeOnly fileTree(project.woodMods) { include "*.jar" }
+		modLocalRuntime fileTree(project.woodMods) { include "*.jar" }
 	}
 }
 
@@ -40,29 +46,46 @@ processResources {
 	}
 }
 
-// cozy-core-<version>-fabric.jar, the name players download (tools/ci-load-test.sh looks for it in dist/).
-tasks.named('jar') { archiveFileName = "${rootProject.name}-${project.version}-fabric.jar" }
-tasks.named('sourcesJar') { archiveFileName = "${rootProject.name}-${project.version}-fabric-sources.jar" }
-
 // Client game tests: `./gradlew :fabric:runClientGameTest` starts a real game and plays through
 // the checks in src/gametest (the rules, the Hearth Lantern and every stonecutter recipe).
-// Nothing there ships in the jar.
+// Nothing there ships in the jar. Fabric's client game test API doesn't exist for 1.21.1, so the
+// harness is the test's own (src/gametest/.../harness) and the run is a plain client run with the
+// test source set as a second mod.
 //   -PwoodMods=<folder>  also load those jars (see above)
 //   -Pexpect=<pack dir>  take the expected stonecutter recipes from a pack folder (such as
 //                        ../pack) instead of the mod's own data, so a jar missing recipes fails too
-fabricApi {
-	configureTests {
-		createSourceSet = true
-		modId = "cozy_core_gametest"
-		enableGameTests = false
-		enableClientGameTests = true
-		eula = true
+sourceSets {
+	gametest {
+		compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+		runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
 	}
 }
 
-tasks.withType(JavaExec).configureEach {
-	if (project.hasProperty("expect")) {
-		// Relative to the repo root, so `-Pexpect=pack` works from anywhere.
-		systemProperty "cozy.expect", rootProject.file(project.expect).absolutePath
+loom {
+	mods {
+		"cozy_core_gametest" {
+			sourceSet sourceSets.gametest
+		}
+	}
+	runs {
+		clientGameTest {
+			client()
+			name = "Client Game Test"
+			source sourceSets.gametest
+			runDir "build/run/clientGameTest"
+			property "cozy_core.gametest", "true"
+			programArgs "--width", "854", "--height", "480"
+			ideConfigGenerated false
+			if (project.hasProperty("expect")) {
+				// Relative to the repo root, so `-Pexpect=pack` works from anywhere.
+				property "cozy.expect", rootProject.file(project.expect).absolutePath
+			}
+		}
 	}
 }
+
+// cozy-core-<version>-fabric.jar, the name players download (tools/ci-load-test.sh looks for it in dist/).
+tasks.named('remapJar') { archiveFileName = "${rootProject.name}-${project.version}-fabric.jar" }
+tasks.named('remapSourcesJar') { archiveFileName = "${rootProject.name}-${project.version}-fabric-sources.jar" }
+tasks.named('jar') { archiveFileName = "${rootProject.name}-${project.version}-fabric-dev.jar" }
+tasks.named('sourcesJar') { archiveFileName = "${rootProject.name}-${project.version}-fabric-dev-sources.jar" }

@@ -2,22 +2,22 @@
 # CI server load tests. Each one starts a real dedicated server with Cozy Core and fails unless the
 # world loads with no data errors.
 #   tools/ci-load-test.sh fabric   [none|A|B|C|D] <wood mods folder> the Fabric jar (+ Fabric API)
-#   tools/ci-load-test.sh neoforge [none|A|B|D]                      the NeoForge jar
+#   tools/ci-load-test.sh neoforge [none|A|B|C|D]                    the NeoForge jar
 #   tools/ci-load-test.sh vanilla                                  the data pack zip on plain vanilla
 # The Fabric groups are tools/group-jars.sh's: A and B wood mods, C Beautify, D Macaw's.
-# The NeoForge groups are tools/neoforge-group.sh's (Ecologics is in B there, and there is no C).
+# The NeoForge groups are tools/neoforge-group.sh's (Ecologics is in B there, with no Wilder Wild).
 # Expects dist/ (node tools/build.js, ./gradlew build, node tools/build.js --jars) and, for vanilla, ~/mc/server-bundler.jar (the CI build job).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 LOADER=$1 GROUP=${2:-none} WOOD=${3:-}
-MC=26.3 FABRIC_LOADER=0.19.5 FABRIC_INSTALLER=1.1.2
+MC=1.21.1 NEOFORGE_LINE=21.1 FABRIC_LOADER=0.19.5 FABRIC_INSTALLER=1.1.2
 FABRIC_JAR=$(ls dist/cozy-core-*-fabric.jar | head -1)
 NEOFORGE_JAR=$(ls dist/cozy-core-*-neoforge.jar | head -1)
 ZIP=$(ls dist/cozy-core-*[0-9].zip | head -1)
 RUN=$(mktemp -d)
 
 modrinth_jar() { # newest Modrinth file of a project for a loader and Minecraft version -> folder
-	# (the newest release, or the newest beta when there's no release yet, as for BOP on NeoForge 26.3)
+	# (the newest release, or the newest beta when there's no release yet, as for BOP on 1.21.1)
 	local url
 	url=$(curl -fsS "https://api.modrinth.com/v2/project/$1/version?loaders=%5B%22$2%22%5D&game_versions=%5B%22$MC%22%5D" \
 		| jq -r '([.[] | select(.version_type == "release")] + .)[0].files | (map(select(.primary)) + .)[0].url')
@@ -54,16 +54,17 @@ case $LOADER in
 		echo "$out" | grep -q "file/$(basename "$ZIP")" || { echo "the Cozy Core data pack isn't enabled"; exit 1; }
 		;;
 	neoforge)
-		# The newest NeoForge release for this Minecraft version, installed as a server.
+		# The newest NeoForge release for this Minecraft version (21.1.x for 1.21.1), installed as a server.
 		NEOFORGE=$(curl -fsS https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml \
-			| grep -o "<version>$MC\.[0-9.]*</version>" | sed 's/<[^>]*>//g' | sort -V | tail -1)
+			| grep -o "<version>$NEOFORGE_LINE\.[0-9.]*</version>" | sed 's/<[^>]*>//g' | sort -V | tail -1)
 		curl -fsSL -o "$RUN/installer.jar" "https://maven.neoforged.net/releases/net/neoforged/neoforge/$NEOFORGE/neoforge-$NEOFORGE-installer.jar"
 		(cd "$RUN" && java -jar installer.jar --install-server . > /dev/null)
 		mkdir -p "$RUN/mods"
 		cp "$NEOFORGE_JAR" "$RUN/mods/"
 		# The groups are tools/neoforge-group.sh's (shared with the NeoForge game test).
 		bash tools/neoforge-group.sh "$GROUP" "$RUN/mods"
-		if [ "$GROUP" = B ]; then export IGNORE='FrozenLib.*Unable to read config'; fi
+		# Beautify's NeoForge build for 1.21.1 logs errors about its own trellis loot tables.
+		if [ "$GROUP" = C ]; then export IGNORE='beautify:blocks/[a-z_]*trellis'; fi
 		server_files
 		echo "NeoForge $NEOFORGE, group $GROUP: $(ls "$RUN/mods" | tr '\n' ' ')"
 		node tools/server-test.js "$RUN" java "@libraries/net/neoforged/neoforge/$NEOFORGE/unix_args.txt" "datapack list enabled"

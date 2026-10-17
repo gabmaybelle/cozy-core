@@ -5,17 +5,30 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:jacaranda_stairs"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:jacaranda_stairs"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "biomesoplenty:jacaranda_planks",
+  "ingredient": {
+    "item": "biomesoplenty:jacaranda_planks"
+  },
   "result": {
+    "count": 1,
     "id": "biomesoplenty:jacaranda_stairs"
   }
 }

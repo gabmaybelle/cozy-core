@@ -5,17 +5,30 @@
       "values": [
         "mcwfences"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwfences:bamboo_pyramid_gate"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwfences"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwfences:bamboo_pyramid_gate"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:bamboo_blocks",
+  "ingredient": {
+    "tag": "minecraft:bamboo_blocks"
+  },
   "result": {
+    "count": 1,
     "id": "mcwfences:bamboo_pyramid_gate"
   }
 }

@@ -5,17 +5,30 @@
       "values": [
         "ecologics"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "ecologics:walnut_fence_gate"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "ecologics"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "ecologics:walnut_fence_gate"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "ecologics:walnut_planks",
+  "ingredient": {
+    "item": "ecologics:walnut_planks"
+  },
   "result": {
+    "count": 1,
     "id": "ecologics:walnut_fence_gate"
   }
 }

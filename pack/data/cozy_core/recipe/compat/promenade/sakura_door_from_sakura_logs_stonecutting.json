@@ -5,16 +5,28 @@
       "values": [
         "promenade"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "promenade:sakura_door"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "promenade"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "promenade:sakura_door"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#promenade:sakura_logs",
+  "ingredient": {
+    "tag": "promenade:sakura_logs"
+  },
   "result": {
     "count": 4,
     "id": "promenade:sakura_door"

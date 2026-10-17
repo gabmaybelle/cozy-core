@@ -1,6 +1,8 @@
 {
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:crimson_stems",
+  "ingredient": {
+    "tag": "minecraft:crimson_stems"
+  },
   "result": {
     "count": 4,
     "id": "minecraft:crimson_pressure_plate"

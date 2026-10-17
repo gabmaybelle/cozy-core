@@ -5,17 +5,30 @@
       "values": [
         "wilderwild"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "wilderwild:baobab_sign"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "wilderwild"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "wilderwild:baobab_sign"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "wilderwild:baobab_planks",
+  "ingredient": {
+    "item": "wilderwild:baobab_planks"
+  },
   "result": {
+    "count": 1,
     "id": "wilderwild:baobab_sign"
   }
 }

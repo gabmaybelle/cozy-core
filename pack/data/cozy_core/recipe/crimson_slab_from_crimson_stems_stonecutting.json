@@ -1,6 +1,8 @@
 {
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:crimson_stems",
+  "ingredient": {
+    "tag": "minecraft:crimson_stems"
+  },
   "result": {
     "count": 8,
     "id": "minecraft:crimson_slab"

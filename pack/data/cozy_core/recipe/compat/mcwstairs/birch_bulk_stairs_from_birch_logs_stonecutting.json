@@ -5,16 +5,28 @@
       "values": [
         "mcwstairs"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwstairs:birch_bulk_stairs"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwstairs"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwstairs:birch_bulk_stairs"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:birch_logs",
+  "ingredient": {
+    "tag": "minecraft:birch_logs"
+  },
   "result": {
     "count": 4,
     "id": "mcwstairs:birch_bulk_stairs"

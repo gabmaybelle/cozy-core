@@ -5,22 +5,37 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:jacaranda_planks"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:jacaranda_planks"
     }
   ],
   "type": "minecraft:crafting_shapeless",
   "category": "building",
   "group": "planks_from_slabs",
   "ingredients": [
-    "biomesoplenty:jacaranda_slab",
-    "biomesoplenty:jacaranda_slab"
+    {
+      "item": "biomesoplenty:jacaranda_slab"
+    },
+    {
+      "item": "biomesoplenty:jacaranda_slab"
+    }
   ],
   "result": {
+    "count": 1,
     "id": "biomesoplenty:jacaranda_planks"
   }
 }

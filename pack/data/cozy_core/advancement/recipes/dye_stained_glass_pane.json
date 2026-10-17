@@ -14,7 +14,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipes": "cozy_core:dye_white_stained_glass_pane"
+        "recipe": "cozy_core:dye_white_stained_glass_pane"
       }
     }
   },

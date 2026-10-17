@@ -5,17 +5,30 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:hellbark_button"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:hellbark_button"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "biomesoplenty:hellbark_planks",
+  "ingredient": {
+    "item": "biomesoplenty:hellbark_planks"
+  },
   "result": {
+    "count": 1,
     "id": "biomesoplenty:hellbark_button"
   }
 }

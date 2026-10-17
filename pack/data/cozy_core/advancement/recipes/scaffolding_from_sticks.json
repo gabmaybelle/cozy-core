@@ -14,7 +14,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipes": "cozy_core:scaffolding_from_sticks"
+        "recipe": "cozy_core:scaffolding_from_sticks"
       }
     }
   },

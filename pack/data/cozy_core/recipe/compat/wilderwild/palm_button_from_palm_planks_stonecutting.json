@@ -5,17 +5,30 @@
       "values": [
         "wilderwild"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "wilderwild:palm_button"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "wilderwild"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "wilderwild:palm_button"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "wilderwild:palm_planks",
+  "ingredient": {
+    "item": "wilderwild:palm_planks"
+  },
   "result": {
+    "count": 1,
     "id": "wilderwild:palm_button"
   }
 }

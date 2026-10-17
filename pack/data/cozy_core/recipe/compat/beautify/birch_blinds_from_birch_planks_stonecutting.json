@@ -5,17 +5,30 @@
       "values": [
         "beautify"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "beautify:birch_blinds"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "beautify"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "beautify:birch_blinds"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:birch_planks",
+  "ingredient": {
+    "item": "minecraft:birch_planks"
+  },
   "result": {
+    "count": 1,
     "id": "beautify:birch_blinds"
   }
 }

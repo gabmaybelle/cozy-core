@@ -5,16 +5,28 @@
       "values": [
         "mcwwindows"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwwindows:jungle_louvered_shutter"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwwindows"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwwindows:jungle_louvered_shutter"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:jungle_planks",
+  "ingredient": {
+    "item": "minecraft:jungle_planks"
+  },
   "result": {
     "count": 2,
     "id": "mcwwindows:jungle_louvered_shutter"

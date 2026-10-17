@@ -1,8 +1,7 @@
 // Writes the empty structure templates the NeoForge game tests are laid out in:
 //   neoforge/src/gametest/resources/data/cozy_core_gametest/structure/<name>.nbt
 // Vanilla's test framework clears a box the size of a test's template and runs the test inside
-// it, so each template is just a size (in the shape of vanilla's own data/minecraft/structure/
-// empty.nbt: one air block and the size); the tests in neoforge/src/gametest build what they need
+// it, so each template is just a size (one air block and the size); the tests in neoforge/src/gametest build what they need
 // in that box themselves. Run this again after changing a size in SIZES, and commit the files.
 //   node tools/generate-test-structures.js
 const fs = require('fs'), path = require('path'), zlib = require('zlib');
@@ -10,11 +9,12 @@ const fs = require('fs'), path = require('path'), zlib = require('zlib');
 const OUT = path.join(__dirname, '..', 'neoforge', 'src', 'gametest', 'resources', 'data', 'cozy_core_gametest', 'structure');
 // [width (x), height (y), depth (z)]. RuleChecks.java says where things go inside each.
 const SIZES = {
+	empty: [1, 1, 1], // for the tests that build nothing
 	explosions: [9, 7, 9],
 	fire: [9, 5, 9],
 	lanterns: [48, 10, 13],
 };
-const DATA_VERSION = 5023; // Minecraft 26.3, as in vanilla's empty.nbt
+const DATA_VERSION = 3955; // Minecraft 1.21.1
 
 // A small NBT writer: just the tags a structure template uses.
 const END = 0, INT = 3, STRING = 8, LIST = 9, COMPOUND = 10;
@@ -31,7 +31,7 @@ function template([x, y, z]) {
 		ints('size', [x, y, z]),
 		tag(LIST, 'entities', list(END, [])),
 		tag(LIST, 'blocks', list(COMPOUND, [compound(ints('pos', [0, 0, 0]), tag(INT, 'state', i32(0)))])),
-		tag(LIST, 'palette', list(COMPOUND, [compound(tag(STRING, 'id', str('minecraft:air')))])),
+		tag(LIST, 'palette', list(COMPOUND, [compound(tag(STRING, 'Name', str('minecraft:air')))])), // 'Name' in 1.21.1 (26.x: 'id')
 		tag(INT, 'DataVersion', i32(DATA_VERSION)),
 	));
 }

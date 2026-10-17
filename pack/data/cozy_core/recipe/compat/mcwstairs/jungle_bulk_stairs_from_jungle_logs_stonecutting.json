@@ -5,16 +5,28 @@
       "values": [
         "mcwstairs"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwstairs:jungle_bulk_stairs"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwstairs"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwstairs:jungle_bulk_stairs"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:jungle_logs",
+  "ingredient": {
+    "tag": "minecraft:jungle_logs"
+  },
   "result": {
     "count": 4,
     "id": "mcwstairs:jungle_bulk_stairs"

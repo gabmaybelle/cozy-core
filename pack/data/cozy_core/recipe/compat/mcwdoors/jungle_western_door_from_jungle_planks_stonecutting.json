@@ -5,17 +5,30 @@
       "values": [
         "mcwdoors"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwdoors:jungle_western_door"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwdoors"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwdoors:jungle_western_door"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:jungle_planks",
+  "ingredient": {
+    "item": "minecraft:jungle_planks"
+  },
   "result": {
+    "count": 1,
     "id": "mcwdoors:jungle_western_door"
   }
 }

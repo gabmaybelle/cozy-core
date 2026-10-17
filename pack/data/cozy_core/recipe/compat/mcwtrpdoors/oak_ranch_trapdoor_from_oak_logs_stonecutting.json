@@ -5,17 +5,30 @@
       "values": [
         "mcwtrpdoors"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwtrpdoors:oak_ranch_trapdoor"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwtrpdoors"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwtrpdoors:oak_ranch_trapdoor"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:oak_logs",
+  "ingredient": {
+    "tag": "minecraft:oak_logs"
+  },
   "result": {
+    "count": 1,
     "id": "mcwtrpdoors:oak_ranch_trapdoor"
   }
 }

@@ -1,15 +1,18 @@
 {
 	"required": true,
 	"package": "com.gabbymaybelle.cozycore.mixin",
-	"compatibilityLevel": "JAVA_25",
+	"compatibilityLevel": "JAVA_21",
 	"mixins": [
+		"BooleanValueInvoker",
 		"DeathLootMixin",
 		"EndermanTakeBlockGoalMixin",
+		"ExplosionMixin",
 		"FireBlockMixin",
-		"GameRuleAccessor",
+		"GameRulesAccessor",
 		"NaturalSpawnerMixin",
-		"ServerExplosionMixin",
-		"ServerPlayerMixin"
+		"ServerPlayerMixin",
+		"VillagerMixin",
+		"WanderingTraderMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

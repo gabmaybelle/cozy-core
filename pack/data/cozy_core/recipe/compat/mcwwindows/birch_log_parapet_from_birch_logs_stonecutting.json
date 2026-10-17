@@ -5,16 +5,28 @@
       "values": [
         "mcwwindows"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwwindows:birch_log_parapet"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwwindows"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwwindows:birch_log_parapet"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:birch_logs",
+  "ingredient": {
+    "tag": "minecraft:birch_logs"
+  },
   "result": {
     "count": 4,
     "id": "mcwwindows:birch_log_parapet"

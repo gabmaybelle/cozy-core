@@ -1,109 +1,139 @@
 package com.gabbymaybelle.cozycore.gametest.neoforge;
 
 import com.gabbymaybelle.cozycore.Rules;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.function.Consumer;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.gametest.framework.FunctionGameTestInstance;
+import java.util.List;
+import net.minecraft.gametest.framework.AfterBatch;
+import net.minecraft.gametest.framework.BeforeBatch;
+import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.gametest.framework.TestData;
-import net.minecraft.gametest.framework.TestEnvironmentDefinition;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.gamerules.GameRuleMap;
-import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.GameRules;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.RegisterGameTestsEvent;
-import net.neoforged.neoforge.registries.RegisterEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Cozy Core's NeoForge game tests: a little mod of its own that only {@code :neoforge:runGameTestServer}
  * loads, handing vanilla's test framework one test per check (the checks are in {@link RuleChecks}).
- * Every rule is tested both ways: in the "kind" environment (a new world's defaults) and in the
- * "vanilla" environment, where the game rules are set back to vanilla's behaviour, so a hook that
- * quietly stops working fails a test instead of passing by doing nothing.
+ * Every rule is tested both ways: in the "kind" batch (a new world's defaults) and in the "vanilla"
+ * batch, where the game rules are set back to vanilla's behaviour first, so a hook that quietly
+ * stops working fails a test instead of passing by doing nothing. Batches run one after another.
  */
 @Mod(CozyCoreGameTests.MOD_ID)
+@GameTestHolder(CozyCoreGameTests.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class CozyCoreGameTests {
 	static final String MOD_ID = "cozy_core_gametest";
-	/** Vanilla's 1x1x1 template, for tests that build nothing. */
-	private static final Identifier EMPTY = Identifier.withDefaultNamespace("empty");
-
-	/** The test functions by name; the test instance of the same name runs each. */
-	private static final Map<String, Consumer<GameTestHelper>> FUNCTIONS = new LinkedHashMap<>();
-
-	static {
-		FUNCTIONS.put("defaults", RuleChecks::defaults);
-		FUNCTIONS.put("recipes", RuleChecks::recipes);
-		FUNCTIONS.put("explosions_spare_blocks", helper -> RuleChecks.explosions(helper, true));
-		FUNCTIONS.put("explosions_break_blocks", helper -> RuleChecks.explosions(helper, false));
-		FUNCTIONS.put("endermen_leave_blocks", helper -> RuleChecks.endermen(helper, true));
-		FUNCTIONS.put("endermen_take_blocks", helper -> RuleChecks.endermen(helper, false));
-		FUNCTIONS.put("fire_spares_blocks", helper -> RuleChecks.fire(helper, true));
-		FUNCTIONS.put("fire_burns_blocks", helper -> RuleChecks.fire(helper, false));
-		FUNCTIONS.put("lantern_keeps_the_night_quiet", helper -> RuleChecks.lanterns(helper, true));
-		FUNCTIONS.put("lantern_off_at_radius_zero", helper -> RuleChecks.lanterns(helper, false));
-		FUNCTIONS.put("hotbar_kept_on_death", helper -> RuleChecks.keepOnDeath(helper, true));
-		FUNCTIONS.put("hotbar_dropped_on_death", helper -> RuleChecks.keepOnDeath(helper, false));
-	}
+	private static final String KIND = "kind", VANILLA = "vanilla";
+	/** The rules the vanilla batch switches; the kind batch leaves them as a new world has them. */
+	private static final List<GameRules.Key<?>> RULES = List.of(Rules.MOB_EXPLOSIONS_BREAK_BLOCKS, Rules.ENDERMEN_TAKE_BLOCKS,
+			Rules.FIRE_BURNS_BLOCKS, Rules.HEARTH_LANTERN_RADIUS, Rules.KEEP_HOTBAR_ON_DEATH);
 
 	public CozyCoreGameTests(IEventBus modBus) {
-		modBus.addListener(RegisterEvent.class, CozyCoreGameTests::registerFunctions);
-		modBus.addListener(RegisterGameTestsEvent.class, CozyCoreGameTests::registerTests);
+		modBus.addListener(RegisterGameTestsEvent.class, event -> event.register(CozyCoreGameTests.class));
 	}
 
-	static Identifier id(String path) {
-		return Identifier.fromNamespaceAndPath(MOD_ID, path);
+	// The templates (tools/generate-test-structures.js) are only sizes; each test builds its own scene.
+
+	@GameTest(template = "empty", batch = KIND)
+	public static void defaults(GameTestHelper helper) {
+		RuleChecks.defaults(helper);
 	}
 
-	/** Test functions live in a built-in registry, so they go in with the mod's other registrations. */
-	private static void registerFunctions(RegisterEvent event) {
-		if (event.getRegistryKey().equals(Registries.TEST_FUNCTION)) {
-			FUNCTIONS.forEach((name, function) -> event.register(Registries.TEST_FUNCTION, id(name), () -> function));
+	@GameTest(template = "empty", batch = KIND)
+	public static void recipes(GameTestHelper helper) {
+		RuleChecks.recipes(helper);
+	}
+
+	@GameTest(template = "explosions", batch = KIND)
+	public static void explosions_spare_blocks(GameTestHelper helper) {
+		RuleChecks.explosions(helper, true);
+	}
+
+	@GameTest(template = "explosions", batch = VANILLA)
+	public static void explosions_break_blocks(GameTestHelper helper) {
+		RuleChecks.explosions(helper, false);
+	}
+
+	@GameTest(template = "empty", batch = KIND)
+	public static void endermen_leave_blocks(GameTestHelper helper) {
+		RuleChecks.endermen(helper, true);
+	}
+
+	@GameTest(template = "empty", batch = VANILLA)
+	public static void endermen_take_blocks(GameTestHelper helper) {
+		RuleChecks.endermen(helper, false);
+	}
+
+	@GameTest(template = "fire", batch = KIND, timeoutTicks = 2000)
+	public static void fire_spares_blocks(GameTestHelper helper) {
+		RuleChecks.fire(helper, true);
+	}
+
+	@GameTest(template = "fire", batch = VANILLA, timeoutTicks = 2000)
+	public static void fire_burns_blocks(GameTestHelper helper) {
+		RuleChecks.fire(helper, false);
+	}
+
+	@GameTest(template = "lanterns", batch = KIND, timeoutTicks = 400)
+	public static void lantern_keeps_the_night_quiet(GameTestHelper helper) {
+		RuleChecks.lanterns(helper, true);
+	}
+
+	@GameTest(template = "lanterns", batch = VANILLA, timeoutTicks = 400)
+	public static void lantern_off_at_radius_zero(GameTestHelper helper) {
+		RuleChecks.lanterns(helper, false);
+	}
+
+	@GameTest(template = "explosions", batch = KIND)
+	public static void hotbar_kept_on_death(GameTestHelper helper) {
+		RuleChecks.keepOnDeath(helper, true);
+	}
+
+	@GameTest(template = "explosions", batch = VANILLA)
+	public static void hotbar_dropped_on_death(GameTestHelper helper) {
+		RuleChecks.keepOnDeath(helper, false);
+	}
+
+	@GameTest(template = "empty", batch = KIND)
+	public static void builder_trades(GameTestHelper helper) {
+		RuleChecks.trades(helper);
+	}
+
+	/**
+	 * Both batches let fire tick: vanilla's test server switches doFireTick off, so without this the
+	 * fire checks would pass on both sides by burning nothing. Cozy Core's rules are put back to a
+	 * new world's values, in case the vanilla batch ran first.
+	 */
+	@BeforeBatch(batch = KIND)
+	public static void kind(ServerLevel level) {
+		level.getGameRules().getRule(GameRules.RULE_DOFIRETICK).set(true, level.getServer());
+		GameRules fresh = new GameRules();
+		for (GameRules.Key<?> rule : RULES) {
+			reset(level, fresh, rule);
 		}
 	}
 
-	/** Test instances and their environments are registered as the test world's data loads. */
-	private static void registerTests(RegisterGameTestsEvent event) {
-		// Both environments let fire tick everywhere: since 26.3 vanilla's fire only ticks (ages,
-		// burns, spreads) within fire_spread_radius_around_player blocks of a player, 128 by
-		// default, and the test server has no players. Before this the fire checks only saw fire
-		// tick while the lantern test's mock player existed, about 40 ticks, so the vanilla-side
-		// check failed at random and the kind-side check proved nothing.
-		GameRuleMap kindRules = GameRuleMap.of();
-		kindRules.set(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, -1);
-		// Kind: none of Cozy Core's rules changed, so these tests also prove a new world starts with the kind settings.
-		Holder<TestEnvironmentDefinition<?>> kind = event.registerEnvironment(id("kind"), new TestEnvironmentDefinition.SetGameRules(kindRules));
-		// Vanilla: every rule switched to vanilla's behaviour for the length of the test.
-		GameRuleMap vanillaRules = GameRuleMap.of();
-		vanillaRules.set(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, -1);
-		vanillaRules.set(Rules.MOB_EXPLOSIONS_BREAK_BLOCKS, true);
-		vanillaRules.set(Rules.ENDERMEN_TAKE_BLOCKS, true);
-		vanillaRules.set(Rules.FIRE_BURNS_BLOCKS, true);
-		vanillaRules.set(Rules.HEARTH_LANTERN_RADIUS, 0);
-		vanillaRules.set(Rules.KEEP_HOTBAR_ON_DEATH, false);
-		Holder<TestEnvironmentDefinition<?>> vanilla = event.registerEnvironment(id("vanilla"), new TestEnvironmentDefinition.SetGameRules(vanillaRules));
-
-		// The templates (tools/generate-test-structures.js) are only sizes; each test builds its own scene.
-		test(event, "defaults", kind, EMPTY, 20);
-		test(event, "recipes", kind, EMPTY, 20);
-		test(event, "explosions_spare_blocks", kind, id("explosions"), 100);
-		test(event, "explosions_break_blocks", vanilla, id("explosions"), 100);
-		test(event, "endermen_leave_blocks", kind, EMPTY, 20);
-		test(event, "endermen_take_blocks", vanilla, EMPTY, 20);
-		test(event, "fire_spares_blocks", kind, id("fire"), 2000);
-		test(event, "fire_burns_blocks", vanilla, id("fire"), 2000);
-		test(event, "lantern_keeps_the_night_quiet", kind, id("lanterns"), 400);
-		test(event, "lantern_off_at_radius_zero", vanilla, id("lanterns"), 400);
-		test(event, "hotbar_kept_on_death", kind, id("explosions"), 100);
-		test(event, "hotbar_dropped_on_death", vanilla, id("explosions"), 100);
+	/** Every rule switched to vanilla's behaviour for the length of the batch. */
+	@BeforeBatch(batch = VANILLA)
+	public static void vanilla(ServerLevel level) {
+		GameRules rules = level.getGameRules();
+		rules.getRule(GameRules.RULE_DOFIRETICK).set(true, level.getServer());
+		rules.getRule(Rules.MOB_EXPLOSIONS_BREAK_BLOCKS).set(true, level.getServer());
+		rules.getRule(Rules.ENDERMEN_TAKE_BLOCKS).set(true, level.getServer());
+		rules.getRule(Rules.FIRE_BURNS_BLOCKS).set(true, level.getServer());
+		rules.getRule(Rules.HEARTH_LANTERN_RADIUS).set(0, level.getServer());
+		rules.getRule(Rules.KEEP_HOTBAR_ON_DEATH).set(false, level.getServer());
 	}
 
-	private static void test(RegisterGameTestsEvent event, String name, Holder<TestEnvironmentDefinition<?>> environment, Identifier structure, int maxTicks) {
-		ResourceKey<Consumer<GameTestHelper>> function = ResourceKey.create(Registries.TEST_FUNCTION, id(name));
-		event.registerTest(id(name), new FunctionGameTestInstance(function, new TestData<>(environment, structure, maxTicks, 0, true)));
+	@AfterBatch(batch = VANILLA)
+	public static void afterVanilla(ServerLevel level) {
+		kind(level);
+	}
+
+	private static <T extends GameRules.Value<T>> void reset(ServerLevel level, GameRules fresh, GameRules.Key<T> rule) {
+		level.getGameRules().getRule(rule).setFrom(fresh.getRule(rule), level.getServer());
 	}
 }

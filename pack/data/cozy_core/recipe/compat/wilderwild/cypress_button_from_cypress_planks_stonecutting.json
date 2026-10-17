@@ -5,17 +5,30 @@
       "values": [
         "wilderwild"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "wilderwild:cypress_button"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "wilderwild"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "wilderwild:cypress_button"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "wilderwild:cypress_planks",
+  "ingredient": {
+    "item": "wilderwild:cypress_planks"
+  },
   "result": {
+    "count": 1,
     "id": "wilderwild:cypress_button"
   }
 }

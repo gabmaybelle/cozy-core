@@ -1,7 +1,10 @@
 {
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:jungle_planks",
+  "ingredient": {
+    "item": "minecraft:jungle_planks"
+  },
   "result": {
+    "count": 1,
     "id": "minecraft:jungle_pressure_plate"
   }
 }

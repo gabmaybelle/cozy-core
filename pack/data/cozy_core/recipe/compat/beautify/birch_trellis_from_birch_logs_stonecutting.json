@@ -5,16 +5,28 @@
       "values": [
         "beautify"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "beautify:birch_trellis"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "beautify"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "beautify:birch_trellis"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:birch_logs",
+  "ingredient": {
+    "tag": "minecraft:birch_logs"
+  },
   "result": {
     "count": 4,
     "id": "beautify:birch_trellis"

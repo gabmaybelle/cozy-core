@@ -5,16 +5,28 @@
       "values": [
         "beautify"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "beautify:crimson_blinds"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "beautify"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "beautify:crimson_blinds"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:crimson_stems",
+  "ingredient": {
+    "tag": "minecraft:crimson_stems"
+  },
   "result": {
     "count": 4,
     "id": "beautify:crimson_blinds"

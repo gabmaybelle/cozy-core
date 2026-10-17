@@ -35,10 +35,11 @@ server.on('exit', code => {
 	// Problems: anything that stops data loading, or an ERROR line that isn't known noise (Windows
 	// process statistics, offline mode). Exits 1 if the server never finished loading or had one.
 	// netty's network libraries for other systems (kqueue on Linux, epoll on Windows) failing to load
-	// is noise too.
+	// is noise too, and so is 1.21.1 saying it has no data fixer for a mod's mobs and boats (it only
+	// upgrades vanilla's own).
 	const ignore = process.env.IGNORE ? new RegExp(process.env.IGNORE) : null;
 	const problems = lines.filter(l => /ERROR|Errors in element|Failed to load registries/.test(l)
-		&& !/Perflib|oshi|Win32Exception|Realms|realms|authlib|Failed to fetch|kqueue|epoll|Only supported on|AppenderLoggingException|exception occurred processing Appender/.test(l)
+		&& !/Perflib|oshi|Win32Exception|Realms|realms|authlib|Failed to fetch|kqueue|epoll|Only supported on|AppenderLoggingException|exception occurred processing Appender|No data fixer registered for/.test(l)
 		&& !(ignore && ignore.test(l)));
 	console.log(`--- server exited (${code}); ${lines.length} log lines, ${problems.length} problem line(s)`);
 	process.exit(sent && problems.length === 0 ? 0 : 1);

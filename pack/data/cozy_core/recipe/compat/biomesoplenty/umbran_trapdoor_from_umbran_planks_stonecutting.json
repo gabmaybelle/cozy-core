@@ -5,17 +5,30 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:umbran_trapdoor"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:umbran_trapdoor"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "biomesoplenty:umbran_planks",
+  "ingredient": {
+    "item": "biomesoplenty:umbran_planks"
+  },
   "result": {
+    "count": 1,
     "id": "biomesoplenty:umbran_trapdoor"
   }
 }

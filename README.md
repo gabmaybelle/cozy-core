@@ -2,7 +2,9 @@
 
 *Put the kettle on and build.*
 
-Cozy Core takes the grind out of building in Minecraft 26.3. Your builds stay built, a lantern keeps the night quiet, and decorating needs fewer trips back to the crafting table. There's nothing new to learn and nothing running in the background.
+Cozy Core takes the grind out of building in Minecraft. Your builds stay built, a lantern keeps the night quiet, and decorating needs fewer trips back to the crafting table. There's nothing new to learn and nothing running in the background.
+
+This is the version for **Minecraft 1.21.1**, on Fabric and NeoForge. It's the same Cozy Core as on 26.3; the few small differences are under [On 1.21.1](#on-1211).
 
 ## Two ways to get it
 
@@ -47,16 +49,26 @@ Each rule is an ordinary game rule: it shows in the Game Rules screen when you m
 | `cozy_core:fire_burns_blocks` | false |
 | `cozy_core:keep_hotbar_on_death` | true |
 | `cozy_core:hearth_lantern_radius` | 32 (0 switches lanterns off) |
-| `spawn_phantoms` (vanilla's own) | false; worlds you already have keep theirs |
+| `doInsomnia` (vanilla's own phantoms rule) | false; worlds you already have keep theirs |
 
 ## Other mods
 
 With the mod version, wood from Biomes O' Plenty, Ecologics, Promenade and Wilder Wild works in the stonecutter like vanilla wood. Pieces from [Beautify](https://modrinth.com/mod/beautify-refabricated) and Macaw's [Roofs](https://modrinth.com/mod/macaws-roofs), [Fences and Walls](https://modrinth.com/mod/macaws-fences-and-walls), [Stairs](https://modrinth.com/mod/macaws-stairs), [Windows](https://modrinth.com/mod/macaws-windows), [Furniture](https://modrinth.com/mod/macaws-furniture), [Doors](https://modrinth.com/mod/macaws-doors) and [Trapdoors](https://modrinth.com/mod/macaws-trapdoors) go in too, when they're made of a single wood. Small pieces cost one plank; big ones, like desks and big gates, cost a log. Anything with glass, iron or paper stays at the crafting table. These recipes only switch on when that mod is installed.
 
+## On 1.21.1
+
+- Wood in the stonecutter covers the woods 1.21.1 has. Pale oak and its pieces came later, and so did shelves.
+- On NeoForge the rules show under vanilla's own headings in the Game Rules screen (Mobs, Updates, Spawning and Player) instead of a "Cozy Core" heading. Fabric has the heading. They're the same rules either way.
+- Phantoms are vanilla's `doInsomnia` rule, which 1.21.1 calls it.
+- Wilder Wild's hollowed logs cut into four planks, like its other logs: on 1.21.1 it counts them as logs.
+- Beautify's NeoForge version has no cherry blinds or trellises, so those are only in the stonecutter on Fabric. Wilder Wild has no NeoForge version for 1.21.1.
+- With the experimental trade rebalance switched on, the wandering trader picks its trades another way and doesn't get the extra slot. Masons still do.
+
 ## Requirements
 
-Minecraft 26.3. The mod version runs on Fabric (with Fabric API) or NeoForge; download the file
-for your loader.
+This version: Minecraft 1.21.1 and Java 21, with either Fabric (Fabric Loader 0.16 or newer and
+Fabric API) or NeoForge 21.1 (nothing else needed). Pick the `fabric` or `neoforge` file for your
+loader. The data pack is for plain Minecraft 1.21.1. For Minecraft 26.3, see the main page.
 
 ## Licence
 

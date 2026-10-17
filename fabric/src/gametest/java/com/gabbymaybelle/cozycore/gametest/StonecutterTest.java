@@ -1,5 +1,9 @@
 package com.gabbymaybelle.cozycore.gametest;
 
+import com.gabbymaybelle.cozycore.gametest.harness.ClientGameTest;
+import com.gabbymaybelle.cozycore.gametest.harness.ClientGameTestContext;
+import com.gabbymaybelle.cozycore.gametest.harness.TestServerContext;
+import com.gabbymaybelle.cozycore.gametest.harness.TestSingleplayerContext;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -14,10 +18,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
-import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
-import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
-import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -27,17 +27,16 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.StonecutterMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.SelectableRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
-import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -49,12 +48,12 @@ import net.minecraft.world.phys.Vec3;
  * every expected output is on offer exactly once, clicks each one (with the real mouse for the
  * first page of buttons) and checks the result and its count, then takes the first result out.
  */
-public class StonecutterTest implements FabricClientGameTest {
+public class StonecutterTest implements ClientGameTest {
 	/** The stonecutter screen's recipe buttons: 4 columns, 3 rows, 16 x 18 pixels, from (52, 14). */
 	private static final int COLUMNS = 4, ROWS = 3, BUTTON_W = 16, BUTTON_H = 18, RECIPES_X = 52, RECIPES_Y = 14;
 
 	/** One expected recipe: its id, the input as written ("item" or "#tag"), and the result. */
-	private record Expected(String id, String input, Identifier result, int count) {
+	private record Expected(String id, String input, ResourceLocation result, int count) {
 	}
 
 	@Override
@@ -64,7 +63,7 @@ public class StonecutterTest implements FabricClientGameTest {
 		List<String> failures = new ArrayList<>();
 		int inputs = 0, recipes = 0;
 		try (TestSingleplayerContext world = ctx.worldBuilder().create()) {
-			world.getConnection().waitForChunksRender();
+			world.waitForChunksRender();
 			TestServerContext server = world.getServer();
 			server.runCommand("gamemode survival @a");
 			BlockPos cutter = server.computeOnServer(s -> s.getPlayerList().getPlayers().getFirst().blockPosition().offset(2, 0, 0));
@@ -100,7 +99,7 @@ public class StonecutterTest implements FabricClientGameTest {
 				inputs++;
 				recipes += wanted.size();
 				putInInput(ctx, server, item);
-				List<Identifier> offered = ctx.computeOnClient(StonecutterTest::offered);
+				List<ResourceLocation> offered = ctx.computeOnClient(StonecutterTest::offered);
 				String name = BuiltInRegistries.ITEM.getKey(item).toString();
 				for (Expected e : wanted) {
 					long times = offered.stream().filter(e.result()::equals).count();
@@ -122,7 +121,7 @@ public class StonecutterTest implements FabricClientGameTest {
 					}
 					select(ctx, index);
 					ItemStack result = ctx.computeOnClient(mc -> ((StonecutterMenu) mc.player.containerMenu).getSlot(StonecutterMenu.RESULT_SLOT).getItem().copy());
-					Identifier got = BuiltInRegistries.ITEM.getKey(result.getItem());
+					ResourceLocation got = BuiltInRegistries.ITEM.getKey(result.getItem());
 					if (!got.equals(e.result()) || result.getCount() != e.count()) {
 						failures.add(name + ": picking " + e.result() + " gave " + result.getCount() + " " + got + " (wanted " + e.count() + ")");
 					}
@@ -131,9 +130,9 @@ public class StonecutterTest implements FabricClientGameTest {
 				Expected first = wanted.stream().filter(e -> offered.contains(e.result())).findFirst().orElse(null);
 				if (first != null) {
 					select(ctx, offered.indexOf(first.result()));
-					Item resultItem = BuiltInRegistries.ITEM.getValue(first.result());
-					ctx.runOnClient(mc -> mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId,
-							StonecutterMenu.RESULT_SLOT, 0, ContainerInput.QUICK_MOVE, mc.player));
+					Item resultItem = BuiltInRegistries.ITEM.get(first.result());
+					ctx.runOnClient(mc -> mc.gameMode.handleInventoryMouseClick(mc.player.containerMenu.containerId,
+							StonecutterMenu.RESULT_SLOT, 0, ClickType.QUICK_MOVE, mc.player));
 					ctx.waitTicks(3);
 					int taken = server.computeOnServer(s -> player(s).getInventory().countItem(resultItem));
 					int left = server.computeOnServer(s -> player(s).containerMenu.getSlot(StonecutterMenu.INPUT_SLOT).getItem().getCount());
@@ -160,7 +159,7 @@ public class StonecutterTest implements FabricClientGameTest {
 			menu.broadcastChanges();
 		});
 		ctx.waitFor(mc -> mc.player.containerMenu instanceof StonecutterMenu menu
-				&& menu.getSlot(StonecutterMenu.INPUT_SLOT).getItem().is(item) && menu.getNumberOfVisibleRecipes() > 0, 40);
+				&& menu.getSlot(StonecutterMenu.INPUT_SLOT).getItem().is(item) && menu.getNumRecipes() > 0, 40);
 		ctx.waitTicks(2);
 	}
 
@@ -168,7 +167,7 @@ public class StonecutterTest implements FabricClientGameTest {
 	private static void select(ClientGameTestContext ctx, int index) {
 		if (index < COLUMNS * ROWS) {
 			int[] at = ctx.computeOnClient(mc -> {
-				AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) mc.gui.screen();
+				AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) mc.screen;
 				int left = field(screen, "leftPos"), top = field(screen, "topPos");
 				return new int[] { left + RECIPES_X + (index % COLUMNS) * BUTTON_W + BUTTON_W / 2, top + RECIPES_Y + (index / COLUMNS) * BUTTON_H + BUTTON_H / 2 };
 			});
@@ -197,11 +196,11 @@ public class StonecutterTest implements FabricClientGameTest {
 	}
 
 	/** The outputs the stonecutter screen is offering, in button order. */
-	private static List<Identifier> offered(Minecraft mc) {
+	private static List<ResourceLocation> offered(Minecraft mc) {
 		StonecutterMenu menu = (StonecutterMenu) mc.player.containerMenu;
-		List<Identifier> out = new ArrayList<>();
-		for (SelectableRecipe.SingleInputEntry<StonecutterRecipe> entry : menu.getVisibleRecipes().entries()) {
-			ItemStack stack = entry.recipe().optionDisplay().resolveForFirstStack(SlotDisplayContext.fromLevel(mc.level));
+		List<ResourceLocation> out = new ArrayList<>();
+		for (RecipeHolder<StonecutterRecipe> recipe : menu.getRecipes()) {
+			ItemStack stack = recipe.value().getResultItem(mc.level.registryAccess());
 			out.add(BuiltInRegistries.ITEM.getKey(stack.getItem()));
 		}
 		return out;
@@ -209,19 +208,18 @@ public class StonecutterTest implements FabricClientGameTest {
 
 	private static Item firstItem(Minecraft mc, String input) {
 		if (!input.startsWith("#")) {
-			Identifier id = Identifier.parse(input);
-			return BuiltInRegistries.ITEM.containsKey(id) ? BuiltInRegistries.ITEM.getValue(id) : null;
+			ResourceLocation id = ResourceLocation.parse(input);
+			return BuiltInRegistries.ITEM.containsKey(id) ? BuiltInRegistries.ITEM.get(id) : null;
 		}
-		TagKey<Item> tag = TagKey.create(Registries.ITEM, Identifier.parse(input.substring(1)));
-		return mc.level.registryAccess().lookupOrThrow(Registries.ITEM).get(tag)
-				.flatMap(set -> set.stream().findFirst()).map(Holder::value).orElse(null);
+		TagKey<Item> tag = TagKey.create(Registries.ITEM, ResourceLocation.parse(input.substring(1)));
+		return BuiltInRegistries.ITEM.getTag(tag).flatMap(set -> set.stream().findFirst()).map(Holder::value).orElse(null);
 	}
 
 	private static boolean accepts(Minecraft mc, String input, Item item) {
 		if (!input.startsWith("#")) {
-			return BuiltInRegistries.ITEM.getKey(item).equals(Identifier.parse(input));
+			return BuiltInRegistries.ITEM.getKey(item).equals(ResourceLocation.parse(input));
 		}
-		TagKey<Item> tag = TagKey.create(Registries.ITEM, Identifier.parse(input.substring(1)));
+		TagKey<Item> tag = TagKey.create(Registries.ITEM, ResourceLocation.parse(input.substring(1)));
 		return item.builtInRegistryHolder().is(tag);
 	}
 
@@ -244,12 +242,14 @@ public class StonecutterTest implements FabricClientGameTest {
 					if (!"minecraft:stonecutting".equals(json.get("type").getAsString()) || !conditionsMet(json)) {
 						continue;
 					}
+					// 1.21.1 writes an ingredient as {"item": id} or {"tag": id}, or a list of them.
 					JsonElement ingredient = json.get("ingredient");
-					String input = ingredient.isJsonArray() ? ingredient.getAsJsonArray().get(0).getAsString() : ingredient.getAsString();
+					JsonObject first = ingredient.isJsonArray() ? ingredient.getAsJsonArray().get(0).getAsJsonObject() : ingredient.getAsJsonObject();
+					String input = first.has("tag") ? "#" + first.get("tag").getAsString() : first.get("item").getAsString();
 					JsonObject result = json.getAsJsonObject("result");
 					int count = result.has("count") ? result.get("count").getAsInt() : 1;
 					String name = recipes.relativize(file).toString().replace('\\', '/').replace(".json", "");
-					out.add(new Expected("cozy_core:" + name, input, Identifier.parse(result.get("id").getAsString()), count));
+					out.add(new Expected("cozy_core:" + name, input, ResourceLocation.parse(result.get("id").getAsString()), count));
 				}
 			} catch (IOException e) {
 				throw new AssertionError("couldn't read Cozy Core's recipes", e);
@@ -258,7 +258,7 @@ public class StonecutterTest implements FabricClientGameTest {
 		return out;
 	}
 
-	/** Fabric load conditions: every listed mod (all_mods_loaded) or any of them (any_mods_loaded). */
+	/** Fabric load conditions: every listed mod (all_mods_loaded) or any of them (any_mods_loaded), and items the game has (registry_contains). */
 	private static boolean conditionsMet(JsonObject json) {
 		if (!json.has("fabric:load_conditions")) {
 			return true;
@@ -272,6 +272,7 @@ public class StonecutterTest implements FabricClientGameTest {
 			boolean met = switch (type) {
 				case "fabric:all_mods_loaded" -> mods.stream().allMatch(FabricLoader.getInstance()::isModLoaded);
 				case "fabric:any_mods_loaded" -> mods.stream().anyMatch(FabricLoader.getInstance()::isModLoaded);
+				case "fabric:registry_contains" -> !condition.has("registry") && mods.stream().allMatch(id -> BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(id)));
 				default -> throw new AssertionError("the test doesn't know the load condition " + type);
 			};
 			if (!met) {

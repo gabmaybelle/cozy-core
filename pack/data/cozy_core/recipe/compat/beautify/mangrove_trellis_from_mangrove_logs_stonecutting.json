@@ -5,16 +5,28 @@
       "values": [
         "beautify"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "beautify:mangrove_trellis"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "beautify"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "beautify:mangrove_trellis"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:mangrove_logs",
+  "ingredient": {
+    "tag": "minecraft:mangrove_logs"
+  },
   "result": {
     "count": 4,
     "id": "beautify:mangrove_trellis"

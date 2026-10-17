@@ -5,17 +5,30 @@
       "values": [
         "beautify"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "beautify:acacia_blinds"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "beautify"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "beautify:acacia_blinds"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:acacia_planks",
+  "ingredient": {
+    "item": "minecraft:acacia_planks"
+  },
   "result": {
+    "count": 1,
     "id": "beautify:acacia_blinds"
   }
 }

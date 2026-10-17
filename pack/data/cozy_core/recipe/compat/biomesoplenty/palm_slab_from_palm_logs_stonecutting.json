@@ -5,16 +5,28 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:palm_slab"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:palm_slab"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#biomesoplenty:palm_logs",
+  "ingredient": {
+    "tag": "biomesoplenty:palm_logs"
+  },
   "result": {
     "count": 8,
     "id": "biomesoplenty:palm_slab"

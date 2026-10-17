@@ -1,5 +1,5 @@
-# Builds Cozy Core on every push and pull request, then tests what it built:
-# - build: regenerates the pack from vanilla 26.3's data and the wood mods, checks for recipe
+# Builds Cozy Core for Minecraft 1.21.1 on every push and pull request, then tests what it built:
+# - build: regenerates the pack from vanilla 1.21.1's data and the wood mods, checks for recipe
 #   clashes and block-making loops, checks the committed pack/ is what the generator makes (a
 #   wood mod changing its recipes shows up here too), and builds the Fabric and NeoForge jars.
 #   The downloads are attached as "Downloads".
@@ -9,8 +9,9 @@
 #   and clicks every stonecutter recipe in the real screen, with and without the wood mods (and
 #   the decoration mods).
 # - game (NeoForge): vanilla's test server runs the NeoForge jar's own checks (neoforge/src/gametest):
-#   the rules both ways, the Hearth Lantern, and every recipe in pack/ being in the game, with and
-#   without the wood mods (tools/neoforge-group.sh's groups).
+#   the rules both ways, the Hearth Lantern, the trades, and every recipe in pack/ being in the
+#   game, with and without the wood mods (tools/neoforge-group.sh's groups).
+# The code is compiled for Java 21 (1.21.1's) by the newer JDK set up here.
 
 name: build
 on: [pull_request, push]
@@ -39,17 +40,17 @@ jobs:
           distribution: 'microsoft'
       - name: setup gradle (with caching)
         uses: gradle/actions/setup-gradle@v6
-      - name: vanilla 26.3 server
+      - name: vanilla 1.21.1 server
         run: |
           mkdir -p ~/mc
-          url=$(curl -fsS https://piston-meta.mojang.com/mc/game/version_manifest_v2.json | jq -r '.versions[] | select(.id == "26.3").url')
+          url=$(curl -fsS https://piston-meta.mojang.com/mc/game/version_manifest_v2.json | jq -r '.versions[] | select(.id == "1.21.1").url')
           curl -fsSL -o ~/mc/server-bundler.jar "$(curl -fsS "$url" | jq -r '.downloads.server.url')"
-          unzip -p ~/mc/server-bundler.jar META-INF/versions/26.3/server-26.3.jar > ~/mc/server-26.3.jar
+          unzip -p ~/mc/server-bundler.jar META-INF/versions/1.21.1/server-1.21.1.jar > ~/mc/server-1.21.1.jar
       - name: wood mods
         run: node tools/fetch-test-mods.js ~/wood
       - name: the data pack
         run: |
-          node tools/build.js ~/mc/server-26.3.jar ~/wood/mods | tee build.log
+          node tools/build.js ~/mc/server-1.21.1.jar ~/wood/mods | tee build.log
           grep -q "No recipe clashes or block-making loops found." build.log
       - name: the committed pack is what the generator makes
         run: |
@@ -91,7 +92,8 @@ jobs:
           - { loader: fabric, group: D, name: 'Fabric with Macaw''s' }
           - { loader: neoforge, group: none, name: 'NeoForge' }
           - { loader: neoforge, group: A, name: 'NeoForge with Biomes O'' Plenty' }
-          - { loader: neoforge, group: B, name: 'NeoForge with Ecologics, Wilder Wild and Promenade' }
+          - { loader: neoforge, group: B, name: 'NeoForge with Ecologics and Promenade' }
+          - { loader: neoforge, group: C, name: 'NeoForge with Beautify' }
           - { loader: neoforge, group: D, name: 'NeoForge with Macaw''s' }
           - { loader: vanilla, group: none, name: 'vanilla with the data pack' }
     name: load (${{ matrix.name }})
@@ -154,13 +156,7 @@ jobs:
           mkdir -p ~/group
           for j in $(bash tools/group-jars.sh ${{ matrix.group }} ~/wood/mods); do cp ~/wood/mods/$j ~/group/; done
           ls ~/group
-      - name: install EGL
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq libegl1 libegl-mesa0
       - name: game test
-        # 26.3 asks for an sRGB-capable window, which Xvfb's GLX can't give, so the game would hang
-        # at startup. Mesa's EGL can; SDL uses it with this set.
-        env:
-          SDL_VIDEO_FORCE_EGL: '1'
         # The Macaw's group clicks about 1,600 recipes, about 6 minutes on a desktop.
         timeout-minutes: 40
         run: |
@@ -186,7 +182,8 @@ jobs:
         include:
           - { group: none, name: 'vanilla wood' }
           - { group: A, name: 'with Biomes O'' Plenty' }
-          - { group: B, name: 'with Ecologics, Wilder Wild and Promenade' }
+          - { group: B, name: 'with Ecologics and Promenade' }
+          - { group: C, name: 'with Beautify' }
           - { group: D, name: 'with Macaw''s' }
     steps:
       - name: checkout repository

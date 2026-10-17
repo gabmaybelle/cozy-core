@@ -1,5 +1,7 @@
 # Cozy Core's NeoForge game tests. Only `./gradlew :neoforge:runGameTestServer` loads this mod;
 # nothing here ships in the jar.
+modLoader = "javafml"
+loaderVersion = "[1,)"
 license = "MIT"
 
 [[mods]]

@@ -3,10 +3,15 @@
   "category": "building",
   "group": "planks_from_slabs",
   "ingredients": [
-    "minecraft:crimson_slab",
-    "minecraft:crimson_slab"
+    {
+      "item": "minecraft:crimson_slab"
+    },
+    {
+      "item": "minecraft:crimson_slab"
+    }
   ],
   "result": {
+    "count": 1,
     "id": "minecraft:crimson_planks"
   }
 }

@@ -5,17 +5,30 @@
       "values": [
         "beautify"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "beautify:jungle_blinds"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "beautify"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "beautify:jungle_blinds"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:jungle_planks",
+  "ingredient": {
+    "item": "minecraft:jungle_planks"
+  },
   "result": {
+    "count": 1,
     "id": "beautify:jungle_blinds"
   }
 }

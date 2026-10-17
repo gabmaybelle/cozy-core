@@ -5,16 +5,28 @@
       "values": [
         "mcwdoors"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwdoors:crimson_western_door"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwdoors"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwdoors:crimson_western_door"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:crimson_stems",
+  "ingredient": {
+    "tag": "minecraft:crimson_stems"
+  },
   "result": {
     "count": 4,
     "id": "mcwdoors:crimson_western_door"

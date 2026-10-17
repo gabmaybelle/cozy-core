@@ -5,16 +5,28 @@
       "values": [
         "mcwroofs"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwroofs:crimson_planks_top_roof"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwroofs"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwroofs:crimson_planks_top_roof"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:crimson_stems",
+  "ingredient": {
+    "tag": "minecraft:crimson_stems"
+  },
   "result": {
     "count": 4,
     "id": "mcwroofs:crimson_planks_top_roof"

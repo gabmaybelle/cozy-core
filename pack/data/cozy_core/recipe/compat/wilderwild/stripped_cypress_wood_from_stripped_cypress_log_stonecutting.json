@@ -5,17 +5,30 @@
       "values": [
         "wilderwild"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "wilderwild:stripped_cypress_wood"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "wilderwild"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "wilderwild:stripped_cypress_wood"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "wilderwild:stripped_cypress_log",
+  "ingredient": {
+    "item": "wilderwild:stripped_cypress_log"
+  },
   "result": {
+    "count": 1,
     "id": "wilderwild:stripped_cypress_wood"
   }
 }

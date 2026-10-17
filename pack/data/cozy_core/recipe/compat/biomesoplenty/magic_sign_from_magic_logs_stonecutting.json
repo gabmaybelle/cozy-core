@@ -5,16 +5,28 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:magic_sign"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:magic_sign"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#biomesoplenty:magic_logs",
+  "ingredient": {
+    "tag": "biomesoplenty:magic_logs"
+  },
   "result": {
     "count": 4,
     "id": "biomesoplenty:magic_sign"

@@ -5,16 +5,28 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:redwood_sign"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:redwood_sign"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#biomesoplenty:redwood_logs",
+  "ingredient": {
+    "tag": "biomesoplenty:redwood_logs"
+  },
   "result": {
     "count": 4,
     "id": "biomesoplenty:redwood_sign"

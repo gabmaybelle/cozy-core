@@ -4,6 +4,7 @@ import com.gabbymaybelle.cozycore.HearthLantern;
 import com.gabbymaybelle.cozycore.HearthLanterns;
 import com.gabbymaybelle.cozycore.KeepOnDeath;
 import com.gabbymaybelle.cozycore.Rules;
+import com.gabbymaybelle.cozycore.Trades;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -14,31 +15,38 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.ProblemReporter;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.Enderman;
+import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.VillagerTrades;
+import net.minecraft.world.entity.npc.VillagerType;
+import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
@@ -46,10 +54,6 @@ import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LanternBlock;
-import net.minecraft.world.level.gamerules.GameRules;
-import net.minecraft.world.level.storage.LevelData;
-import net.minecraft.world.level.storage.TagValueInput;
-import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
@@ -64,20 +68,67 @@ final class RuleChecks {
 	private RuleChecks() {
 	}
 
-	/** A new world starts kind: every rule at its kind value, phantoms off, the rules under their own heading. */
+	/** A new world starts kind: every rule at its kind value, phantoms off, the rules named cozy_core:... */
 	static void defaults(GameTestHelper helper) {
 		GameRules rules = helper.getLevel().getGameRules();
-		helper.assertFalse(rules.get(Rules.MOB_EXPLOSIONS_BREAK_BLOCKS), "mob explosions should spare blocks by default");
-		helper.assertFalse(rules.get(Rules.ENDERMEN_TAKE_BLOCKS), "endermen should leave blocks alone by default");
-		helper.assertFalse(rules.get(Rules.FIRE_BURNS_BLOCKS), "fire shouldn't burn blocks by default");
-		helper.assertValueEqual(rules.get(Rules.HEARTH_LANTERN_RADIUS), 32, "the Hearth Lantern radius");
-		helper.assertFalse(rules.get(GameRules.SPAWN_PHANTOMS), "a new world should start with phantoms off");
-		helper.assertTrue(rules.get(Rules.KEEP_HOTBAR_ON_DEATH), "the hotbar should be kept on death by default");
-		helper.assertTrue(rules.availableRules().anyMatch(rule -> rule.category() == Rules.CATEGORY), "the rules should have the Cozy Core heading");
-		helper.assertValueEqual(Rules.FIRE_BURNS_BLOCKS.getIdentifier().toString(), "cozy_core:fire_burns_blocks", "a rule's id");
-		helper.assertTrue(helper.getLevel().getServer().getRecipeManager().byKey(ResourceKey.create(Registries.RECIPE, HearthLantern.ID)).isPresent(),
+		helper.assertFalse(rules.getBoolean(Rules.MOB_EXPLOSIONS_BREAK_BLOCKS), "mob explosions should spare blocks by default");
+		helper.assertFalse(rules.getBoolean(Rules.ENDERMEN_TAKE_BLOCKS), "endermen should leave blocks alone by default");
+		helper.assertFalse(rules.getBoolean(Rules.FIRE_BURNS_BLOCKS), "fire shouldn't burn blocks by default");
+		helper.assertValueEqual(rules.getInt(Rules.HEARTH_LANTERN_RADIUS), 32, "the Hearth Lantern radius");
+		helper.assertFalse(rules.getBoolean(GameRules.RULE_DOINSOMNIA), "a new world should start with phantoms off");
+		helper.assertFalse(new GameRules().getBoolean(GameRules.RULE_DOINSOMNIA), "phantoms should be off in a brand-new set of rules");
+		helper.assertTrue(rules.getBoolean(Rules.KEEP_HOTBAR_ON_DEATH), "the hotbar should be kept on death by default");
+		helper.assertValueEqual(Rules.FIRE_BURNS_BLOCKS.getId(), "cozy_core:fire_burns_blocks", "a rule's id");
+		helper.assertValueEqual(Rules.KEEP_HOTBAR_ON_DEATH.getCategory(), GameRules.Category.PLAYER, "keep_hotbar_on_death's heading");
+		helper.assertTrue(helper.getLevel().getServer().getRecipeManager().byKey(HearthLantern.ID).isPresent(),
 				"the Hearth Lantern recipe should load");
 		helper.succeed();
+	}
+
+	/**
+	 * The builder trades: in the pools (NeoForge's trade events), and the extra slot. A new mason at
+	 * level 1 offers three trades (vanilla two) from a pool of four, so at least one is Cozy Core's;
+	 * the same at level 2. A wandering trader offers six common trades (vanilla five) and one rare
+	 * (checked only without the experimental trade rebalance, see below).
+	 */
+	static void trades(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		helper.assertTrue(pool(VillagerTrades.TRADES.get(VillagerProfession.MASON).get(1), level, Items.TUFF), "the mason's level-1 pool should have tuff");
+		helper.assertTrue(pool(VillagerTrades.TRADES.get(VillagerProfession.MASON).get(2), level, Items.PACKED_MUD), "the mason's level-2 pool should have packed mud");
+		helper.assertTrue(pool(VillagerTrades.WANDERING_TRADER_TRADES.get(1), level, Items.FLOWERING_AZALEA), "the wandering trader's pool should have flowering azalea");
+		Predicate<MerchantOffer> ours = offer -> offer.getResult().is(Items.TUFF) || offer.getResult().is(Items.MUD_BRICKS)
+				|| offer.getResult().is(Items.CALCITE) || offer.getResult().is(Items.PACKED_MUD);
+		for (int tier = 1; tier <= 2; tier++) {
+			Villager mason = EntityType.VILLAGER.create(level);
+			mason.setVillagerData(mason.getVillagerData().setType(VillagerType.PLAINS).setProfession(VillagerProfession.MASON).setLevel(tier));
+			MerchantOffers offers = mason.getOffers();
+			helper.assertValueEqual(offers.size(), 2 + Trades.EXTRA_SLOTS, "offers from a new level-" + tier + " mason");
+			helper.assertTrue(offers.stream().anyMatch(ours), "a level-" + tier + " mason should offer builder stone (" + describe(offers) + ")");
+		}
+		// Vanilla's test server switches every experiment on, and with the trade rebalance a wandering
+		// trader picks its offers another way (the extra slot is for the usual way). The Fabric test,
+		// in an ordinary world, counts them.
+		if (!level.enabledFeatures().contains(FeatureFlags.TRADE_REBALANCE)) {
+			WanderingTrader trader = EntityType.WANDERING_TRADER.create(level);
+			helper.assertValueEqual(trader.getOffers().size(), 5 + Trades.EXTRA_SLOTS + 1, "offers from a new wandering trader");
+		}
+		helper.succeed();
+	}
+
+	/** Whether one of the offers in this pool gives the item. */
+	private static boolean pool(VillagerTrades.ItemListing[] listings, ServerLevel level, Item item) {
+		WanderingTrader trader = EntityType.WANDERING_TRADER.create(level);
+		for (VillagerTrades.ItemListing listing : listings) {
+			MerchantOffer offer = listing.getOffer(trader, level.getRandom());
+			if (offer != null && offer.getResult().is(item)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static String describe(MerchantOffers offers) {
+		return offers.stream().map(o -> o.getResult().getCount() + " " + o.getResult().getItem()).toList().toString();
 	}
 
 	/**
@@ -96,7 +147,7 @@ final class RuleChecks {
 			for (Path file : files.filter(p -> p.toString().endsWith(".json")).toList()) {
 				JsonObject json = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
 				String name = recipes.relativize(file).toString().replace('\\', '/').replace(".json", "");
-				boolean present = manager.byKey(ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath("cozy_core", name))).isPresent();
+				boolean present = manager.byKey(ResourceLocation.fromNamespaceAndPath("cozy_core", name)).isPresent();
 				boolean wanted = conditionsMet(json);
 				if (wanted) {
 					expected++;
@@ -121,7 +172,7 @@ final class RuleChecks {
 		helper.succeed();
 	}
 
-	/** NeoForge load conditions: the pack only uses {@code neoforge:mod_loaded}. */
+	/** NeoForge load conditions: the pack only uses {@code neoforge:mod_loaded} and {@code neoforge:item_exists}. */
 	private static boolean conditionsMet(JsonObject json) {
 		if (!json.has("neoforge:conditions")) {
 			return true;
@@ -129,10 +180,12 @@ final class RuleChecks {
 		for (JsonElement element : json.getAsJsonArray("neoforge:conditions")) {
 			JsonObject condition = element.getAsJsonObject();
 			String type = condition.get("type").getAsString();
-			if (!"neoforge:mod_loaded".equals(type)) {
-				throw new IllegalStateException("the test doesn't know the load condition " + type);
-			}
-			if (!ModList.get().isLoaded(condition.get("modid").getAsString())) {
+			boolean met = switch (type) {
+				case "neoforge:mod_loaded" -> ModList.get().isLoaded(condition.get("modid").getAsString());
+				case "neoforge:item_exists" -> BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(condition.get("item").getAsString()));
+				default -> throw new IllegalStateException("the test doesn't know the load condition " + type);
+			};
+			if (!met) {
 				return false;
 			}
 		}
@@ -160,13 +213,13 @@ final class RuleChecks {
 			}
 		}
 		int before = placed;
-		Zombie zombie = EntityTypes.ZOMBIE.create(level, EntitySpawnReason.COMMAND);
-		zombie.snapTo(at.getX() + 1.5, at.getY(), at.getZ() + 1.5, 0, 0);
+		Zombie zombie = EntityType.ZOMBIE.create(level);
+		zombie.moveTo(at.getX() + 1.5, at.getY(), at.getZ() + 1.5, 0, 0);
 		zombie.setNoAi(true);
 		level.addFreshEntity(zombie);
 		helper.runAfterDelay(2, () -> {
-			Creeper creeper = EntityTypes.CREEPER.create(level, EntitySpawnReason.COMMAND);
-			creeper.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0, 0);
+			Creeper creeper = EntityType.CREEPER.create(level);
+			creeper.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0, 0);
 			level.explode(creeper, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 3.0F, Level.ExplosionInteraction.MOB);
 			helper.runAfterDelay(5, () -> {
 				int gone = before - count(level, at, -2, -1, -2, 2, 3, 2, Blocks.STONE);
@@ -198,9 +251,9 @@ final class RuleChecks {
 	/** How many times out of {@code tries} the take-block goal of a fresh enderman says it can start (vanilla: about 1 in 20). */
 	private static int wantsBlocks(ServerLevel level, int tries) {
 		try {
-			Enderman enderman = EntityTypes.ENDERMAN.create(level, EntitySpawnReason.COMMAND);
-			Class<?> type = Class.forName("net.minecraft.world.entity.monster.Enderman$EndermanTakeBlockGoal");
-			Constructor<?> constructor = type.getDeclaredConstructor(Enderman.class);
+			EnderMan enderman = EntityType.ENDERMAN.create(level);
+			Class<?> type = Class.forName("net.minecraft.world.entity.monster.EnderMan$EndermanTakeBlockGoal");
+			Constructor<?> constructor = type.getDeclaredConstructor(EnderMan.class);
 			constructor.setAccessible(true);
 			Goal goal = (Goal) constructor.newInstance(enderman);
 			int wanted = 0;
@@ -218,15 +271,13 @@ final class RuleChecks {
 	/**
 	 * A 7x7 oak-plank floor with fire on every other plank (16 fires), left 1500 ticks at 200 ticks
 	 * a second. Kind: no plank burns and the fires go out, the way fire on stone does. Vanilla:
-	 * planks burn. Fire only ticks near a player in 26.3, so the environment sets
-	 * fire_spread_radius_around_player to -1 (everywhere): the test server has no players.
+	 * planks burn. The test server starts with doFireTick off, so both batches switch it on.
 	 */
 	static void fire(GameTestHelper helper, boolean kind) {
 		ServerLevel level = helper.getLevel();
 		MinecraftServer server = level.getServer();
 		helper.assertValueEqual(Rules.is(level, Rules.FIRE_BURNS_BLOCKS), !kind, "the fire_burns_blocks rule for this test");
-		helper.assertValueEqual(level.getGameRules().get(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER), -1,
-				"fire_spread_radius_around_player for this test (fire must tick with no player near)");
+		helper.assertTrue(level.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK), "doFireTick should be on for this test (fire must tick)");
 		BlockPos at = helper.absolutePos(new BlockPos(4, 1, 4));
 		for (int x = -3; x <= 3; x++) {
 			for (int z = -3; z <= 3; z++) {
@@ -287,13 +338,14 @@ final class RuleChecks {
 		// Vanilla only spawns monsters more than 24 blocks from the nearest player and from the
 		// world's spawn point, so for this test there's a player high above the room and the
 		// spawn point is moved away.
-		LevelData.RespawnData spawnPoint = level.getRespawnData();
-		level.setRespawnData(LevelData.RespawnData.of(level.dimension(), room.offset(1000, 0, 0), 0, 0));
+		BlockPos spawnPoint = level.getSharedSpawnPos();
+		float spawnAngle = level.getSharedSpawnAngle();
+		level.setDefaultSpawnPos(room.offset(1000, 0, 0), 0);
 		ServerPlayer watcher = helper.makeMockServerPlayerInLevel();
-		watcher.teleportTo(level, room.getX() + 0.5, room.getY() + 40, room.getZ() + 0.5, Set.of(), 0, 90, false);
+		watcher.teleportTo(level, room.getX() + 0.5, room.getY() + 40, room.getZ() + 0.5, Set.of(), 0, 90);
 		Runnable tidy = () -> {
 			level.getServer().getPlayerList().remove(watcher);
-			level.setRespawnData(spawnPoint);
+			level.setDefaultSpawnPos(spawnPoint, spawnAngle);
 		};
 		// Let the light engine catch up with the new roof: the room has to read as dark.
 		helper.runAfterDelay(40, () -> {
@@ -349,7 +401,7 @@ final class RuleChecks {
 		boolean loadedListed = true;
 		try {
 			player.setGameMode(GameType.SURVIVAL);
-			player.teleportTo(level, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, Set.of(), 0, 0, false);
+			player.teleportTo(level, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, Set.of(), 0, 0);
 			Inventory inventory = player.getInventory();
 			inventory.setItem(0, new ItemStack(Items.DIAMOND_PICKAXE));
 			inventory.setItem(20, new ItemStack(Items.COBBLESTONE, 10));
@@ -358,14 +410,12 @@ final class RuleChecks {
 			helper.assertTrue(dropped(level, at, Items.COBBLESTONE), "the cobblestone should drop where the player fell");
 			helper.assertValueEqual(dropped(level, at, Items.DIAMOND_PICKAXE), !kind, "whether the hotbar's pickaxe dropped");
 			// Saved and loaded, as when a player logs out while dead and comes back later.
-			TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
-			player.saveWithoutId(output);
-			CompoundTag saved = output.buildResult();
+			CompoundTag saved = player.saveWithoutId(new CompoundTag());
 			helper.assertValueEqual(saved.contains(KeepOnDeath.SAVE_KEY), kind, "whether the kept items are in the player's saved data");
 			// The loaded player takes on the dead one's identity, so it leaves the player list first.
 			level.getServer().getPlayerList().remove(loaded);
 			loadedListed = false;
-			loaded.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+			loaded.load(saved);
 			respawned.restoreFrom(loaded, false);
 			Inventory after = respawned.getInventory();
 			helper.assertValueEqual(after.getItem(0).is(Items.DIAMOND_PICKAXE), kind, "whether the pickaxe is back on the hotbar after respawning");
@@ -403,8 +453,7 @@ final class RuleChecks {
 		var player = level.getNearestPlayer(at.getX(), at.getY(), at.getZ(), -1, false);
 		return "light " + level.getMaxLocalRawBrightness(at) + ", sky " + level.getBrightness(LightLayer.SKY, at)
 				+ ", block " + level.getBrightness(LightLayer.BLOCK, at) + ", floor " + level.getBlockState(at.below())
-				+ ", difficulty " + level.getDifficulty() + ", spawn_monsters " + level.getGameRules().get(GameRules.SPAWN_MONSTERS)
-				+ ", spawn point " + level.getRespawnData().pos()
+				+ ", difficulty " + level.getDifficulty() + ", spawn point " + level.getSharedSpawnPos()
 				+ ", nearest player " + (player == null ? "none" : Math.sqrt(player.distanceToSqr(Vec3.atCenterOf(at))) + " blocks");
 	}
 

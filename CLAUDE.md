@@ -1,6 +1,6 @@
 # Cozy Core
 
-A data pack for Minecraft 26.3 (namespace `cozy_core`) with small building helpers: wood in the
+A data pack for Minecraft 26.3, and on the `1.21.1` branch for 1.21.1 (namespace `cozy_core`) with small building helpers: wood in the
 stonecutter at cheap rates (1 plank -> 1 fence, door, sign...; 1 log -> 4), two wooden slabs ->
 one plank, re-dyeing terracotta, glass, panes and concrete powder, a few hard-to-get block
 recipes, and builder trades (wandering trader, mason). The mod version (Fabric and NeoForge jars
@@ -16,7 +16,9 @@ it first, and add this session's row before ending.
 ## Branches
 
 - **`public`** is the live branch and the one to push: its history starts fresh with one commit
-  (2026-10-13). Work here.
+  (2026-10-13). Work here. It is pushed to the remote's `main` (Minecraft 26.x).
+- **`1.21.1`** is Minecraft 1.21.1 (Fabric and NeoForge, Java 21), cut from `main` at 0.3.0 and
+  pushed as `1.21.1`; versions there are `<version>+1.21.1`. See "On the 1.21.1 branch" below.
 - **`main`** keeps the earlier local history, which has a personal detail in it. Never push `main`.
 
 ## Layout
@@ -132,6 +134,57 @@ it first, and add this session's row before ending.
   and with each group; and the NeoForge game test alone and with groups A, B and D. `node tools/build.js <vanilla server jar> <wood mods folder>` builds from
   given inputs.
 
+## On the 1.21.1 branch
+
+What differs from 26.3, and why (2026-10-17):
+
+- **Toolchain.** Loom `fabric-loom` with `loom.officialMojangMappings()` and `mod*` configurations
+  (1.21.1 is obfuscated), Java 21, MDG 2.0.148 with NeoForge 21.1.262. `common/` has a compile-only
+  access widener (`BlockEntityType$BlockEntitySupplier`): Fabric API and NeoForge's access
+  transformer open it at run time, so neither jar ships it. No refmap file appears in the Fabric
+  jar (Loom remaps the mixin annotations in place). Jars: `cozy-core-<version>-fabric.jar` and
+  `-neoforge.jar`, as on 26.3.
+- **Rules** are 1.21.1 `GameRules.Key`s, registered through `Platform`: Fabric API's
+  `GameRuleRegistry` under a `CustomGameRuleCategory` (the "Cozy Core" heading, bounded int rule);
+  NeoForge's plain `GameRules.register` under vanilla categories (MOBS, UPDATES, SPAWNING, PLAYER),
+  since NeoForge can't add a heading, and with no bounds (`Rules.get` clamps the radius to 0..128).
+  Ids stay `cozy_core:<name>`, so commands and docs match 26.3; lang keys are `gamerule.cozy_core:<name>`.
+  Phantoms are vanilla's `doInsomnia`: `GameRulesAccessor` replaces its type in vanilla's map of
+  rule types with one that starts false (`BooleanValueInvoker`, as vanilla keeps `create` private),
+  so new worlds start off and saved worlds load their own value.
+- **Explosions:** `ExplosionMixin` clears `Explosion.getToBlow()` at the head of `finalizeExplosion`
+  (server side only); the server sends players that emptied list. Lithium replaces `explode()`, not this.
+- **Keep-on-death** saves with `CompoundTag` and the codec through `RegistryOps` (no `ValueOutput` in 1.21.1).
+- **Trades are code.** 1.21.1 has no `villager_trade` data, so `Trades.java` lists them and
+  `Platform` adds them (Fabric `TradeOfferHelper`, NeoForge `VillagerTradesEvent`/`WandererTradesEvent`);
+  the extra slot is `WanderingTraderMixin` (5 -> 6 common offers) and `VillagerMixin` (mason levels
+  1 and 2: 2 -> 3). The generator writes no trade files on this branch. With the experimental trade
+  rebalance (`trade_rebalance` feature) the wandering trader uses another code path and gets no
+  extra slot; the NeoForge test server switches every experiment on, so it skips that count, and
+  the Fabric test (an ordinary world) checks it.
+- **Data:** the generator reads 1.21.1's long ingredient form (`{item}`/`{tag}`) into the short one
+  it works in and writes the long one back (`readRecipe`/`writeRecipe`, every result with a
+  `count`); recipe unlocks use `conditions.recipe`; `pack_format` 48. Missing on 1.21.1, so not
+  generated: pale oak, poplar and shelves. Compat recipes also carry an item-exists condition for
+  their result (`fabric:registry_contains`, `neoforge:item_exists`): Beautify's NeoForge 2.0.2 has
+  no cherry blinds or trellises, which its Fabric 3.0.0 has. A log source whose logs another source
+  for the same planks already takes in is dropped: Wilder Wild 4.2.1 puts its hollowed logs in the
+  log tags too (2 planks by their own recipe, 4 by the tag), which made clashing stonecutter recipes.
+- **Wood mods on 1.21.1** (Modrinth, 2026-10-16): Fabric has all of them; NeoForge has BOP,
+  Ecologics, Promenade, Beautify and Macaw's, but no Wilder Wild. NeoForge groups: A BOP; B
+  Ecologics and Promenade; C Beautify (its own trellis loot tables log errors, ignored in the load
+  test); D Macaw's.
+- **Tests.** The Fabric game test runs on its own harness (`fabric/src/gametest/.../harness`, the
+  same as Spawn Gazebo's and Pocket List's 1.21.1 branches: Fabric has no client game test API on
+  1.21.1), started by a `client` entrypoint when `cozy_core.gametest` is set; the tests are the
+  `cozy_core:gametest` entrypoint. `RulesTest` also counts the trades. The NeoForge game test uses
+  1.21.1's annotation tests (`@GameTestHolder`, `@GameTest`, batches `kind` and `vanilla` with
+  `@BeforeBatch`/`@AfterBatch` instead of 26.3's test environments); vanilla's test server switches
+  `doFireTick` off, so both batches switch it on (the 1.21.1 side of 26.3's fire-radius gotcha).
+  Templates are size-only `.nbt` files with palette key `Name` and data version 3955 (26.x's `id`
+  loads as air), plus an `empty` one. 1.21.1 logs "No data fixer registered for" a mod's mobs and
+  boats; `server-test.js` ignores it.
+
 ## Gotchas
 
 - **Plain vanilla can't load the compat recipes.** In 26.x recipes are a registry and a recipe
@@ -225,6 +278,6 @@ or test names. Check the diff for these before every push.
 - Keep the credit line: "made by Gabby with help from Claude, an AI assistant".
 - Gabby publishes on Modrinth herself. Don't upload anything there.
 
-**Minecraft.** Fabric on Minecraft 26.3 (Mojang names; Loom 1.18.4, Java 25). Vanilla names
+**Minecraft.** Fabric on Minecraft 26.3 (Mojang names; Loom 1.18.4, Java 25); the `1.21.1` branch is 1.21.1 (Java 21, see above). Vanilla names
 changed a lot in 26.x: check the merged jar rather than older docs (for example `iron_chain`,
 `pink_petals[flower_amount=N]`, timelines instead of `time query daytime`).

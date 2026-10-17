@@ -16,8 +16,6 @@
               "minecraft:jungle_slab",
               "minecraft:mangrove_slab",
               "minecraft:oak_slab",
-              "minecraft:pale_oak_slab",
-              "minecraft:poplar_slab",
               "minecraft:spruce_slab",
               "minecraft:warped_slab"
             ]
@@ -28,7 +26,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipes": "cozy_core:acacia_planks_from_slabs"
+        "recipe": "cozy_core:acacia_planks_from_slabs"
       }
     }
   },
@@ -49,8 +47,6 @@
       "cozy_core:jungle_planks_from_slabs",
       "cozy_core:mangrove_planks_from_slabs",
       "cozy_core:oak_planks_from_slabs",
-      "cozy_core:pale_oak_planks_from_slabs",
-      "cozy_core:poplar_planks_from_slabs",
       "cozy_core:spruce_planks_from_slabs",
       "cozy_core:warped_planks_from_slabs"
     ]

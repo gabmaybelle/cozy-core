@@ -5,16 +5,28 @@
       "values": [
         "promenade"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "promenade:maple_planks"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "promenade"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "promenade:maple_planks"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#promenade:maple_logs",
+  "ingredient": {
+    "tag": "promenade:maple_logs"
+  },
   "result": {
     "count": 4,
     "id": "promenade:maple_planks"

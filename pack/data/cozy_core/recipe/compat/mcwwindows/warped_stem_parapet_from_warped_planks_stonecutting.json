@@ -5,17 +5,30 @@
       "values": [
         "mcwwindows"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwwindows:warped_stem_parapet"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwwindows"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwwindows:warped_stem_parapet"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:warped_planks",
+  "ingredient": {
+    "item": "minecraft:warped_planks"
+  },
   "result": {
+    "count": 1,
     "id": "mcwwindows:warped_stem_parapet"
   }
 }

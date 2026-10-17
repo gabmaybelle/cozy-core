@@ -5,16 +5,28 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:willow_slab"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:willow_slab"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "biomesoplenty:willow_planks",
+  "ingredient": {
+    "item": "biomesoplenty:willow_planks"
+  },
   "result": {
     "count": 2,
     "id": "biomesoplenty:willow_slab"

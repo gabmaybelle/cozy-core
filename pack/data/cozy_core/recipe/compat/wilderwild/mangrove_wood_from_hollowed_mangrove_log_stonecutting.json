@@ -5,17 +5,30 @@
       "values": [
         "wilderwild"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "minecraft:mangrove_wood"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "wilderwild"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "minecraft:mangrove_wood"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "wilderwild:hollowed_mangrove_log",
+  "ingredient": {
+    "item": "wilderwild:hollowed_mangrove_log"
+  },
   "result": {
+    "count": 1,
     "id": "minecraft:mangrove_wood"
   }
 }

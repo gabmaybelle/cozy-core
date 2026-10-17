@@ -6,7 +6,7 @@
 # Windows, Furniture, Doors and Trapdoors. Biolith, bundled in Wilder Wild and
 # Promenade, crashes with TerraBlender, so A and B never share a game. Prints one file name per line.
 case $1 in
-	A) ls "$2" | grep -E '^(BiomesOPlenty|GlitchCore|TerraBlender|Ecologics)' ;;
+	A) ls "$2" | grep -E '^(BiomesOPlenty|GlitchCore|TerraBlender|[Ee]cologics)' ;;
 	B) ls "$2" | grep -E '^(WilderWild|FrozenLib|promenade)' ;;
 	C) ls "$2" | grep -E '^(beautify|cloth-config)' ;;
 	D) ls "$2" | grep -E '^mcw-' ;;

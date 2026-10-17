@@ -34,7 +34,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipes": "cozy_core:compat/wilderwild/baobab_planks_from_slabs"
+        "recipe": "cozy_core:compat/wilderwild/baobab_planks_from_slabs"
       }
     }
   },

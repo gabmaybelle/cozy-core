@@ -5,16 +5,28 @@
       "values": [
         "mcwwindows"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwwindows:dark_oak_louvered_shutter"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwwindows"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwwindows:dark_oak_louvered_shutter"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:dark_oak_planks",
+  "ingredient": {
+    "item": "minecraft:dark_oak_planks"
+  },
   "result": {
     "count": 2,
     "id": "mcwwindows:dark_oak_louvered_shutter"

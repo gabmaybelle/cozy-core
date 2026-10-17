@@ -5,16 +5,28 @@
       "values": [
         "mcwstairs"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwstairs:oak_terrace_stairs"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwstairs"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwstairs:oak_terrace_stairs"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:oak_logs",
+  "ingredient": {
+    "tag": "minecraft:oak_logs"
+  },
   "result": {
     "count": 4,
     "id": "mcwstairs:oak_terrace_stairs"

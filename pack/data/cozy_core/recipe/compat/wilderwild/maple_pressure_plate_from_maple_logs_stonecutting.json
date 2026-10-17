@@ -5,16 +5,28 @@
       "values": [
         "wilderwild"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "wilderwild:maple_pressure_plate"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "wilderwild"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "wilderwild:maple_pressure_plate"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#wilderwild:maple_logs",
+  "ingredient": {
+    "tag": "wilderwild:maple_logs"
+  },
   "result": {
     "count": 4,
     "id": "wilderwild:maple_pressure_plate"

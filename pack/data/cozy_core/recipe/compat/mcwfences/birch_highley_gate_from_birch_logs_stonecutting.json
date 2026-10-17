@@ -5,17 +5,30 @@
       "values": [
         "mcwfences"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwfences:birch_highley_gate"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwfences"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwfences:birch_highley_gate"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:birch_logs",
+  "ingredient": {
+    "tag": "minecraft:birch_logs"
+  },
   "result": {
+    "count": 1,
     "id": "mcwfences:birch_highley_gate"
   }
 }

@@ -3,12 +3,15 @@
   "category": "building",
   "group": "planks_from_slabs",
   "key": {
-    "#": "minecraft:bamboo_slab"
+    "#": {
+      "item": "minecraft:bamboo_slab"
+    }
   },
   "pattern": [
     "##"
   ],
   "result": {
+    "count": 1,
     "id": "minecraft:bamboo_planks"
   }
 }

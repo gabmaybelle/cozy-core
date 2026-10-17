@@ -5,17 +5,30 @@
       "values": [
         "mcwfences"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwfences:cherry_pyramid_gate"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwfences"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwfences:cherry_pyramid_gate"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:cherry_logs",
+  "ingredient": {
+    "tag": "minecraft:cherry_logs"
+  },
   "result": {
+    "count": 1,
     "id": "mcwfences:cherry_pyramid_gate"
   }
 }

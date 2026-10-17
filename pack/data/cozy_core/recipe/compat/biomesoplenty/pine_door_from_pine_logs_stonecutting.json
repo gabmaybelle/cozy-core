@@ -5,16 +5,28 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:pine_door"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:pine_door"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#biomesoplenty:pine_logs",
+  "ingredient": {
+    "tag": "biomesoplenty:pine_logs"
+  },
   "result": {
     "count": 4,
     "id": "biomesoplenty:pine_door"

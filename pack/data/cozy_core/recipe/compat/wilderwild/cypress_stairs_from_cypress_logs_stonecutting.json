@@ -5,16 +5,28 @@
       "values": [
         "wilderwild"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "wilderwild:cypress_stairs"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "wilderwild"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "wilderwild:cypress_stairs"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#wilderwild:cypress_logs",
+  "ingredient": {
+    "tag": "wilderwild:cypress_logs"
+  },
   "result": {
     "count": 4,
     "id": "wilderwild:cypress_stairs"

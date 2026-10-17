@@ -1,14 +1,14 @@
 {
   "block.cozy_core.hearth_lantern": "Hearth Lantern",
   "gamerule.category.cozy_core.cozy_core": "Cozy Core",
-  "gamerule.cozy_core.mob_explosions_break_blocks": "Creeper and ghast explosions break blocks",
-  "gamerule.cozy_core.mob_explosions_break_blocks.description": "Off: their explosions still hurt, but leave every block standing. TNT and the wither are unchanged.",
-  "gamerule.cozy_core.endermen_take_blocks": "Endermen pick up blocks",
-  "gamerule.cozy_core.endermen_take_blocks.description": "Off: endermen leave your blocks where they are.",
-  "gamerule.cozy_core.fire_burns_blocks": "Fire spreads and burns blocks",
-  "gamerule.cozy_core.fire_burns_blocks.description": "Off: fire still appears and goes out, but never catches a block alight or burns one away.",
-  "gamerule.cozy_core.keep_hotbar_on_death": "Keep your hotbar on death",
-  "gamerule.cozy_core.keep_hotbar_on_death.description": "On: your hotbar, armour and off-hand stay with you when you die; everything else drops where you fell. Vanilla's keepInventory keeps everything and wins when it's on.",
-  "gamerule.cozy_core.hearth_lantern_radius": "Hearth Lantern radius",
-  "gamerule.cozy_core.hearth_lantern_radius.description": "How many blocks around a Hearth Lantern, at any height, monsters don't spawn naturally. 0 switches the lanterns off."
+  "gamerule.cozy_core:mob_explosions_break_blocks": "Creeper and ghast explosions break blocks",
+  "gamerule.cozy_core:mob_explosions_break_blocks.description": "Off: their explosions still hurt, but leave every block standing. TNT and the wither are unchanged.",
+  "gamerule.cozy_core:endermen_take_blocks": "Endermen pick up blocks",
+  "gamerule.cozy_core:endermen_take_blocks.description": "Off: endermen leave your blocks where they are.",
+  "gamerule.cozy_core:fire_burns_blocks": "Fire spreads and burns blocks",
+  "gamerule.cozy_core:fire_burns_blocks.description": "Off: fire still appears and goes out, but never catches a block alight or burns one away.",
+  "gamerule.cozy_core:keep_hotbar_on_death": "Keep your hotbar on death",
+  "gamerule.cozy_core:keep_hotbar_on_death.description": "On: your hotbar, armour and off-hand stay with you when you die; everything else drops where you fell. Vanilla's keepInventory keeps everything and wins when it's on.",
+  "gamerule.cozy_core:hearth_lantern_radius": "Hearth Lantern radius",
+  "gamerule.cozy_core:hearth_lantern_radius.description": "How many blocks around a Hearth Lantern, at any height, monsters don't spawn naturally. 0 switches the lanterns off."
 }

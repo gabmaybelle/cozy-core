@@ -5,17 +5,30 @@
       "values": [
         "mcwfences"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwfences:crimson_highley_gate"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwfences"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwfences:crimson_highley_gate"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:crimson_stems",
+  "ingredient": {
+    "tag": "minecraft:crimson_stems"
+  },
   "result": {
+    "count": 1,
     "id": "mcwfences:crimson_highley_gate"
   }
 }

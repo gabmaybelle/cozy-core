@@ -5,16 +5,28 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:umbran_slab"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:umbran_slab"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "biomesoplenty:umbran_planks",
+  "ingredient": {
+    "item": "biomesoplenty:umbran_planks"
+  },
   "result": {
     "count": 2,
     "id": "biomesoplenty:umbran_slab"

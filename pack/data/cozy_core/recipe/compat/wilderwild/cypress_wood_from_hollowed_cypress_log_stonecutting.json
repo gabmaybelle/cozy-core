@@ -5,17 +5,30 @@
       "values": [
         "wilderwild"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "wilderwild:cypress_wood"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "wilderwild"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "wilderwild:cypress_wood"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "wilderwild:hollowed_cypress_log",
+  "ingredient": {
+    "item": "wilderwild:hollowed_cypress_log"
+  },
   "result": {
+    "count": 1,
     "id": "wilderwild:cypress_wood"
   }
 }

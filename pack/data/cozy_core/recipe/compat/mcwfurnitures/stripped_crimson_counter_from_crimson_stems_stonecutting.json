@@ -5,17 +5,30 @@
       "values": [
         "mcwfurnitures"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwfurnitures:stripped_crimson_counter"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwfurnitures"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwfurnitures:stripped_crimson_counter"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:crimson_stems",
+  "ingredient": {
+    "tag": "minecraft:crimson_stems"
+  },
   "result": {
+    "count": 1,
     "id": "mcwfurnitures:stripped_crimson_counter"
   }
 }

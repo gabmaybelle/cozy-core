@@ -5,17 +5,30 @@
       "values": [
         "mcwfurnitures"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwfurnitures:stripped_oak_counter"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwfurnitures"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwfurnitures:stripped_oak_counter"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:oak_logs",
+  "ingredient": {
+    "tag": "minecraft:oak_logs"
+  },
   "result": {
+    "count": 1,
     "id": "mcwfurnitures:stripped_oak_counter"
   }
 }

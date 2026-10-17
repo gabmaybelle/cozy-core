@@ -2,10 +2,15 @@
   "type": "minecraft:crafting_shapeless",
   "category": "building",
   "ingredients": [
-    "#minecraft:leaves",
-    "minecraft:bone_meal"
+    {
+      "tag": "minecraft:leaves"
+    },
+    {
+      "item": "minecraft:bone_meal"
+    }
   ],
   "result": {
+    "count": 1,
     "id": "minecraft:moss_block"
   }
 }

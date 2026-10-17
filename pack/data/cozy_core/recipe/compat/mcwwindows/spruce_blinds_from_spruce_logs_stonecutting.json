@@ -5,16 +5,28 @@
       "values": [
         "mcwwindows"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwwindows:spruce_blinds"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwwindows"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwwindows:spruce_blinds"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:spruce_logs",
+  "ingredient": {
+    "tag": "minecraft:spruce_logs"
+  },
   "result": {
     "count": 4,
     "id": "mcwwindows:spruce_blinds"

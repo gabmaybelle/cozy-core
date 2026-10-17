@@ -5,17 +5,30 @@
       "values": [
         "beautify"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "beautify:crimson_trellis"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "beautify"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "beautify:crimson_trellis"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:crimson_planks",
+  "ingredient": {
+    "item": "minecraft:crimson_planks"
+  },
   "result": {
+    "count": 1,
     "id": "beautify:crimson_trellis"
   }
 }

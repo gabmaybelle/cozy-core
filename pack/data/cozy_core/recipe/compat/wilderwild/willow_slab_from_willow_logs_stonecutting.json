@@ -5,16 +5,28 @@
       "values": [
         "wilderwild"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "wilderwild:willow_slab"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "wilderwild"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "wilderwild:willow_slab"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#wilderwild:willow_logs",
+  "ingredient": {
+    "tag": "wilderwild:willow_logs"
+  },
   "result": {
     "count": 8,
     "id": "wilderwild:willow_slab"

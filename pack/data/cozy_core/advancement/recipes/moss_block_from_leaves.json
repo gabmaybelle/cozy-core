@@ -14,7 +14,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipes": "cozy_core:moss_block_from_leaves"
+        "recipe": "cozy_core:moss_block_from_leaves"
       }
     }
   },

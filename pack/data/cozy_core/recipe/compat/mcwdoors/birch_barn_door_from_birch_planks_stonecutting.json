@@ -5,17 +5,30 @@
       "values": [
         "mcwdoors"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwdoors:birch_barn_door"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwdoors"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwdoors:birch_barn_door"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:birch_planks",
+  "ingredient": {
+    "item": "minecraft:birch_planks"
+  },
   "result": {
+    "count": 1,
     "id": "mcwdoors:birch_barn_door"
   }
 }

@@ -5,17 +5,30 @@
       "values": [
         "mcwfurnitures"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwfurnitures:stripped_jungle_counter"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwfurnitures"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwfurnitures:stripped_jungle_counter"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:jungle_logs",
+  "ingredient": {
+    "tag": "minecraft:jungle_logs"
+  },
   "result": {
+    "count": 1,
     "id": "mcwfurnitures:stripped_jungle_counter"
   }
 }

@@ -5,17 +5,30 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:umbran_wood"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:umbran_wood"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "biomesoplenty:umbran_log",
+  "ingredient": {
+    "item": "biomesoplenty:umbran_log"
+  },
   "result": {
+    "count": 1,
     "id": "biomesoplenty:umbran_wood"
   }
 }

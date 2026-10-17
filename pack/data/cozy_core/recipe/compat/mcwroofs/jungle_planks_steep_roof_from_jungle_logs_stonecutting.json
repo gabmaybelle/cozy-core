@@ -5,16 +5,28 @@
       "values": [
         "mcwroofs"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwroofs:jungle_planks_steep_roof"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwroofs"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwroofs:jungle_planks_steep_roof"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:jungle_logs",
+  "ingredient": {
+    "tag": "minecraft:jungle_logs"
+  },
   "result": {
     "count": 4,
     "id": "mcwroofs:jungle_planks_steep_roof"

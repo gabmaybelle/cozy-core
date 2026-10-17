@@ -5,7 +5,10 @@
 	"name": "Cozy Core game tests",
 	"environment": "*",
 	"entrypoints": {
-		"fabric-client-gametest": [
+		"client": [
+			"com.gabbymaybelle.cozycore.gametest.harness.GameTestRunner"
+		],
+		"cozy_core:gametest": [
 			"com.gabbymaybelle.cozycore.gametest.RulesTest",
 			"com.gabbymaybelle.cozycore.gametest.StonecutterTest"
 		]

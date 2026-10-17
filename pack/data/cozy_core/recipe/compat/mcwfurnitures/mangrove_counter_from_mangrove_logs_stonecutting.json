@@ -5,17 +5,30 @@
       "values": [
         "mcwfurnitures"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwfurnitures:mangrove_counter"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwfurnitures"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwfurnitures:mangrove_counter"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:mangrove_logs",
+  "ingredient": {
+    "tag": "minecraft:mangrove_logs"
+  },
   "result": {
+    "count": 1,
     "id": "mcwfurnitures:mangrove_counter"
   }
 }

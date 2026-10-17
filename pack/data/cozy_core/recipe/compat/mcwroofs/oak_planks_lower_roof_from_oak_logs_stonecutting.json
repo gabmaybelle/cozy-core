@@ -5,16 +5,28 @@
       "values": [
         "mcwroofs"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwroofs:oak_planks_lower_roof"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwroofs"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwroofs:oak_planks_lower_roof"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:oak_logs",
+  "ingredient": {
+    "tag": "minecraft:oak_logs"
+  },
   "result": {
     "count": 4,
     "id": "mcwroofs:oak_planks_lower_roof"

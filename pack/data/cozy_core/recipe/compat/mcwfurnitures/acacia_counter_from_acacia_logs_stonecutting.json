@@ -5,17 +5,30 @@
       "values": [
         "mcwfurnitures"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwfurnitures:acacia_counter"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwfurnitures"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwfurnitures:acacia_counter"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:acacia_logs",
+  "ingredient": {
+    "tag": "minecraft:acacia_logs"
+  },
   "result": {
+    "count": 1,
     "id": "mcwfurnitures:acacia_counter"
   }
 }

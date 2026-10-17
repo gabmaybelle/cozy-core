@@ -5,17 +5,30 @@
       "values": [
         "wilderwild"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "wilderwild:maple_fence"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "wilderwild"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "wilderwild:maple_fence"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "wilderwild:maple_planks",
+  "ingredient": {
+    "item": "wilderwild:maple_planks"
+  },
   "result": {
+    "count": 1,
     "id": "wilderwild:maple_fence"
   }
 }

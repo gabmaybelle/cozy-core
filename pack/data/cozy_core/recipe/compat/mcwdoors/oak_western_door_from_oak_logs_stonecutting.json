@@ -5,16 +5,28 @@
       "values": [
         "mcwdoors"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwdoors:oak_western_door"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwdoors"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwdoors:oak_western_door"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:oak_logs",
+  "ingredient": {
+    "tag": "minecraft:oak_logs"
+  },
   "result": {
     "count": 4,
     "id": "mcwdoors:oak_western_door"

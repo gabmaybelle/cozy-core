@@ -5,17 +5,30 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:mahogany_fence"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:mahogany_fence"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "biomesoplenty:mahogany_planks",
+  "ingredient": {
+    "item": "biomesoplenty:mahogany_planks"
+  },
   "result": {
+    "count": 1,
     "id": "biomesoplenty:mahogany_fence"
   }
 }

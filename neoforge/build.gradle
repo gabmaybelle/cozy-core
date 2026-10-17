@@ -52,7 +52,7 @@ neoForge {
 		gameTestServer {
 			type = 'gameTestServer'
 			loadedMods = [mods.cozy_core, mods.cozy_core_gametest]
-			programArguments.addAll('--tests', 'cozy_core_gametest:*')
+			systemProperty 'neoforge.enabledGameTestNamespaces', 'cozy_core_gametest'
 			systemProperty 'cozy.expect', rootProject.file(project.hasProperty('expect') ? project.expect : 'pack').absolutePath
 			systemProperty 'cozy.expectMods', project.findProperty('expectMods') ?: ''
 		}

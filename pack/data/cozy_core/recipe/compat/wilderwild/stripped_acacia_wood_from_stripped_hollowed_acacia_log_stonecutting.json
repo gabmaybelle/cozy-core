@@ -5,17 +5,30 @@
       "values": [
         "wilderwild"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "minecraft:stripped_acacia_wood"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "wilderwild"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "minecraft:stripped_acacia_wood"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "wilderwild:stripped_hollowed_acacia_log",
+  "ingredient": {
+    "item": "wilderwild:stripped_hollowed_acacia_log"
+  },
   "result": {
+    "count": 1,
     "id": "minecraft:stripped_acacia_wood"
   }
 }

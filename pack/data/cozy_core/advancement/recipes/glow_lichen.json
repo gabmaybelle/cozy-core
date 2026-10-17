@@ -14,7 +14,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipes": "cozy_core:glow_lichen"
+        "recipe": "cozy_core:glow_lichen"
       }
     }
   },

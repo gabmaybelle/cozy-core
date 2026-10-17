@@ -2,8 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "#": "minecraft:lantern",
-    "X": "minecraft:amethyst_shard"
+    "#": {
+      "item": "minecraft:lantern"
+    },
+    "X": {
+      "item": "minecraft:amethyst_shard"
+    }
   },
   "pattern": [
     " X ",
@@ -11,6 +15,7 @@
     " X "
   ],
   "result": {
+    "count": 1,
     "id": "cozy_core:hearth_lantern"
   }
 }

@@ -5,16 +5,28 @@
       "values": [
         "ecologics"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "ecologics:flowering_azalea_slab"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "ecologics"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "ecologics:flowering_azalea_slab"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "ecologics:flowering_azalea_planks",
+  "ingredient": {
+    "item": "ecologics:flowering_azalea_planks"
+  },
   "result": {
     "count": 2,
     "id": "ecologics:flowering_azalea_slab"

@@ -5,17 +5,30 @@
       "values": [
         "mcwfences"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwfences:bamboo_picket_fence"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwfences"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwfences:bamboo_picket_fence"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:bamboo_planks",
+  "ingredient": {
+    "item": "minecraft:bamboo_planks"
+  },
   "result": {
+    "count": 1,
     "id": "mcwfences:bamboo_picket_fence"
   }
 }

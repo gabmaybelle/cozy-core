@@ -5,17 +5,30 @@
       "values": [
         "mcwtrpdoors"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwtrpdoors:crimson_ranch_trapdoor"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwtrpdoors"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwtrpdoors:crimson_ranch_trapdoor"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:crimson_stems",
+  "ingredient": {
+    "tag": "minecraft:crimson_stems"
+  },
   "result": {
+    "count": 1,
     "id": "mcwtrpdoors:crimson_ranch_trapdoor"
   }
 }

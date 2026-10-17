@@ -5,17 +5,30 @@
       "values": [
         "biomesoplenty"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "biomesoplenty:stripped_hellbark_wood"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "biomesoplenty"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "biomesoplenty:stripped_hellbark_wood"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "biomesoplenty:stripped_hellbark_log",
+  "ingredient": {
+    "item": "biomesoplenty:stripped_hellbark_log"
+  },
   "result": {
+    "count": 1,
     "id": "biomesoplenty:stripped_hellbark_wood"
   }
 }

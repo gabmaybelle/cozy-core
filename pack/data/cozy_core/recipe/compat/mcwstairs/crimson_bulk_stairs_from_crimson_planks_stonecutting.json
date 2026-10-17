@@ -5,17 +5,30 @@
       "values": [
         "mcwstairs"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwstairs:crimson_bulk_stairs"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwstairs"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwstairs:crimson_bulk_stairs"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "minecraft:crimson_planks",
+  "ingredient": {
+    "item": "minecraft:crimson_planks"
+  },
   "result": {
+    "count": 1,
     "id": "mcwstairs:crimson_bulk_stairs"
   }
 }

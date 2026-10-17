@@ -5,16 +5,28 @@
       "values": [
         "mcwstairs"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwstairs:cherry_platform"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwstairs"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwstairs:cherry_platform"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:cherry_logs",
+  "ingredient": {
+    "tag": "minecraft:cherry_logs"
+  },
   "result": {
     "count": 4,
     "id": "mcwstairs:cherry_platform"

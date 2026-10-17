@@ -5,16 +5,28 @@
       "values": [
         "mcwstairs"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mcwstairs:spruce_bulk_stairs"
+      ]
     }
   ],
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "mcwstairs"
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "mcwstairs:spruce_bulk_stairs"
     }
   ],
   "type": "minecraft:stonecutting",
-  "ingredient": "#minecraft:spruce_logs",
+  "ingredient": {
+    "tag": "minecraft:spruce_logs"
+  },
   "result": {
     "count": 4,
     "id": "mcwstairs:spruce_bulk_stairs"

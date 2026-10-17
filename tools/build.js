@@ -2,15 +2,13 @@
 //   dist/cozy-core-<version>.zip   the data pack: the recipes (vanilla wood only)
 // The mods, dist/cozy-core-<version>-fabric.jar and -neoforge.jar, are built by Gradle from the
 // same pack/ plus the code in common/ (`./gradlew build` after this, then `node tools/build.js
-// --jars` or CI copies them here). Three things are mod-only:
+// --jars` or CI copies them here). Two things are mod-only:
 // - compat/ recipes: plain vanilla can't skip them (it doesn't know load conditions) and refuses
 //   to load the world.
-// - trades (villager_trade, trade_set and their tags): a world data pack with these makes vanilla
-//   show "Worlds using Experimental Settings are not supported" every time the world opens (no
-//   Realms either), and they need a restart. A mod's data doesn't get that warning (both tested
-//   2026-10-13). Without them the zip reloads live with /reload.
-// - the rules and the Hearth Lantern: code, so they live in common/ and never touch pack/.
-//   node tools/build.js [vanilla 26.3 server jar] [folder of wood-mod jars]
+// - the trades, the rules and the Hearth Lantern: code in 1.21.1 (villager trades aren't data
+//   until later versions), so they live in common/ and never touch pack/. The zip reloads live
+//   with /reload.
+//   node tools/build.js [vanilla 1.21.1 server jar] [folder of wood-mod jars]
 //   node tools/build.js --jars      only copy Gradle's two jars into dist/
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
 const zipDir = require('./zip');
