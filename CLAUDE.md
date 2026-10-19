@@ -69,6 +69,18 @@ it first, and add this session's row before ending.
   colours, never weathering; Gabby's pick 2026-10-19), all one block entity type. Since 0.5.0
   each has a loot table and the `minecraft:mineable/pickaxe` tag (0.4.0's lantern had neither and
   dropped nothing).
+- **Home comforts (0.6.0, `HomeComforts.java`):** at home, dropped items last
+  `hearth_item_minutes` (`ItemEntityMixin`: vanilla saves an item's age as a short, so an item about
+  to go is set back a minute at a time and the extra is kept, and saved, beside it); animals and
+  villagers aren't hurt by creeper/ghast blasts, fire or lightning (`LivingEntityMixin`, following
+  `hearths_protect_builds`) and lightning doesn't convert them (`ThunderHitMixin`, one mixin on
+  `Entity`, `Villager`, `Pig`, `MushroomCow` and `Turtle`, which each have their own `thunderHit`);
+  players and tamed pets take no fall damage (`FallDamageMixin` on `LivingEntity`, plus
+  `AbstractHorse` and `Llama`, which work out their own); `cozy_core:keeps_at_home` blocks (glass,
+  panes, ice, bookshelves) drop themselves (`BlockBehaviourMixin` on `getDrops`; `IceBlockMixin`
+  skips the melt). Candles re-dye in the generator's `REDYE` list. Gabby's calls, 2026-10-19:
+  every passive animal and pet plus villagers; players and their tamed pets; every glass block and
+  pane, ice, packed and blue ice, and bookshelves.
 - `art/icon.ase`: Gabby's own 32x32 sprite; `art/icon.png` is it at 512x512 (nearest-neighbour).
   The build puts it in the zip as `pack.png` and Gradle puts it in the jars as `icon.png` (Fabric
   `icon`, NeoForge `logoFile`). Never replace it with generated art; re-export from the .ase.
@@ -151,7 +163,10 @@ it first, and add this session's row before ending.
   environment per check that places lanterns (`HomeChecks.java`: blasts and fire at home and on the
   edge, endermen, every style's drop, name and sync, phantoms (vanilla's own `PhantomSpawner` run
   100 times at midnight over a sleepless mock player, with and without a lantern), the spawning
-  room). **Vanilla runs each
+  room), and 0.6.0's comforts (`ComfortsChecks.java`: items, animals, lightning, falls, glass).
+  The item and lightning checks keep every spot inside the test's own (48-block) area: items only
+  age, and a mob only turns into another, where entities tick, which the test server only promises
+  near a test (a forced chunk wasn't enough). **Vanilla runs each
   environment as its own batch, one after another, in the same part of the world**, so a lantern
   or stand-in player left by one check would guard or quiet a later batch's test: every check
   removes them even when it fails (`RuleChecks.orTidy`; learned 2026-10-19, when a failed proof

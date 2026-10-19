@@ -48,6 +48,7 @@ Each rule is an ordinary game rule: it shows in the Game Rules screen when you m
 | `cozy_core:fire_burns_blocks` | true (false: fire burns nothing anywhere) |
 | `cozy_core:keep_hotbar_on_death` | true |
 | `cozy_core:hearth_lantern_radius` | 32 (how far home reaches; 0 switches lanterns off) |
+| `cozy_core:hearth_item_minutes` | 60 (how long dropped items last at home; 5 is the usual five minutes) |
 | `spawn_phantoms` (vanilla's own) | true (phantoms don't come for you near a Hearth Lantern) |
 
 Worlds you already have keep the settings they were made with.

@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "dyed_candle",
+  "key": {
+    "#": [
+      "minecraft:white_candle",
+      "minecraft:orange_candle",
+      "minecraft:magenta_candle",
+      "minecraft:light_blue_candle",
+      "minecraft:yellow_candle",
+      "minecraft:lime_candle",
+      "minecraft:pink_candle",
+      "minecraft:gray_candle",
+      "minecraft:light_gray_candle",
+      "minecraft:cyan_candle",
+      "minecraft:purple_candle",
+      "minecraft:blue_candle",
+      "minecraft:brown_candle",
+      "minecraft:green_candle",
+      "minecraft:red_candle"
+    ],
+    "X": "minecraft:black_dye"
+  },
+  "pattern": [
+    "###",
+    "#X#",
+    "###"
+  ],
+  "result": {
+    "count": 8,
+    "id": "minecraft:black_candle"
+  }
+}

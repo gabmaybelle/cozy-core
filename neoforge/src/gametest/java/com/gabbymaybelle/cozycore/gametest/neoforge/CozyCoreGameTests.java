@@ -60,6 +60,11 @@ public final class CozyCoreGameTests {
 		FUNCTIONS.put("endermen_leave_home", HomeChecks::endermen);
 		FUNCTIONS.put("lantern_styles", HomeChecks::styles);
 		FUNCTIONS.put("phantoms_leave_home_alone", HomeChecks::phantoms);
+		FUNCTIONS.put("items_last_at_home", ComfortsChecks::items);
+		FUNCTIONS.put("animals_safe_at_home", ComfortsChecks::animals);
+		FUNCTIONS.put("lightning_spares_home", ComfortsChecks::lightning);
+		FUNCTIONS.put("no_falls_at_home", ComfortsChecks::falls);
+		FUNCTIONS.put("glass_comes_back_at_home", ComfortsChecks::glass);
 		FUNCTIONS.put("lantern_keeps_the_night_quiet", helper -> RuleChecks.lanterns(helper, true));
 		FUNCTIONS.put("lantern_off_at_radius_zero", helper -> RuleChecks.lanterns(helper, false));
 		FUNCTIONS.put("hotbar_kept_on_death", helper -> RuleChecks.keepOnDeath(helper, true));
@@ -126,6 +131,17 @@ public final class CozyCoreGameTests {
 		}), EMPTY, 20);
 		test(event, "phantoms_leave_home_alone", environment(event, "home_phantoms", rules -> {
 		}), EMPTY, 100);
+		// 0.6.0's home comforts (ComfortsChecks), each alone in its batch too.
+		test(event, "items_last_at_home", environment(event, "home_items", rules -> {
+		}), id("lanterns"), 100);
+		test(event, "animals_safe_at_home", environment(event, "home_animals", rules -> {
+		}), EMPTY, 100);
+		test(event, "lightning_spares_home", environment(event, "home_lightning", rules -> {
+		}), id("lanterns"), 20);
+		test(event, "no_falls_at_home", environment(event, "home_falls", rules -> {
+		}), EMPTY, 20);
+		test(event, "glass_comes_back_at_home", environment(event, "home_glass", rules -> {
+		}), EMPTY, 20);
 		test(event, "lantern_keeps_the_night_quiet", environment(event, "home_spawning", rules -> {
 		}), id("lanterns"), 400);
 		test(event, "lantern_off_at_radius_zero", vanilla, id("lanterns"), 400);

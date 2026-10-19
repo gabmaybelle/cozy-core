@@ -3,13 +3,19 @@
 	"package": "com.gabbymaybelle.cozycore.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
+		"BlockBehaviourMixin",
 		"DeathLootMixin",
 		"EndermanTakeBlockGoalMixin",
+		"FallDamageMixin",
 		"FireBlockMixin",
+		"IceBlockMixin",
+		"ItemEntityMixin",
+		"LivingEntityMixin",
 		"NaturalSpawnerMixin",
 		"PhantomSpawnerMixin",
 		"ServerExplosionMixin",
-		"ServerPlayerMixin"
+		"ServerPlayerMixin",
+		"ThunderHitMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

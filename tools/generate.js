@@ -284,6 +284,8 @@ const REDYE = [ // family, item id pattern, the vanilla group its dyed recipes u
 	{ family: 'stained_glass', id: c => `minecraft:${c}_stained_glass`, group: 'stained_glass' },
 	{ family: 'stained_glass_pane', id: c => `minecraft:${c}_stained_glass_pane`, group: 'stained_glass_pane' },
 	{ family: 'concrete_powder', id: c => `minecraft:${c}_concrete_powder`, group: 'concrete_powder' },
+	// Gabby's pick for 0.6.0 (2026-10-19): vanilla only dyes a plain candle.
+	{ family: 'candle', id: c => `minecraft:${c}_candle`, group: 'dyed_candle' },
 ];
 
 function redye() {
@@ -418,7 +420,7 @@ const ADVANCEMENT_TEXT = {
 	the_kettles_on: ["The kettle's on", 'Craft a Hearth Lantern'],
 	safe_and_sound: ['Safe and sound', 'A creeper exploded at home, and nothing broke'],
 	plank_to_porch: ['Plank to porch', 'Cut wood in a stonecutter'],
-	a_fresh_coat: ['A fresh coat', 'Re-dye terracotta, stained glass, panes or concrete powder'],
+	a_fresh_coat: ['A fresh coat', 'Re-dye terracotta, stained glass, panes, concrete powder or candles'],
 	green_thumb: ['Green thumb', 'Craft moss from leaves, or glow lichen from vines'],
 	far_flung_flowers: ['Far-flung flowers', 'Buy an azalea or a fungus from a wandering trader'],
 	built_to_last: ['Built to last', 'Buy tuff or mud bricks from a mason'],

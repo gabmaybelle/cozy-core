@@ -38,6 +38,8 @@ public final class Rules {
 	public static final GameRule<Boolean> FIRE_BURNS_BLOCKS = bool("fire_burns_blocks", true);
 	/** How far a Hearth Lantern reaches (sideways, any height): no natural monster spawns, and builds kept safe. 0 turns the lanterns off. */
 	public static final GameRule<Integer> HEARTH_LANTERN_RADIUS = integer("hearth_lantern_radius", 32, 0, 128);
+	/** How many minutes a dropped item lasts at home (inside a Hearth Lantern's reach); 5 is vanilla's five minutes. */
+	public static final GameRule<Integer> HEARTH_ITEM_MINUTES = integer("hearth_item_minutes", 60, 5, 1440);
 	/** The hotbar, armour and off-hand stay with a player who dies; the rest drops. Vanilla's {@code keep_inventory} keeps everything and wins when it's on. */
 	public static final GameRule<Boolean> KEEP_HOTBAR_ON_DEATH = bool("keep_hotbar_on_death", true);
 
