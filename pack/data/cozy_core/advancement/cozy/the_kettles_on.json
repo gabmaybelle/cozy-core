@@ -5,7 +5,12 @@
       "trigger": "minecraft:recipe_crafted",
       "conditions": {
         "recipes": [
-          "cozy_core:hearth_lantern"
+          "cozy_core:copper_hearth_lantern",
+          "cozy_core:exposed_copper_hearth_lantern",
+          "cozy_core:hearth_lantern",
+          "cozy_core:oxidized_copper_hearth_lantern",
+          "cozy_core:soul_hearth_lantern",
+          "cozy_core:weathered_copper_hearth_lantern"
         ]
       }
     }

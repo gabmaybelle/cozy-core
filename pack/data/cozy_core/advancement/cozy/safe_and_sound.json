@@ -1,0 +1,26 @@
+{
+  "parent": "cozy_core:cozy/the_kettles_on",
+  "criteria": {
+    "safe_and_sound": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.cozy_core.cozy.safe_and_sound.description",
+      "fallback": "A creeper exploded at home, and nothing broke"
+    },
+    "icon": {
+      "id": "minecraft:creeper_head"
+    },
+    "title": {
+      "translate": "advancements.cozy_core.cozy.safe_and_sound.title",
+      "fallback": "Safe and sound"
+    }
+  },
+  "requirements": [
+    [
+      "safe_and_sound"
+    ]
+  ]
+}

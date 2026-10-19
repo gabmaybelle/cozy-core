@@ -4,11 +4,14 @@ A data pack for Minecraft 26.3 (namespace `cozy_core`) with small building helpe
 stonecutter at cheap rates (1 plank -> 1 fence, door, sign...; 1 log -> 4), two wooden slabs ->
 one plank, re-dyeing terracotta, glass, panes and concrete powder, a few hard-to-get block
 recipes, and builder trades (wandering trader, mason). The mod version (Fabric and NeoForge jars
-from one codebase) adds the little code a data pack can't: five `cozy_core:` game rules (mob
-explosions, endermen and fire spare blocks; the Hearth Lantern's reach; keep your hotbar on
-death), phantoms off by default for new worlds, and the Hearth Lantern block, near which no
-monster spawns naturally. Nothing runs on a timer: the rules are hooks, the lantern is a block
-entity that only reports where it is, and keep-on-death is two hooks around dying and respawning.
+from one codebase) adds the little code a data pack can't: the Hearth Lantern (since 0.5.0 its
+centrepiece, "Light a hearth. Home is safe."): inside its reach no monster spawns naturally and
+creeper/ghast blasts, fire and endermen leave blocks alone, while the wild stays vanilla; six
+`cozy_core:` game rules (hearths protect builds; world-wide switches for mob explosions, endermen
+and fire; the lantern's reach; keep your hotbar on death), and no phantoms over a player at home
+(until 0.4.0 phantoms were off by default in new worlds; Gabby's call 2026-10-19). Nothing runs on a timer on the server: the rules are hooks, the lantern is a block entity
+that only reports where it is, and keep-on-death is two hooks around dying and respawning. The
+client has one tick hook (`client/HearthClient`) for the "Home" sign and the edge flames.
 
 `PROGRESS.md` says what's done, what's broken and what's next, with a row per session: read
 it first, and add this session's row before ending.
@@ -37,30 +40,53 @@ it first, and add this session's row before ending.
 - **Rules are game rules** (`Rules.java`): registered into vanilla's game-rule registry under the
   `cozy_core` category, so they show in the create-world screen, work with `/gamerule`, save with
   the world and need no settings file or sync. Each rule's code is one mixin in `common/.../mixin/`:
-  `ServerExplosionMixin` (creeper/ghast blasts clear their block list; the `cozy_core:explosions_spare_blocks`
-  tag says which mobs), `EndermanTakeBlockGoalMixin`, `FireBlockMixin` (ignite and burn odds read
-  as 0 while the rule is off, so fire ages out like on stone), `NaturalSpawnerMixin` (the lantern),
+  `ServerExplosionMixin` (creeper/ghast blasts drop the blocks at home from their list, or clear it
+  with the world-wide switch off; the `cozy_core:explosions_spare_blocks` tag says which mobs; a
+  blast centred at home awards "Safe and sound", `SafeAndSound.java`), `EndermanTakeBlockGoalMixin`
+  (home reaches 3 blocks further for endermen, which take blocks up to 2 away), `FireBlockMixin`
+  (ignite and burn odds read as 0 for a fire at home or with the switch off, so it ages out like on
+  stone; plus spot checks so a fire outside can't burn or spread into home; NeoForge adds a
+  `Direction` to `checkBurnOut`, so that hook exists in both shapes with `require = 0`, and the
+  edge-fire game tests prove each applies), `NaturalSpawnerMixin` (the lantern),
   and for keep-on-death two: `DeathLootMixin` (the head of `dropAllDeathLoot` sets the hotbar,
   armour and off-hand aside, before graves mods see the inventory) and `ServerPlayerMixin` (the
   set-aside list lives on the dead player, is saved with them, and is handed to the new player at
   the end of `restoreFrom`); the logic is `KeepOnDeath.java`. Vanilla's `keep_inventory` wins when on.
-  `GameRuleAccessor` flips vanilla `spawn_phantoms`' default to false; saved worlds keep their value.
-- **The Hearth Lantern** (`HearthLantern*.java`): a `LanternBlock` with a block entity that does
-  nothing but tell `HearthLanterns` (an in-memory set per `ServerLevel`) when it's in a loaded chunk
-  (`clearRemoved`) and when it isn't (`setRemoved`). The chunk is the only record of where lanterns
-  are: no saved data (26.3's `SavedDataType` needs a non-null `DataFixTypes`, and none fits a mod).
-  `protects(level, pos)` is a horizontal-distance check against that set, any height.
+  `PhantomSpawnerMixin` passes over a player at home the way vanilla passes over spectators
+  (NeoForge keeps that `isSpectator()` call around its phantom event, so one redirect works on
+  both). 0.4.0's `GameRuleAccessor` (vanilla `spawn_phantoms` defaulting to false) is gone; worlds
+  made before keep their saved value.
+- **The Hearth Lantern** (`HearthLantern*.java`): a `LanternBlock` with a block entity that tells
+  `HearthLanterns` (an in-memory map per `Level`, on the server and on each client) when it's in a
+  loaded chunk (`clearRemoved`) and when it isn't (`setRemoved`). The chunk is the only record of
+  where lanterns are: no saved data (26.3's `SavedDataType` needs a non-null `DataFixTypes`, and
+  none fits a mod). `protects(level, pos)` (spawning) and `guards(level, pos)` (builds, while
+  `hearths_protect_builds` is on) are horizontal-distance checks against that map, any height.
+  The block entity keeps the anvil name (the home's name, `CustomName`, copied into the drop by
+  the loot table) and sends clients the name plus the server's reach (`cozy_core_reach`, only in
+  the update tag), since game rules don't reach clients; a reach change reaches clients when the
+  chunk is sent again. Six styles (`HearthLantern.STYLES`: classic, soul, and copper in its four
+  colours, never weathering; Gabby's pick 2026-10-19), all one block entity type. Since 0.5.0
+  each has a loot table and the `minecraft:mineable/pickaxe` tag (0.4.0's lantern had neither and
+  dropped nothing).
 - `art/icon.ase`: Gabby's own 32x32 sprite; `art/icon.png` is it at 512x512 (nearest-neighbour).
   The build puts it in the zip as `pack.png` and Gradle puts it in the jars as `icon.png` (Fabric
   `icon`, NeoForge `logoFile`). Never replace it with generated art; re-export from the .ase.
-  `tools/generate-art.js` draws the Hearth Lantern's block and item textures (original pixel art,
-  laid out like vanilla's lantern texture so the vanilla lantern models can be the parents).
+  `tools/generate-art.js` draws every Hearth Lantern style's block and item textures (original
+  pixel art, laid out like vanilla's lantern texture so the vanilla lantern models can be the
+  parents; the classic palette is unchanged since 0.2.0, the others take their frame and flame
+  colours from their vanilla lantern) and writes each style's models, recipe, recipe unlock, loot
+  table and the `cozy_core:hearth_lanterns` tags into `common/`. Its `STYLES` list must match
+  `HearthLantern.STYLES`.
 - **The advancements tab** (`cozy_core:cozy/...`, Gabby's picks and wording, 2026-10-17) is made by
-  `tools/generate.js` (section 6b): a root that opens on picking up planks and six steps. Each
+  `tools/generate.js` (section 6b): a root that opens on picking up planks and seven steps ("Safe
+  and sound", 0.5.0, sits under the Hearth Lantern's step and has an impossible criterion that
+  the explosion hook awards). Each
   title and description has its English as the `fallback`, so the data pack reads properly with no
   language file; the generator stops if `en_us.json` doesn't say the same. On 26.x `recipe_crafted`
-  takes a list of recipe ids, checked against the generated recipes. The Hearth Lantern step and
-  the two trade steps are mod-only (`MOD_ONLY` in `tools/build.js`), and the zip's root shows a
+  takes a list of recipe ids, checked against the generated recipes (and the six Hearth Lantern
+  recipes in `common/`). The two Hearth Lantern steps and the two trade steps are mod-only
+  (`MOD_ONLY` in `tools/build.js`), and the zip's root shows a
   vanilla lantern. The NeoForge game test's `advancements` check loads every one and every recipe
   it names.
 - `tools/pack-info.js`: the Minecraft version and descriptions the generator and the build share;
@@ -108,8 +134,10 @@ it first, and add this session's row before ending.
   installs the newest NeoForge server, adds the jar (and a wood-mod group from Modrinth) and runs
   `tools/server-test.js`, which must end with 0 problem lines. Needs jq and curl (CI has both).
 - The game test: `./gradlew :fabric:runClientGameTest -Pexpect=pack` (plus `-PwoodMods=<folder>`
-  per wood-mod group), about three minutes. `RulesTest` checks each rule both ways (kind, then
-  switched to vanilla with its game rule), the Hearth Lantern (placed, listed, guarding a dark
+  per wood-mod group), about three minutes. `RulesTest` checks each world-wide rule both ways
+  (switched off, then at its vanilla default), home (a blast with a lantern 10 blocks away breaks
+  nothing, and does with hearths switched off; fire on the edge of home burns only the wild half,
+  which proves the vanilla-shaped `checkBurnOut` hook applies), the Hearth Lantern (placed, listed, guarding a dark
   room 10 blocks away, not from 40, off at radius 0, hanging above the room), keep-on-death (a
   real death and respawn in survival, both ways) and takes the
   `hearth_lantern` screenshot; `StonecutterTest` clicks every stonecutter recipe in the real screen.
@@ -117,9 +145,17 @@ it first, and add this session's row before ending.
 - The NeoForge game test: `./gradlew :neoforge:runGameTestServer` (about a minute, no window).
   `neoforge/src/gametest` is a mod of its own (`cozy_core_gametest`, loaded only by that run) that
   registers one vanilla test instance per check through `RegisterGameTestsEvent`, with the test
-  functions in the `TEST_FUNCTION` registry (`RegisterEvent`). Two environments: `kind` (a new
-  world's defaults) and `vanilla` (the rules set to vanilla's behaviour), so each rule is checked
-  both ways; the lantern, explosion, fire and keep-on-death checks are the Fabric test's, rewritten on
+  functions in the `TEST_FUNCTION` registry (`RegisterEvent`). Environments: `kind` (a new world's
+  defaults: safe at home, vanilla in the wild), `everywhere` (the world-wide switches off, like
+  pre-0.5.0 worlds), `vanilla` (everything at vanilla's behaviour), `hearths_off`, and one `home_...`
+  environment per check that places lanterns (`HomeChecks.java`: blasts and fire at home and on the
+  edge, endermen, every style's drop, name and sync, phantoms (vanilla's own `PhantomSpawner` run
+  100 times at midnight over a sleepless mock player, with and without a lantern), the spawning
+  room). **Vanilla runs each
+  environment as its own batch, one after another, in the same part of the world**, so a lantern
+  or stand-in player left by one check would guard or quiet a later batch's test: every check
+  removes them even when it fails (`RuleChecks.orTidy`; learned 2026-10-19, when a failed proof
+  run's leftover lantern made three wild checks fail too). The explosion, fire and keep-on-death checks are the Fabric test's, rewritten on
   `GameTestHelper` (keep-on-death on mock server players: die, save, load, `restoreFrom`); `recipes` checks every recipe in `pack/` (`-Pexpect=<dir>`, default `pack/`)
   is in the game, or isn't when its mod isn't loaded. `-PwoodMods=<folder>` adds a group's jars to the
   run and `-PexpectMods=<ids>` (from `neoforge-group.sh <group> --ids`) makes `recipes` fail if one of
@@ -171,9 +207,10 @@ it first, and add this session's row before ending.
 One job per mod, decided 2026-10-15, so nothing is done twice and each repo tells the same story.
 This repo's copy leaves out one mod and one modpack on purpose (Gabby's call); don't add them back.
 
-- **Cozy Core** (cozy-core): the builder rules, each an ordinary game rule: builds stay built (mob
-  explosions, endermen, fire), no phantoms, keep your hotbar on death, the Hearth Lantern, cheap
-  wood in the stonecutter, re-dyeing and builder trades. Fabric and NeoForge jars, plus a plain
+- **Cozy Core** (cozy-core): the Hearth Lantern, which makes the ground around it home: no
+  monsters or phantoms spawn there, and creeper and ghast blasts, fire and endermen leave its
+  blocks alone (each an ordinary game rule, with world-wide switches too); keep your hotbar on
+  death, cheap wood in the stonecutter, re-dyeing and builder trades. Fabric and NeoForge jars, plus a plain
   data pack of the recipes.
 - **Spawn Gazebo** (spawn-gazebo): the gazebo at the world spawn and its starter chest.
 - **Nightfall Clock** (nightfall-clock): the clock above the hotbar and the dusk warning.

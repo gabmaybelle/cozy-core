@@ -48,7 +48,7 @@ execFileSync(process.execPath, [path.join(__dirname, 'generate.js'), ...process.
 fs.rmSync(STAGE, { recursive: true, force: true });
 fs.mkdirSync(DIST, { recursive: true });
 // The advancements tab's Hearth Lantern and trade steps are mod-only too (tools/generate.js, section 6b).
-const MOD_ONLY = /^data\/(cozy_core\/(recipe|advancement\/recipes)\/compat|cozy_core\/villager_trade|minecraft\/trade_set|minecraft\/tags\/villager_trade|cozy_core\/advancement\/cozy\/(the_kettles_on|far_flung_flowers|built_to_last)\.json$)(\/|$)/;
+const MOD_ONLY = /^data\/(cozy_core\/(recipe|advancement\/recipes)\/compat|cozy_core\/villager_trade|minecraft\/trade_set|minecraft\/tags\/villager_trade|cozy_core\/advancement\/cozy\/(the_kettles_on|safe_and_sound|far_flung_flowers|built_to_last)\.json$)(\/|$)/;
 const isModOnly = rel => MOD_ONLY.test(rel.split(path.sep).join('/'));
 
 // The data pack, with its own description (it has no trades).

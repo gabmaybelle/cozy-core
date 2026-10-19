@@ -1,5 +1,41 @@
 # Changelog
 
+## 0.5.0: Light a hearth. Home is safe.
+
+The Hearth Lantern now makes the ground around it home, and home keeps your build safe.
+
+- **Home is safe.** Within a Hearth Lantern's reach (32 blocks across the ground, at any height,
+  as before):
+  - no monster spawns naturally (as before), and no phantoms come for you while you're there;
+  - creeper and ghast explosions still hurt, but break no blocks. A blast at the edge leaves a
+    crater that stops where home begins;
+  - fire still burns and goes out, but doesn't spread or burn blocks away;
+  - endermen leave blocks alone.
+
+  It's the game rule `cozy_core:hearths_protect_builds` (on in new worlds).
+- **The wild stays wild.** In new worlds, creepers, fire and endermen behave as in vanilla away
+  from home. The three world-wide switches (`cozy_core:mob_explosions_break_blocks`,
+  `cozy_core:endermen_take_blocks`, `cozy_core:fire_burns_blocks`) are still there: turn one off
+  to spare blocks everywhere. **Worlds you already have keep their settings**, so a world made
+  with an earlier version still spares blocks everywhere.
+- **Phantoms leave you alone at home,** instead of being off everywhere. New worlds have vanilla's
+  phantoms out in the wild, but none spawn over you inside a Hearth Lantern's reach. Worlds you
+  already have keep their setting, and vanilla's `spawn_phantoms` game rule still turns them off
+  everywhere.
+- **"Home."** Walking into a Hearth Lantern's reach shows "Home" above your hotbar for a moment,
+  with a soft fireplace crackle.
+- **Name your home.** Rename a Hearth Lantern on an anvil ("Willow Cottage") and walking in
+  shows that name instead. Where two named homes overlap, the nearest one's name shows. The
+  lantern keeps its name when you pick it up.
+- **See where home ends.** While you hold a Hearth Lantern, small flames on the ground mark the
+  edge of the homes nearby.
+- **Six Hearth Lanterns.** Besides the classic one, there's a Soul Hearth Lantern and a Copper
+  Hearth Lantern in each of copper's four colours (they don't weather). Each is made like the
+  classic one, from its own lantern and four amethyst shards, and works the same.
+- **A new advancement, "Safe and sound":** a creeper explodes at home, and nothing breaks.
+- **Fixed:** a broken Hearth Lantern now drops itself (it used to drop nothing), and a pickaxe
+  mines it quickly, like a lantern.
+
 ## 0.4.0
 
 - **A Cozy Core advancements tab.** It opens when you pick up planks, with six steps: craft a

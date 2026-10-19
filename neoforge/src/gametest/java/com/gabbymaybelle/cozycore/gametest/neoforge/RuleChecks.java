@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -64,19 +65,26 @@ final class RuleChecks {
 	private RuleChecks() {
 	}
 
-	/** A new world starts kind: every rule at its kind value, phantoms off, the rules under their own heading. */
+	/**
+	 * A new world starts kind at home and vanilla in the wild: hearths keep builds safe, the three
+	 * "everywhere" switches start at vanilla's behaviour, phantoms are vanilla's, and the rules have their
+	 * own heading.
+	 */
 	static void defaults(GameTestHelper helper) {
 		GameRules rules = helper.getLevel().getGameRules();
-		helper.assertFalse(rules.get(Rules.MOB_EXPLOSIONS_BREAK_BLOCKS), "mob explosions should spare blocks by default");
-		helper.assertFalse(rules.get(Rules.ENDERMEN_TAKE_BLOCKS), "endermen should leave blocks alone by default");
-		helper.assertFalse(rules.get(Rules.FIRE_BURNS_BLOCKS), "fire shouldn't burn blocks by default");
+		helper.assertTrue(rules.get(Rules.HEARTHS_PROTECT_BUILDS), "hearths should keep builds safe by default");
+		helper.assertTrue(rules.get(Rules.MOB_EXPLOSIONS_BREAK_BLOCKS), "out in the wild, mob explosions should break blocks by default");
+		helper.assertTrue(rules.get(Rules.ENDERMEN_TAKE_BLOCKS), "out in the wild, endermen should take blocks by default");
+		helper.assertTrue(rules.get(Rules.FIRE_BURNS_BLOCKS), "out in the wild, fire should burn blocks by default");
 		helper.assertValueEqual(rules.get(Rules.HEARTH_LANTERN_RADIUS), 32, "the Hearth Lantern radius");
-		helper.assertFalse(rules.get(GameRules.SPAWN_PHANTOMS), "a new world should start with phantoms off");
+		helper.assertTrue(rules.get(GameRules.SPAWN_PHANTOMS), "phantoms should be vanilla in a new world (they leave you alone at home instead)");
 		helper.assertTrue(rules.get(Rules.KEEP_HOTBAR_ON_DEATH), "the hotbar should be kept on death by default");
 		helper.assertTrue(rules.availableRules().anyMatch(rule -> rule.category() == Rules.CATEGORY), "the rules should have the Cozy Core heading");
 		helper.assertValueEqual(Rules.FIRE_BURNS_BLOCKS.getIdentifier().toString(), "cozy_core:fire_burns_blocks", "a rule's id");
-		helper.assertTrue(helper.getLevel().getServer().getRecipeManager().byKey(ResourceKey.create(Registries.RECIPE, HearthLantern.ID)).isPresent(),
-				"the Hearth Lantern recipe should load");
+		for (HearthLantern.Style style : HearthLantern.STYLES) {
+			helper.assertTrue(helper.getLevel().getServer().getRecipeManager().byKey(ResourceKey.create(Registries.RECIPE, style.id())).isPresent(),
+					"the " + style.id() + " recipe should load");
+		}
 		helper.succeed();
 	}
 
@@ -157,12 +165,26 @@ final class RuleChecks {
 		} catch (IOException e) {
 			throw new IllegalStateException("couldn't read the advancements in " + tab, e);
 		}
-		if (advancements != 7) {
-			wrong.add(advancements + " advancements in the tab, not 7 (the root and six steps)");
+		if (advancements != 8) {
+			wrong.add(advancements + " advancements in the tab, not 8 (the root and seven steps)");
 		}
 		helper.assertTrue(wrong.isEmpty(), wrong.size() + " problem(s): " + String.join(", ", wrong.subList(0, Math.min(wrong.size(), 10))));
 		System.out.println("[cozy_core_gametest] advancements tab: " + advancements + " advancements, " + recipes + " recipes named, all in the game");
 		helper.succeed();
+	}
+
+	/**
+	 * Runs {@code checks}; if one fails, runs {@code tidy} before passing the failure on. Batches run
+	 * one after another in the same part of the world, so a lantern or stand-in player left behind by
+	 * a failed check would guard or quiet a later batch's test and make it fail too.
+	 */
+	static void orTidy(Runnable tidy, Runnable checks) {
+		try {
+			checks.run();
+		} catch (RuntimeException | Error e) {
+			tidy.run();
+			throw e;
+		}
 	}
 
 	/** NeoForge load conditions: the pack only uses {@code neoforge:mod_loaded}. */
@@ -184,13 +206,28 @@ final class RuleChecks {
 	}
 
 	/**
-	 * A creeper's blast in a 5x5x5 stone room with a zombie inside. Kind: every block stands and
-	 * the zombie is still hurt. Vanilla: blocks go.
+	 * A creeper's blast in a 5x5x5 stone room with a zombie inside, with no Hearth Lantern near.
+	 * Kind (the "everywhere" switch off): every block stands and the zombie is still hurt. Otherwise
+	 * (a new world's default, out in the wild): blocks go.
 	 */
 	static void explosions(GameTestHelper helper, boolean kind) {
 		ServerLevel level = helper.getLevel();
 		helper.assertValueEqual(Rules.is(level, Rules.MOB_EXPLOSIONS_BREAK_BLOCKS), !kind, "the mob_explosions_break_blocks rule for this test");
 		BlockPos at = helper.absolutePos(new BlockPos(4, 2, 4));
+		stoneRoom(level, at);
+		blast(helper, level, at, (gone, hurt) -> {
+			if (kind) {
+				helper.assertValueEqual(gone, 0, "stone blocks broken by a creeper's blast");
+				helper.assertTrue(hurt, "the blast should still hurt the zombie");
+			} else {
+				helper.assertTrue(gone > 0, "with the rule on, the blast should break blocks again (" + gone + " gone)");
+			}
+			helper.succeed();
+		});
+	}
+
+	/** The 5x5x5 stone room (hollow, 3x3x3 inside) around {@code at}; returns how many stone blocks it has. */
+	static int stoneRoom(ServerLevel level, BlockPos at) {
 		int placed = 0;
 		for (int x = -2; x <= 2; x++) {
 			for (int z = -2; z <= 2; z++) {
@@ -203,7 +240,16 @@ final class RuleChecks {
 				}
 			}
 		}
-		int before = placed;
+		return placed;
+	}
+
+	/**
+	 * A creeper's blast of power 3 at the centre of the stone room at {@code at}, with a zombie
+	 * beside it; after it, {@code then} gets how many of the room's stone blocks are gone and whether
+	 * the zombie was hurt.
+	 */
+	static void blast(GameTestHelper helper, ServerLevel level, BlockPos at, BiConsumer<Integer, Boolean> then) {
+		int before = count(level, at, -2, -1, -2, 2, 3, 2, Blocks.STONE);
 		Zombie zombie = EntityTypes.ZOMBIE.create(level, EntitySpawnReason.COMMAND);
 		zombie.snapTo(at.getX() + 1.5, at.getY(), at.getZ() + 1.5, 0, 0);
 		zombie.setNoAi(true);
@@ -214,20 +260,14 @@ final class RuleChecks {
 			level.explode(creeper, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 3.0F, Level.ExplosionInteraction.MOB);
 			helper.runAfterDelay(5, () -> {
 				int gone = before - count(level, at, -2, -1, -2, 2, 3, 2, Blocks.STONE);
-				float health = zombie.getHealth();
+				boolean hurt = zombie.getHealth() < zombie.getMaxHealth();
 				zombie.discard();
-				if (kind) {
-					helper.assertValueEqual(gone, 0, "stone blocks broken by a creeper's blast");
-					helper.assertTrue(health < zombie.getMaxHealth(), "the blast should still hurt the zombie (health " + health + ")");
-				} else {
-					helper.assertTrue(gone > 0, "with the rule on, the blast should break blocks again (" + gone + " gone)");
-				}
-				helper.succeed();
+				then.accept(gone, hurt);
 			});
 		});
 	}
 
-	/** The goal that makes an enderman pick a block up. Kind: it never wants to start. Vanilla: it soon does. */
+	/** The goal that makes an enderman pick a block up, with no Hearth Lantern near. Kind (the "everywhere" switch off): it never wants to start. Otherwise: it soon does. */
 	static void endermen(GameTestHelper helper, boolean kind) {
 		ServerLevel level = helper.getLevel();
 		helper.assertValueEqual(Rules.is(level, Rules.ENDERMEN_TAKE_BLOCKS), !kind, "the endermen_take_blocks rule for this test");
@@ -241,8 +281,16 @@ final class RuleChecks {
 
 	/** How many times out of {@code tries} the take-block goal of a fresh enderman says it can start (vanilla: about 1 in 20). */
 	private static int wantsBlocks(ServerLevel level, int tries) {
+		return wantsBlocks(level, null, tries);
+	}
+
+	/** {@link #wantsBlocks(ServerLevel, int)} for an enderman standing at {@code at} (null: wherever it's made). */
+	static int wantsBlocks(ServerLevel level, BlockPos at, int tries) {
 		try {
 			Enderman enderman = EntityTypes.ENDERMAN.create(level, EntitySpawnReason.COMMAND);
+			if (at != null) {
+				enderman.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0, 0);
+			}
 			Class<?> type = Class.forName("net.minecraft.world.entity.monster.Enderman$EndermanTakeBlockGoal");
 			Constructor<?> constructor = type.getDeclaredConstructor(Enderman.class);
 			constructor.setAccessible(true);
@@ -261,8 +309,8 @@ final class RuleChecks {
 
 	/**
 	 * A 7x7 oak-plank floor with fire on every other plank (16 fires), left 1500 ticks at 200 ticks
-	 * a second. Kind: no plank burns and the fires go out, the way fire on stone does. Vanilla:
-	 * planks burn. Fire only ticks near a player in 26.3, so the environment sets
+	 * a second, with no Hearth Lantern near. Kind (the "everywhere" switch off): no plank burns and
+	 * the fires go out, the way fire on stone does. Otherwise: planks burn. Fire only ticks near a player in 26.3, so the environment sets
 	 * fire_spread_radius_around_player to -1 (everywhere): the test server has no players.
 	 */
 	static void fire(GameTestHelper helper, boolean kind) {
@@ -272,17 +320,7 @@ final class RuleChecks {
 		helper.assertValueEqual(level.getGameRules().get(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER), -1,
 				"fire_spread_radius_around_player for this test (fire must tick with no player near)");
 		BlockPos at = helper.absolutePos(new BlockPos(4, 1, 4));
-		for (int x = -3; x <= 3; x++) {
-			for (int z = -3; z <= 3; z++) {
-				level.setBlockAndUpdate(at.offset(x, -1, z), Blocks.STONE.defaultBlockState());
-				level.setBlockAndUpdate(at.offset(x, 0, z), Blocks.OAK_PLANKS.defaultBlockState());
-			}
-		}
-		for (int x = -3; x <= 3; x += 2) {
-			for (int z = -3; z <= 3; z += 2) {
-				level.setBlockAndUpdate(at.offset(x, 1, z), Blocks.FIRE.defaultBlockState());
-			}
-		}
+		burningFloor(level, at);
 		server.tickRateManager().setTickRate(200.0F);
 		helper.runAfterDelay(1500, () -> {
 			server.tickRateManager().setTickRate(20.0F);
@@ -299,6 +337,21 @@ final class RuleChecks {
 			}
 			helper.succeed();
 		});
+	}
+
+	/** The 7x7 plank floor on stone around {@code at}, with fire on every other plank (16 fires). */
+	static void burningFloor(ServerLevel level, BlockPos at) {
+		for (int x = -3; x <= 3; x++) {
+			for (int z = -3; z <= 3; z++) {
+				level.setBlockAndUpdate(at.offset(x, -1, z), Blocks.STONE.defaultBlockState());
+				level.setBlockAndUpdate(at.offset(x, 0, z), Blocks.OAK_PLANKS.defaultBlockState());
+			}
+		}
+		for (int x = -3; x <= 3; x += 2) {
+			for (int z = -3; z <= 3; z += 2) {
+				level.setBlockAndUpdate(at.offset(x, 1, z), Blocks.FIRE.defaultBlockState());
+			}
+		}
 	}
 
 	/**
@@ -345,7 +398,7 @@ final class RuleChecks {
 			}
 		};
 		// Let the light engine catch up with the new roof: the room has to read as dark.
-		helper.runAfterDelay(40, () -> {
+		helper.runAfterDelay(40, () -> orTidy(tidy, () -> {
 			helper.assertTrue(HearthLanterns.in(level).contains(near), "a placed Hearth Lantern should be on the world's list (" + HearthLanterns.in(level) + ")");
 			int first = spawn(level, room);
 			if (!kind) {
@@ -357,7 +410,7 @@ final class RuleChecks {
 			helper.assertValueEqual(first, 0, "monsters spawned 10 blocks from a Hearth Lantern");
 			level.setBlockAndUpdate(near, Blocks.AIR.defaultBlockState());
 			level.setBlockAndUpdate(far, lantern.defaultBlockState());
-			helper.runAfterDelay(2, () -> {
+			helper.runAfterDelay(2, () -> orTidy(tidy, () -> {
 				Set<BlockPos> known = HearthLanterns.in(level);
 				helper.assertTrue(!known.contains(near) && known.contains(far), "breaking and placing lanterns should keep the list right (" + known + ")");
 				int outside = spawn(level, room);
@@ -366,13 +419,13 @@ final class RuleChecks {
 				level.setBlockAndUpdate(above.above(), Blocks.STONE.defaultBlockState());
 				// A hanging lantern straight above the room: height doesn't matter.
 				level.setBlockAndUpdate(above, lantern.defaultBlockState().setValue(LanternBlock.HANGING, true));
-				helper.runAfterDelay(2, () -> {
+				helper.runAfterDelay(2, () -> orTidy(tidy, () -> {
 					helper.assertValueEqual(spawn(level, room), 0, "monsters spawned under a hanging Hearth Lantern");
 					tidy.run();
 					helper.succeed();
-				});
-			});
-		});
+				}));
+			}));
+		}));
 	}
 
 	/**
@@ -437,7 +490,7 @@ final class RuleChecks {
 	}
 
 	/** Asks vanilla's natural spawner for monsters at the room's centre 80 times, then counts (and removes) what appeared. */
-	private static int spawn(ServerLevel level, BlockPos room) {
+	static int spawn(ServerLevel level, BlockPos room) {
 		for (int i = 0; i < 80; i++) {
 			// At floor level: the spawner wants solid ground right under the spot it's given.
 			NaturalSpawner.spawnCategoryForPosition(MobCategory.MONSTER, level, room);
@@ -458,7 +511,7 @@ final class RuleChecks {
 	}
 
 	/** How many blocks of a kind are in the box {@code at + (x1,y1,z1)} to {@code at + (x2,y2,z2)}. */
-	private static int count(ServerLevel level, BlockPos at, int x1, int y1, int z1, int x2, int y2, int z2, Block block) {
+	static int count(ServerLevel level, BlockPos at, int x1, int y1, int z1, int x2, int y2, int z2, Block block) {
 		int found = 0;
 		for (int x = x1; x <= x2; x++) {
 			for (int z = z1; z <= z2; z++) {

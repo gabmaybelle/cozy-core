@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "cozy_core:block/exposed_copper_hearth_lantern"
+    },
+    "hanging=true": {
+      "model": "cozy_core:block/exposed_copper_hearth_lantern_hanging"
+    }
+  }
+}

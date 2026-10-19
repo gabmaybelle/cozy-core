@@ -11,11 +11,11 @@ Cozy Core takes the grind out of building in Minecraft 26.3. Your builds stay bu
 
 ## What it adds
 
-**Builds stay built.** Creeper and ghast explosions still hurt, but break no blocks. Endermen leave your blocks alone. Fire still burns, but never spreads to a block or destroys one. Phantoms are off in new worlds.
+**Builds stay built.** Near a Hearth Lantern (below), creeper and ghast explosions still hurt, but break no blocks. Endermen leave your blocks alone. Fire still burns, but never spreads to a block or destroys one. Phantoms don't come for you there. Out in the wild, Minecraft is as usual, or a game rule spares blocks everywhere.
 
 **Keep your hotbar when you die.** Your hotbar, armour and off-hand stay with you. Everything else drops where you fell (into a grave, with a graves mod), so there's still a trip back.
 
-**The Hearth Lantern.** Make it from a lantern and four amethyst shards. No monster spawns naturally within 32 blocks of it, so a build site stays quiet at night without torches everywhere. Spawners and raids work as usual.
+**The Hearth Lantern.** Make it from a lantern (or a soul or copper lantern) and four amethyst shards. Within 32 blocks of it is home: your build is kept safe (above) and no monster spawns naturally, so a build site stays quiet at night without torches everywhere. Spawners and raids work as usual.
 
 **Wood in the stonecutter.** One plank makes one set of stairs, a fence, a gate, a door, a trapdoor, a button, a pressure plate or a sign, or two slabs. A log makes four times as much. Logs also cut into wood and stripped wood, and bamboo works too.
 
@@ -42,12 +42,15 @@ Each rule is an ordinary game rule: it shows in the Game Rules screen when you m
 
 | Game rule | New worlds |
 |---|---|
-| `cozy_core:mob_explosions_break_blocks` | false (explosions break nothing) |
-| `cozy_core:endermen_take_blocks` | false |
-| `cozy_core:fire_burns_blocks` | false |
+| `cozy_core:hearths_protect_builds` | true (blasts, fire and endermen spare blocks near a Hearth Lantern) |
+| `cozy_core:mob_explosions_break_blocks` | true (false: explosions break nothing anywhere) |
+| `cozy_core:endermen_take_blocks` | true (false: endermen take nothing anywhere) |
+| `cozy_core:fire_burns_blocks` | true (false: fire burns nothing anywhere) |
 | `cozy_core:keep_hotbar_on_death` | true |
-| `cozy_core:hearth_lantern_radius` | 32 (0 switches lanterns off) |
-| `spawn_phantoms` (vanilla's own) | false; worlds you already have keep theirs |
+| `cozy_core:hearth_lantern_radius` | 32 (how far home reaches; 0 switches lanterns off) |
+| `spawn_phantoms` (vanilla's own) | true (phantoms don't come for you near a Hearth Lantern) |
+
+Worlds you already have keep the settings they were made with.
 
 ## Other mods
 

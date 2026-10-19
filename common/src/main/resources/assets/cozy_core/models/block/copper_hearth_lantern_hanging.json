@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/template_hanging_lantern",
+  "textures": {
+    "lantern": "cozy_core:block/copper_hearth_lantern"
+  }
+}

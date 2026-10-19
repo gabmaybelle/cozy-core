@@ -76,24 +76,32 @@ public class RulesTest implements FabricClientGameTest {
 		}
 	}
 
-	/** The rules exist, show under their own heading, and a new world starts kind. */
+	/**
+	 * The rules exist, show under their own heading, and a new world starts kind at home and
+	 * vanilla in the wild: hearths keep builds safe, and the "everywhere" switches start at vanilla.
+	 */
 	private void defaults(TestServerContext server) {
-		check(server.computeOnServer(s -> !rules(s).get(Rules.MOB_EXPLOSIONS_BREAK_BLOCKS)), "mob explosions spare blocks by default");
-		check(server.computeOnServer(s -> !rules(s).get(Rules.ENDERMEN_TAKE_BLOCKS)), "endermen leave blocks alone by default");
-		check(server.computeOnServer(s -> !rules(s).get(Rules.FIRE_BURNS_BLOCKS)), "fire doesn't burn blocks by default");
+		check(server.computeOnServer(s -> rules(s).get(Rules.HEARTHS_PROTECT_BUILDS)), "hearths keep builds safe by default");
+		check(server.computeOnServer(s -> rules(s).get(Rules.MOB_EXPLOSIONS_BREAK_BLOCKS)), "out in the wild, mob explosions break blocks by default");
+		check(server.computeOnServer(s -> rules(s).get(Rules.ENDERMEN_TAKE_BLOCKS)), "out in the wild, endermen take blocks by default");
+		check(server.computeOnServer(s -> rules(s).get(Rules.FIRE_BURNS_BLOCKS)), "out in the wild, fire burns blocks by default");
 		check(server.computeOnServer(s -> rules(s).get(Rules.HEARTH_LANTERN_RADIUS) == 32), "the Hearth Lantern radius defaults to 32");
-		check(server.computeOnServer(s -> !rules(s).get(GameRules.SPAWN_PHANTOMS)), "a new world starts with phantoms off");
+		check(server.computeOnServer(s -> rules(s).get(GameRules.SPAWN_PHANTOMS)), "phantoms are vanilla in a new world (they leave you alone at home instead)");
 		check(server.computeOnServer(s -> rules(s).get(Rules.KEEP_HOTBAR_ON_DEATH)), "the hotbar is kept on death by default");
 		check(server.computeOnServer(s -> rules(s).availableRules().anyMatch(r -> r.category() == Rules.CATEGORY)), "the rules have the Cozy Core heading");
 		check("cozy_core:fire_burns_blocks".equals(Rules.FIRE_BURNS_BLOCKS.getIdentifier().toString()), "a rule's id is cozy_core:... (got " + Rules.FIRE_BURNS_BLOCKS.getIdentifier() + ")");
-		check(server.computeOnServer(s -> s.getRecipeManager().byKey(ResourceKey.create(Registries.RECIPE, HearthLantern.ID)).isPresent()), "the Hearth Lantern recipe loads");
+		for (HearthLantern.Style style : HearthLantern.STYLES) {
+			check(server.computeOnServer(s -> s.getRecipeManager().byKey(ResourceKey.create(Registries.RECIPE, style.id())).isPresent()), "the " + style.id() + " recipe loads");
+		}
 	}
 
 	/**
-	 * A creeper's explosion in a stone room: with the rule off every block stands and the zombie
-	 * inside is still hurt; with it on, blocks go.
+	 * A creeper's explosion in a stone room: with the "everywhere" rule off every block stands and
+	 * the zombie inside is still hurt; with it on (the default), blocks go out in the wild, but not
+	 * at home, with a Hearth Lantern 10 blocks away, nor once hearths are switched off.
 	 */
 	private void explosions(ClientGameTestContext ctx, TestServerContext server, BlockPos at) {
+		set(server, Rules.MOB_EXPLOSIONS_BREAK_BLOCKS, false);
 		int kind = explode(ctx, server, at);
 		float hurt = server.computeOnServer(s -> {
 			ServerLevel level = s.overworld();
@@ -107,8 +115,32 @@ public class RulesTest implements FabricClientGameTest {
 		set(server, Rules.MOB_EXPLOSIONS_BREAK_BLOCKS, true);
 		int vanilla = explode(ctx, server, at);
 		server.runCommand("kill @e[type=minecraft:zombie]");
-		set(server, Rules.MOB_EXPLOSIONS_BREAK_BLOCKS, false);
 		check(vanilla > 0, "with the rule on, the explosion breaks blocks again (" + vanilla + " gone)");
+		BlockPos hearth = at.offset(10, -1, 0);
+		placeHearth(server, hearth);
+		int home = explode(ctx, server, at);
+		set(server, Rules.HEARTHS_PROTECT_BUILDS, false);
+		int hearthsOff = explode(ctx, server, at);
+		set(server, Rules.HEARTHS_PROTECT_BUILDS, true);
+		removeHearth(server, hearth);
+		server.runCommand("kill @e[type=minecraft:zombie]");
+		check(home == 0, "at home, a creeper's explosion breaks no blocks (" + home + " gone)");
+		check(hearthsOff > 0, "with hearths switched off, the explosion at home breaks blocks (" + hearthsOff + " gone)");
+	}
+
+	/** A Hearth Lantern on a stone block. */
+	private static void placeHearth(TestServerContext server, BlockPos pos) {
+		server.runOnServer(s -> {
+			s.overworld().setBlockAndUpdate(pos.below(), Blocks.STONE.defaultBlockState());
+			s.overworld().setBlockAndUpdate(pos, HearthLantern.BLOCK.get().defaultBlockState());
+		});
+	}
+
+	private static void removeHearth(TestServerContext server, BlockPos pos) {
+		server.runOnServer(s -> {
+			s.overworld().setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+			s.overworld().setBlockAndUpdate(pos.below(), Blocks.AIR.defaultBlockState());
+		});
 	}
 
 	/** Builds a 5x5x3 stone room around {@code at}, puts a zombie in it, sets off a creeper-sourced blast, and counts the stone that's gone. */
@@ -157,13 +189,13 @@ public class RulesTest implements FabricClientGameTest {
 		});
 	}
 
-	/** The goal that makes an enderman pick a block up: with the rule off it never wants to start; with it on it soon does. */
+	/** The goal that makes an enderman pick a block up: with the "everywhere" rule off it never wants to start; with it on (the default, no lantern near) it soon does. */
 	private void endermen(TestServerContext server) {
+		set(server, Rules.ENDERMEN_TAKE_BLOCKS, false);
 		int kind = server.computeOnServer(s -> wantsBlocks(s, 300));
 		check(kind == 0, "with the rule off, an enderman never wants to pick a block up (wanted " + kind + " times in 300)");
 		set(server, Rules.ENDERMEN_TAKE_BLOCKS, true);
 		int vanilla = server.computeOnServer(s -> wantsBlocks(s, 2000));
-		set(server, Rules.ENDERMEN_TAKE_BLOCKS, false);
 		check(vanilla > 0, "with the rule on, an enderman wants to pick a block up again (wanted " + vanilla + " times in 2000)");
 	}
 
@@ -187,8 +219,14 @@ public class RulesTest implements FabricClientGameTest {
 		}
 	}
 
-	/** Fire on a plank floor: with the rule off, no plank burns and the fire goes out; with it on, planks burn. */
+	/**
+	 * Fire on a plank floor: with the "everywhere" rule off, no plank burns and the fire goes out;
+	 * with it on (the default), planks burn out in the wild. On the edge of home (a Hearth Lantern
+	 * exactly its reach west of the floor's centre), the planks at home all stand, even next to the
+	 * wild half burning.
+	 */
 	private void fire(ClientGameTestContext ctx, TestServerContext server, BlockPos at) {
+		set(server, Rules.FIRE_BURNS_BLOCKS, false);
 		int[] kind = burn(ctx, server, at);
 		check(kind[0] == 0, "with the rule off, fire burns no planks (" + kind[0] + " of 49 gone)");
 		// A fire over planks it can't burn ages past 3 and goes out, like fire on stone; each tick has
@@ -196,12 +234,26 @@ public class RulesTest implements FabricClientGameTest {
 		check(kind[1] <= 2, "with the rule off, fire still goes out (" + kind[1] + " of 16 fires left)");
 		set(server, Rules.FIRE_BURNS_BLOCKS, true);
 		int[] vanilla = burn(ctx, server, at);
-		set(server, Rules.FIRE_BURNS_BLOCKS, false);
 		check(vanilla[0] > 0, "with the rule on, fire burns planks again (" + vanilla[0] + " of 49 gone)");
+		int reach = server.computeOnServer(s -> rules(s).get(Rules.HEARTH_LANTERN_RADIUS));
+		BlockPos hearth = at.offset(-reach, 0, 0);
+		placeHearth(server, hearth);
+		int[] edge = burn(ctx, server, at, true);
+		removeHearth(server, hearth);
+		check(edge[2] > 0 && edge[0] == 0, "on the edge of home, fire burns no planks at home (" + edge[0] + " of " + edge[2] + " gone)");
+		check(edge[1] > 0, "on the edge of home, the wild half still burns (" + edge[1] + " planks gone)");
 	}
 
 	/** A 7x7 oak plank floor with fire on every other plank (16 fires), left to burn for 1500 ticks (at 200 ticks a second). Returns {planks gone, fires left}. */
 	private static int[] burn(ClientGameTestContext ctx, TestServerContext server, BlockPos at) {
+		return burn(ctx, server, at, false);
+	}
+
+	/**
+	 * {@link #burn(ClientGameTestContext, TestServerContext, BlockPos)}; with {@code split}, the
+	 * planks are counted apart: {planks gone at home, planks gone in the wild, planks at home}.
+	 */
+	private static int[] burn(ClientGameTestContext ctx, TestServerContext server, BlockPos at, boolean split) {
 		server.runOnServer(s -> {
 			ServerLevel level = s.overworld();
 			for (int x = -4; x <= 4; x++) {
@@ -231,17 +283,28 @@ public class RulesTest implements FabricClientGameTest {
 			ServerLevel level = s.overworld();
 			int planks = 0;
 			int fires = 0;
+			int homeGone = 0;
+			int wildGone = 0;
+			int home = 0;
 			for (int x = -3; x <= 3; x++) {
 				for (int z = -3; z <= 3; z++) {
-					if (level.getBlockState(at.offset(x, 0, z)).is(Blocks.OAK_PLANKS)) {
+					BlockPos plank = at.offset(x, 0, z);
+					boolean standing = level.getBlockState(plank).is(Blocks.OAK_PLANKS);
+					if (standing) {
 						planks++;
+					}
+					if (HearthLanterns.guards(level, plank)) {
+						home++;
+						homeGone += standing ? 0 : 1;
+					} else {
+						wildGone += standing ? 0 : 1;
 					}
 					if (level.getBlockState(at.offset(x, 1, z)).is(Blocks.FIRE)) {
 						fires++;
 					}
 				}
 			}
-			return new int[] { 49 - planks, fires };
+			return split ? new int[] { homeGone, wildGone, home } : new int[] { 49 - planks, fires };
 		});
 		server.runOnServer(s -> {
 			ServerLevel level = s.overworld();

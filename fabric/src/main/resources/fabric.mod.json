@@ -18,6 +18,9 @@
 	"entrypoints": {
 		"main": [
 			"com.gabbymaybelle.cozycore.fabric.CozyCoreFabric"
+		],
+		"client": [
+			"com.gabbymaybelle.cozycore.fabric.CozyCoreFabricClient"
 		]
 	},
 	"mixins": [

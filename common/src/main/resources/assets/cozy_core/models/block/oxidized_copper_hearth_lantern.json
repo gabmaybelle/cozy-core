@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/template_lantern",
+  "textures": {
+    "lantern": "cozy_core:block/oxidized_copper_hearth_lantern"
+  }
+}

@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * No monster spawns naturally near a Hearth Lantern. Only natural spawning goes through here:
- * spawners, raids, patrols and phantoms are vanilla.
+ * spawners, raids and patrols are vanilla. Phantoms have their own spawner: PhantomSpawnerMixin.
  */
 @Mixin(NaturalSpawner.class)
 public abstract class NaturalSpawnerMixin {

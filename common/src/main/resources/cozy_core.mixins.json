@@ -6,8 +6,8 @@
 		"DeathLootMixin",
 		"EndermanTakeBlockGoalMixin",
 		"FireBlockMixin",
-		"GameRuleAccessor",
 		"NaturalSpawnerMixin",
+		"PhantomSpawnerMixin",
 		"ServerExplosionMixin",
 		"ServerPlayerMixin"
 	],

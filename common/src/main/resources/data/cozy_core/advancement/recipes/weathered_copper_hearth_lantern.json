@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_items": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:weathered_copper_lantern",
+              "minecraft:waxed_weathered_copper_lantern"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "cozy_core:weathered_copper_hearth_lantern"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_items"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "cozy_core:weathered_copper_hearth_lantern"
+    ]
+  }
+}

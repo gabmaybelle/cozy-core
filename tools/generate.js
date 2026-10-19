@@ -403,16 +403,20 @@ function trades() {
 }
 
 // ---------- 6b. the Cozy Core advancements tab ----------
-// Gabby's picks (2026-10-17): a "Cozy Core" tab that opens on picking up planks, with six steps.
-// The Hearth Lantern and the trades are mod-only, so those three steps (MOD_ONLY_ADVANCEMENTS) stay
+// Gabby's picks (2026-10-17): a "Cozy Core" tab that opens on picking up planks, with six steps,
+// and since 0.5.0 a seventh under the Hearth Lantern's, "Safe and sound" (Gabby's name, 2026-10-19):
+// a creeper or ghast blast at home breaks nothing. No vanilla trigger sees that, so it has one
+// impossible criterion and the mod's explosion hook awards it (SafeAndSound.java).
+// The Hearth Lantern and the trades are mod-only, so those four steps (MOD_ONLY_ADVANCEMENTS) stay
 // out of the data pack, and tools/build.js gives the data pack's tab a vanilla lantern for its icon.
 // No rewards. Each title and description has its English text as the fallback, so the data pack
 // (which has no language file) reads properly too; the mod's en_us.json carries the same text.
 const TAB = 'cozy';
-const MOD_ONLY_ADVANCEMENTS = ['the_kettles_on', 'far_flung_flowers', 'built_to_last'];
+const MOD_ONLY_ADVANCEMENTS = ['the_kettles_on', 'safe_and_sound', 'far_flung_flowers', 'built_to_last'];
 const ADVANCEMENT_TEXT = {
 	root: ['Cozy Core', 'Pick up some planks and start building'],
 	the_kettles_on: ["The kettle's on", 'Craft a Hearth Lantern'],
+	safe_and_sound: ['Safe and sound', 'A creeper exploded at home, and nothing broke'],
 	plank_to_porch: ['Plank to porch', 'Cut wood in a stonecutter'],
 	a_fresh_coat: ['A fresh coat', 'Re-dye terracotta, stained glass, panes or concrete powder'],
 	green_thumb: ['Green thumb', 'Craft moss from leaves, or glow lichen from vines'],
@@ -423,12 +427,17 @@ const advancementKey = (name, part) => `advancements.${NS}.${TAB}.${name}.${part
 const text = (name, part) => ({ translate: advancementKey(name, part), fallback: ADVANCEMENT_TEXT[name][part === 'title' ? 0 : 1] });
 
 function advancementsTab() {
-	const ours = id => { if (!ownRecipes[id] && id !== `${NS}:hearth_lantern`) throw new Error(`The advancements tab names a recipe that isn't there: ${id}`); return id; };
+	// The Hearth Lanterns' recipes are the mod's own (common/), one per style (tools/generate-art.js).
+	const hearths = fs.readdirSync(path.join(ROOT, 'common', 'src', 'main', 'resources', 'data', NS, 'recipe'))
+		.filter(f => f.endsWith('hearth_lantern.json')).map(f => `${NS}:${f.slice(0, -5)}`).sort();
+	if (!hearths.includes(`${NS}:hearth_lantern`)) throw new Error('The Hearth Lantern recipe is missing from common/');
+	const ours = id => { if (!ownRecipes[id] && !hearths.includes(id)) throw new Error(`The advancements tab names a recipe that isn't there: ${id}`); return id; };
 	const ids = filter => Object.keys(ownRecipes).filter(id => !id.startsWith(`${NS}:compat/`) && filter(id, ownRecipes[id])).map(ours);
 	const crafted = recipes => ({ trigger: 'minecraft:recipe_crafted', conditions: { recipes } });
 	const traded = items => ({ trigger: 'minecraft:villager_trade', conditions: { item: { items } } });
 	const steps = {
-		the_kettles_on: { icon: `${NS}:hearth_lantern`, criterion: crafted([`${NS}:hearth_lantern`]) },
+		the_kettles_on: { icon: `${NS}:hearth_lantern`, criterion: crafted(hearths) },
+		safe_and_sound: { icon: 'minecraft:creeper_head', parent: 'the_kettles_on', criterion: { trigger: 'minecraft:impossible' } },
 		plank_to_porch: { icon: 'minecraft:stonecutter', criterion: crafted(ids((id, r) => r.type === 'minecraft:stonecutting')) },
 		a_fresh_coat: { icon: 'minecraft:magenta_glazed_terracotta', criterion: crafted(ids(id => /^cozy_core:dye_/.test(id))) },
 		green_thumb: { icon: 'minecraft:moss_block', criterion: crafted([ours(`${NS}:moss_block_from_leaves`), ours(`${NS}:glow_lichen`)]) },
@@ -436,7 +445,7 @@ function advancementsTab() {
 		built_to_last: { icon: 'minecraft:mud_bricks', criterion: traded(['minecraft:tuff', 'minecraft:mud_bricks']) },
 	};
 	for (const [name, step] of Object.entries(steps)) {
-		if (step.criterion.conditions.recipes?.length === 0) throw new Error(`The advancement ${name} names no recipes`);
+		if (step.criterion.conditions?.recipes?.length === 0) throw new Error(`The advancement ${name} names no recipes`);
 	}
 	// The mod's language file must say the same as the fallbacks here.
 	const lang = readJson(path.join(ROOT, 'common', 'src', 'main', 'resources', 'assets', NS, 'lang', 'en_us.json'));
@@ -452,7 +461,7 @@ function advancementsTab() {
 		requirements: [['planks']],
 	});
 	for (const [name, step] of Object.entries(steps)) write(`data/${NS}/advancement/${TAB}/${name}.json`, {
-		parent: `${NS}:${TAB}/root`,
+		parent: `${NS}:${TAB}/${step.parent ?? 'root'}`,
 		criteria: { [name]: step.criterion },
 		display: { description: text(name, 'description'), icon: { id: step.icon }, title: text(name, 'title') },
 		requirements: [[name]],
