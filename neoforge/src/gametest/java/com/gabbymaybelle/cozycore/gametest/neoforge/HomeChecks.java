@@ -135,7 +135,7 @@ final class HomeChecks {
 	 * The burning plank floor, 1500 ticks at 200 ticks a second. Home ({@code edge} false, a lantern
 	 * 10 blocks away): no plank burns and the fires go out. On the edge (the lantern exactly the
 	 * reach west of the floor's centre): every plank at home stands, even next to the fires burning
-	 * in the wild half, which loses planks.
+	 * in the wild half (which start right against home), and the wild half loses planks.
 	 */
 	static void fire(GameTestHelper helper, boolean edge) {
 		ServerLevel level = helper.getLevel();
@@ -145,19 +145,38 @@ final class HomeChecks {
 		BlockPos hearth = edge ? at.offset(-REACH, 0, 0) : at.offset(10, 0, 0);
 		RuleChecks.burningFloor(level, at);
 		lantern(level, hearth);
+		if (edge) {
+			// The wild planks touching home become fires on stone, so every one of their ticks tries
+			// to burn the home plank beside it: without the burn-out hooks home loses planks every
+			// run, not only when a wild plank happens to burn away next to the edge first.
+			for (int x = -3; x <= 3; x++) {
+				for (int z = -3; z <= 3; z++) {
+					BlockPos plank = at.offset(x, 0, z);
+					if (!HearthLanterns.guards(level, plank) && HearthLanterns.guards(level, plank.west())) {
+						level.setBlockAndUpdate(plank, Blocks.FIRE.defaultBlockState());
+					}
+				}
+			}
+		}
 		List<BlockPos> home = new ArrayList<>();
 		List<BlockPos> wild = new ArrayList<>();
 		for (int x = -3; x <= 3; x++) {
 			for (int z = -3; z <= 3; z++) {
 				BlockPos plank = at.offset(x, 0, z);
-				(HearthLanterns.guards(level, plank) ? home : wild).add(plank);
+				if (level.getBlockState(plank).is(Blocks.OAK_PLANKS)) {
+					(HearthLanterns.guards(level, plank) ? home : wild).add(plank);
+				}
 			}
 		}
 		RuleChecks.orTidy(() -> {
 			removeLantern(level, hearth);
 			for (int x = -3; x <= 3; x++) {
 				for (int z = -3; z <= 3; z++) {
-					level.setBlockAndUpdate(at.offset(x, 1, z), Blocks.AIR.defaultBlockState());
+					for (int y = 0; y <= 1; y++) {
+						if (level.getBlockState(at.offset(x, y, z)).is(Blocks.FIRE)) {
+							level.setBlockAndUpdate(at.offset(x, y, z), Blocks.AIR.defaultBlockState());
+						}
+					}
 				}
 			}
 		}, () -> helper.assertValueEqual(wild.isEmpty(), !edge, "whether the whole floor is home"));
@@ -177,11 +196,14 @@ final class HomeChecks {
 				helper.assertTrue(fires <= 2, "the fires at home should still go out (" + fires + " of 16 left)");
 			}
 			// Put the fires out so nothing burns on into the next test.
-			for (BlockPos plank : home) {
-				level.setBlockAndUpdate(plank.above(), Blocks.AIR.defaultBlockState());
-			}
-			for (BlockPos plank : wild) {
-				level.setBlockAndUpdate(plank.above(), Blocks.AIR.defaultBlockState());
+			for (int x = -3; x <= 3; x++) {
+				for (int z = -3; z <= 3; z++) {
+					for (int y = 0; y <= 1; y++) {
+						if (level.getBlockState(at.offset(x, y, z)).is(Blocks.FIRE)) {
+							level.setBlockAndUpdate(at.offset(x, y, z), Blocks.AIR.defaultBlockState());
+						}
+					}
+				}
 			}
 			helper.succeed();
 		});
