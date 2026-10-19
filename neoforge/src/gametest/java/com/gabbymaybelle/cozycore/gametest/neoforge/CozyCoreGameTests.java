@@ -37,9 +37,11 @@ public final class CozyCoreGameTests {
 	private static final String HOME_EXPLOSIONS = "home_explosions", HOME_EDGE = "home_explosion_edge", HOME_FIRE = "home_fire",
 			HOME_FIRE_EDGE = "home_fire_edge", HOME_ENDERMEN = "home_endermen", HOME_STYLES = "home_styles",
 			HOME_PHANTOMS = "home_phantoms", HOME_SPAWNING = "home_spawning";
+	private static final String HOME_ITEMS = "home_items", HOME_ANIMALS = "home_animals", HOME_LIGHTNING = "home_lightning",
+			HOME_FALLS = "home_falls", HOME_GLASS = "home_glass";
 	/** The rules a batch may change; each batch starts from a new world's values of them. */
 	private static final List<GameRules.Key<?>> RULES = List.of(Rules.HEARTHS_PROTECT_BUILDS, Rules.MOB_EXPLOSIONS_BREAK_BLOCKS,
-			Rules.ENDERMEN_TAKE_BLOCKS, Rules.FIRE_BURNS_BLOCKS, Rules.HEARTH_LANTERN_RADIUS, Rules.KEEP_HOTBAR_ON_DEATH, GameRules.RULE_DOINSOMNIA);
+			Rules.ENDERMEN_TAKE_BLOCKS, Rules.FIRE_BURNS_BLOCKS, Rules.HEARTH_LANTERN_RADIUS, Rules.KEEP_HOTBAR_ON_DEATH, GameRules.RULE_DOINSOMNIA, Rules.HEARTH_ITEM_MINUTES);
 
 	public CozyCoreGameTests(IEventBus modBus) {
 		modBus.addListener(RegisterGameTestsEvent.class, event -> event.register(CozyCoreGameTests.class));
@@ -130,6 +132,32 @@ public final class CozyCoreGameTests {
 	@GameTest(template = "empty", batch = HOME_PHANTOMS, timeoutTicks = 100)
 	public static void phantoms_leave_home_alone(GameTestHelper helper) {
 		HomeChecks.phantoms(helper);
+	}
+
+	// 0.6.0's home comforts (ComfortsChecks), each alone in its batch too.
+	@GameTest(template = "lanterns", batch = HOME_ITEMS, timeoutTicks = 100)
+	public static void items_last_at_home(GameTestHelper helper) {
+		ComfortsChecks.items(helper);
+	}
+
+	@GameTest(template = "empty", batch = HOME_ANIMALS, timeoutTicks = 100)
+	public static void animals_safe_at_home(GameTestHelper helper) {
+		ComfortsChecks.animals(helper);
+	}
+
+	@GameTest(template = "lanterns", batch = HOME_LIGHTNING)
+	public static void lightning_spares_home(GameTestHelper helper) {
+		ComfortsChecks.lightning(helper);
+	}
+
+	@GameTest(template = "empty", batch = HOME_FALLS)
+	public static void no_falls_at_home(GameTestHelper helper) {
+		ComfortsChecks.falls(helper);
+	}
+
+	@GameTest(template = "empty", batch = HOME_GLASS)
+	public static void glass_comes_back_at_home(GameTestHelper helper) {
+		ComfortsChecks.glass(helper);
 	}
 
 	@GameTest(template = "lanterns", batch = HOME_SPAWNING, timeoutTicks = 400)
@@ -230,6 +258,31 @@ public final class CozyCoreGameTests {
 
 	@BeforeBatch(batch = HOME_PHANTOMS)
 	public static void homePhantoms(ServerLevel level) {
+		kind(level);
+	}
+
+	@BeforeBatch(batch = HOME_ITEMS)
+	public static void homeItems(ServerLevel level) {
+		kind(level);
+	}
+
+	@BeforeBatch(batch = HOME_ANIMALS)
+	public static void homeAnimals(ServerLevel level) {
+		kind(level);
+	}
+
+	@BeforeBatch(batch = HOME_LIGHTNING)
+	public static void homeLightning(ServerLevel level) {
+		kind(level);
+	}
+
+	@BeforeBatch(batch = HOME_FALLS)
+	public static void homeFalls(ServerLevel level) {
+		kind(level);
+	}
+
+	@BeforeBatch(batch = HOME_GLASS)
+	public static void homeGlass(ServerLevel level) {
 		kind(level);
 	}
 

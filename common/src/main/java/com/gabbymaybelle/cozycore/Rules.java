@@ -33,6 +33,9 @@ public final class Rules {
 	/** How far a Hearth Lantern reaches (sideways, any height): no natural monster spawns, no phantoms, and builds kept safe. 0 turns the lanterns off. */
 	public static final GameRules.Key<GameRules.IntegerValue> HEARTH_LANTERN_RADIUS =
 			Services.PLATFORM.integerRule(name("hearth_lantern_radius"), GameRules.Category.SPAWNING, 32, 0, 128);
+	/** How many minutes a dropped item lasts at home (inside a Hearth Lantern's reach); 5 is vanilla's five minutes. */
+	public static final GameRules.Key<GameRules.IntegerValue> HEARTH_ITEM_MINUTES =
+			Services.PLATFORM.integerRule(name("hearth_item_minutes"), GameRules.Category.DROPS, 60, 5, 1440);
 	/** The hotbar, armour and off-hand stay with a player who dies; the rest drops. Vanilla's {@code keepInventory} keeps everything and wins when it's on. */
 	public static final GameRules.Key<GameRules.BooleanValue> KEEP_HOTBAR_ON_DEATH =
 			Services.PLATFORM.booleanRule(name("keep_hotbar_on_death"), GameRules.Category.PLAYER, true);
@@ -57,6 +60,10 @@ public final class Rules {
 
 	public static int get(ServerLevel level, GameRules.Key<GameRules.IntegerValue> rule) {
 		int value = level.getGameRules().getInt(rule);
+		// NeoForge's number rules have no bounds, so a value outside is read as the nearest end.
+		if (rule == HEARTH_ITEM_MINUTES) {
+			return Math.clamp(value, 5, 1440);
+		}
 		return rule == HEARTH_LANTERN_RADIUS ? Math.clamp(value, MIN_RADIUS, MAX_RADIUS) : value;
 	}
 

@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_items": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#cozy_core:dyed_candle"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "cozy_core:dye_white_candle"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_items"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "cozy_core:dye_white_candle",
+      "cozy_core:dye_orange_candle",
+      "cozy_core:dye_magenta_candle",
+      "cozy_core:dye_light_blue_candle",
+      "cozy_core:dye_yellow_candle",
+      "cozy_core:dye_lime_candle",
+      "cozy_core:dye_pink_candle",
+      "cozy_core:dye_gray_candle",
+      "cozy_core:dye_light_gray_candle",
+      "cozy_core:dye_cyan_candle",
+      "cozy_core:dye_purple_candle",
+      "cozy_core:dye_blue_candle",
+      "cozy_core:dye_brown_candle",
+      "cozy_core:dye_green_candle",
+      "cozy_core:dye_red_candle",
+      "cozy_core:dye_black_candle"
+    ]
+  }
+}

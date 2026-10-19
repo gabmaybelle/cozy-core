@@ -177,6 +177,11 @@ What differs from 26.3, and why (2026-10-17):
   `PhantomSpawner` (2026-10-19; NeoForge, unremapped, was fine). The hook moves the spot vanilla
   checks for a player at home to the bottom of the world, so its sky check says no. Keep to
   `@Inject` and `@ModifyVariable` on this branch.
+- **Home comforts (0.6.0)** are 26.3's, with: `LivingEntity.hurt(source, amount)` (no level
+  argument) for sparing animals; `causeFallDamage(float, ...)`; item extra time saved in the
+  `CompoundTag`; 1.21.1's class locations (`animal.Pig`, `animal.horse.Llama`, `npc.Villager`...);
+  `getType().is(...)` for the blast-mob tag. All `@Inject`. `hearth_item_minutes` is clamped to
+  5..1440 in `Rules.get`, as NeoForge's number rules have no bounds.
 - **Keep-on-death** saves with `CompoundTag` and the codec through `RegistryOps` (no `ValueOutput` in 1.21.1).
 - **Trades are code.** 1.21.1 has no `villager_trade` data, so `Trades.java` lists them and
   `Platform` adds them (Fabric `TradeOfferHelper`, NeoForge `VillagerTradesEvent`/`WandererTradesEvent`);

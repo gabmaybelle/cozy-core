@@ -384,12 +384,108 @@
       "conditions": {
         "recipe_id": "cozy_core:dye_black_concrete_powder"
       }
+    },
+    "dye_white_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_white_candle"
+      }
+    },
+    "dye_orange_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_orange_candle"
+      }
+    },
+    "dye_magenta_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_magenta_candle"
+      }
+    },
+    "dye_light_blue_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_light_blue_candle"
+      }
+    },
+    "dye_yellow_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_yellow_candle"
+      }
+    },
+    "dye_lime_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_lime_candle"
+      }
+    },
+    "dye_pink_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_pink_candle"
+      }
+    },
+    "dye_gray_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_gray_candle"
+      }
+    },
+    "dye_light_gray_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_light_gray_candle"
+      }
+    },
+    "dye_cyan_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_cyan_candle"
+      }
+    },
+    "dye_purple_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_purple_candle"
+      }
+    },
+    "dye_blue_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_blue_candle"
+      }
+    },
+    "dye_brown_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_brown_candle"
+      }
+    },
+    "dye_green_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_green_candle"
+      }
+    },
+    "dye_red_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_red_candle"
+      }
+    },
+    "dye_black_candle": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:dye_black_candle"
+      }
     }
   },
   "display": {
     "description": {
       "translate": "advancements.cozy_core.cozy.a_fresh_coat.description",
-      "fallback": "Re-dye terracotta, stained glass, panes or concrete powder"
+      "fallback": "Re-dye terracotta, stained glass, panes, concrete powder or candles"
     },
     "icon": {
       "id": "minecraft:magenta_glazed_terracotta"
@@ -464,7 +560,23 @@
       "dye_brown_concrete_powder",
       "dye_green_concrete_powder",
       "dye_red_concrete_powder",
-      "dye_black_concrete_powder"
+      "dye_black_concrete_powder",
+      "dye_white_candle",
+      "dye_orange_candle",
+      "dye_magenta_candle",
+      "dye_light_blue_candle",
+      "dye_yellow_candle",
+      "dye_lime_candle",
+      "dye_pink_candle",
+      "dye_gray_candle",
+      "dye_light_gray_candle",
+      "dye_cyan_candle",
+      "dye_purple_candle",
+      "dye_blue_candle",
+      "dye_brown_candle",
+      "dye_green_candle",
+      "dye_red_candle",
+      "dye_black_candle"
     ]
   ]
 }

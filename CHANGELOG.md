@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.6.0+1.21.1: Home comforts
+
+Small kindnesses of being at home, inside a Hearth Lantern's reach.
+
+- **Nothing lost at home.** Things you drop at home last an hour instead of five minutes, so a
+  build site full of dropped blocks keeps them. The game rule `cozy_core:hearth_item_minutes`
+  sets how long (60 in new worlds; 5 is the usual five minutes).
+- **Animals are safe at home.** Creeper and ghast blasts, fire and lightning don't hurt your
+  animals, pets and villagers at home, and lightning doesn't turn a villager into a witch, a pig
+  into a zombified piglin or a mooshroom into the other colour. Players and monsters are hurt as
+  usual. It follows `cozy_core:hearths_protect_builds`, like the rest of home's protection.
+- **Safe footing at home.** You and your tamed pets take no fall damage at home, so a slip off a
+  roof or scaffolding doesn't cost a trip back.
+- **Glass comes back at home.** Glass and glass panes of every colour, ice, packed ice, blue ice
+  and bookshelves broken at home drop themselves, as with Silk Touch (and ice leaves no water).
+- **Re-dye candles.** Eight candles in any colours around a dye make eight of that colour, like
+  terracotta and glass. In the data pack too, and "A fresh coat" counts them.
+
 ## 0.5.0+1.21.1: Light a hearth. Home is safe.
 
 The Hearth Lantern now makes the ground around it home, and home keeps your build safe.
