@@ -162,11 +162,21 @@ What differs from 26.3, and why (2026-10-17):
   NeoForge's plain `GameRules.register` under vanilla categories (MOBS, UPDATES, SPAWNING, PLAYER),
   since NeoForge can't add a heading, and with no bounds (`Rules.get` clamps the radius to 0..128).
   Ids stay `cozy_core:<name>`, so commands and docs match 26.3; lang keys are `gamerule.cozy_core:<name>`.
-  Phantoms are vanilla's `doInsomnia`: `GameRulesAccessor` replaces its type in vanilla's map of
-  rule types with one that starts false (`BooleanValueInvoker`, as vanilla keeps `create` private),
-  so new worlds start off and saved worlds load their own value.
-- **Explosions:** `ExplosionMixin` clears `Explosion.getToBlow()` at the head of `finalizeExplosion`
-  (server side only); the server sends players that emptied list. Lithium replaces `explode()`, not this.
+  Phantoms are vanilla's `doInsomnia`. Until 0.4.0 `GameRulesAccessor`/`BooleanValueInvoker`
+  made it start false; since 0.5.0 it's vanilla's default and phantoms only skip players at home.
+  `GameRules.createTag` writes every rule, so worlds made before keep their saved values.
+- **Explosions:** `ExplosionMixin` trims `Explosion.getToBlow()` at the head of `finalizeExplosion`
+  (server side only: the blocks at home, or all of them with the world-wide switch off); the server
+  sends players that list, and the explosion's fire uses it too. Lithium replaces `explode()`, not this.
+- **The Hearth (0.5.0)** is 26.3's, with: classic and soul styles only (no copper lanterns before
+  1.21.9); `CompoundTag` saving and 1.21.1's component hooks in the block entity; loot `functions`
+  with `copy_components`; the fire hooks' two shapes (vanilla and NeoForge's `+Direction`) as on
+  26.3. **Phantoms are a `@ModifyVariable` here, not 26.3's `@Redirect`:** Loom remaps mixin
+  annotations in place on 1.21.1 and writes a redirect's single `at` as a list, which MixinExtras'
+  redirect handling in Fabric Loader can't read, so the Fabric server crashed loading
+  `PhantomSpawner` (2026-10-19; NeoForge, unremapped, was fine). The hook moves the spot vanilla
+  checks for a player at home to the bottom of the world, so its sky check says no. Keep to
+  `@Inject` and `@ModifyVariable` on this branch.
 - **Keep-on-death** saves with `CompoundTag` and the codec through `RegistryOps` (no `ValueOutput` in 1.21.1).
 - **Trades are code.** 1.21.1 has no `villager_trade` data, so `Trades.java` lists them and
   `Platform` adds them (Fabric `TradeOfferHelper`, NeoForge `VillagerTradesEvent`/`WandererTradesEvent`);
@@ -191,9 +201,10 @@ What differs from 26.3, and why (2026-10-17):
   same as Spawn Gazebo's and Pocket List's 1.21.1 branches: Fabric has no client game test API on
   1.21.1), started by a `client` entrypoint when `cozy_core.gametest` is set; the tests are the
   `cozy_core:gametest` entrypoint. `RulesTest` also counts the trades. The NeoForge game test uses
-  1.21.1's annotation tests (`@GameTestHolder`, `@GameTest`, batches `kind` and `vanilla` with
-  `@BeforeBatch`/`@AfterBatch` instead of 26.3's test environments); vanilla's test server switches
-  `doFireTick` off, so both batches switch it on (the 1.21.1 side of 26.3's fire-radius gotcha).
+  1.21.1's annotation tests (`@GameTestHolder`, `@GameTest`, batches with `@BeforeBatch`/`@AfterBatch`
+  instead of 26.3's test environments: `kind`, `everywhere`, `vanilla`, `hearths_off` and one
+  `home_...` batch per check that places lanterns, as 26.3 has environments); vanilla's test server
+  switches `doFireTick` off, so every batch switches it on (the 1.21.1 side of 26.3's fire-radius gotcha).
   Templates are size-only `.nbt` files with palette key `Name` and data version 3955 (26.x's `id`
   loads as air), plus an `empty` one. 1.21.1 logs "No data fixer registered for" a mod's mobs and
   boats; `server-test.js` ignores it.
@@ -225,9 +236,10 @@ What differs from 26.3, and why (2026-10-17):
 One job per mod, decided 2026-10-15, so nothing is done twice and each repo tells the same story.
 This repo's copy leaves out one mod and one modpack on purpose (Gabby's call); don't add them back.
 
-- **Cozy Core** (cozy-core): the builder rules, each an ordinary game rule: builds stay built (mob
-  explosions, endermen, fire), no phantoms, keep your hotbar on death, the Hearth Lantern, cheap
-  wood in the stonecutter, re-dyeing and builder trades. Fabric and NeoForge jars, plus a plain
+- **Cozy Core** (cozy-core): the Hearth Lantern, which makes the ground around it home: no
+  monsters or phantoms spawn there, and creeper and ghast blasts, fire and endermen leave its
+  blocks alone (each an ordinary game rule, with world-wide switches too); keep your hotbar on
+  death, cheap wood in the stonecutter, re-dyeing and builder trades. Fabric and NeoForge jars, plus a plain
   data pack of the recipes.
 - **Spawn Gazebo** (spawn-gazebo): the gazebo at the world spawn and its starter chest.
 - **Nightfall Clock** (nightfall-clock): the clock above the hotbar and the dusk warning.

@@ -13,11 +13,11 @@ This is the version for **Minecraft 1.21.1**, on Fabric and NeoForge. It's the s
 
 ## What it adds
 
-**Builds stay built.** Creeper and ghast explosions still hurt, but break no blocks. Endermen leave your blocks alone. Fire still burns, but never spreads to a block or destroys one. Phantoms are off in new worlds.
+**Builds stay built.** Near a Hearth Lantern (below), creeper and ghast explosions still hurt, but break no blocks. Endermen leave your blocks alone. Fire still burns, but never spreads to a block or destroys one. Phantoms don't come for you there. Out in the wild, Minecraft is as usual, or a game rule spares blocks everywhere.
 
 **Keep your hotbar when you die.** Your hotbar, armour and off-hand stay with you. Everything else drops where you fell (into a grave, with a graves mod), so there's still a trip back.
 
-**The Hearth Lantern.** Make it from a lantern and four amethyst shards. No monster spawns naturally within 32 blocks of it, so a build site stays quiet at night without torches everywhere. Spawners and raids work as usual.
+**The Hearth Lantern.** Make it from a lantern (or a soul lantern) and four amethyst shards. Within 32 blocks of it is home: your build is kept safe (above) and no monster spawns naturally, so a build site stays quiet at night without torches everywhere. Spawners and raids work as usual.
 
 **Wood in the stonecutter.** One plank makes one set of stairs, a fence, a gate, a door, a trapdoor, a button, a pressure plate or a sign, or two slabs. A log makes four times as much. Logs also cut into wood and stripped wood, and bamboo works too.
 
@@ -44,12 +44,15 @@ Each rule is an ordinary game rule: it shows in the Game Rules screen when you m
 
 | Game rule | New worlds |
 |---|---|
-| `cozy_core:mob_explosions_break_blocks` | false (explosions break nothing) |
-| `cozy_core:endermen_take_blocks` | false |
-| `cozy_core:fire_burns_blocks` | false |
+| `cozy_core:hearths_protect_builds` | true (blasts, fire and endermen spare blocks near a Hearth Lantern) |
+| `cozy_core:mob_explosions_break_blocks` | true (false: explosions break nothing anywhere) |
+| `cozy_core:endermen_take_blocks` | true (false: endermen take nothing anywhere) |
+| `cozy_core:fire_burns_blocks` | true (false: fire burns nothing anywhere) |
 | `cozy_core:keep_hotbar_on_death` | true |
-| `cozy_core:hearth_lantern_radius` | 32 (0 switches lanterns off) |
-| `doInsomnia` (vanilla's own phantoms rule) | false; worlds you already have keep theirs |
+| `cozy_core:hearth_lantern_radius` | 32 (how far home reaches; 0 switches lanterns off) |
+| `doInsomnia` (vanilla's own phantoms rule) | true (phantoms don't come for you near a Hearth Lantern) |
+
+Worlds you already have keep the settings they were made with.
 
 ## Other mods
 
@@ -60,6 +63,7 @@ With the mod version, wood from Biomes O' Plenty, Ecologics, Promenade and Wilde
 - Wood in the stonecutter covers the woods 1.21.1 has. Pale oak and its pieces came later, and so did shelves.
 - On NeoForge the rules show under vanilla's own headings in the Game Rules screen (Mobs, Updates, Spawning and Player) instead of a "Cozy Core" heading. Fabric has the heading. They're the same rules either way.
 - Phantoms are vanilla's `doInsomnia` rule, which 1.21.1 calls it.
+- There are no copper Hearth Lanterns: copper lanterns came in a later Minecraft version. The classic and soul ones are here.
 - Wilder Wild's hollowed logs cut into four planks, like its other logs: on 1.21.1 it counts them as logs.
 - Beautify's NeoForge version has no cherry blinds or trellises, so those are only in the stonecutter on Fabric. Wilder Wild has no NeoForge version for 1.21.1.
 - With the experimental trade rebalance switched on, the wandering trader picks its trades another way and doesn't get the extra slot. Masons still do.

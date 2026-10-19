@@ -1,7 +1,5 @@
 package com.gabbymaybelle.cozycore;
 
-import com.gabbymaybelle.cozycore.mixin.BooleanValueInvoker;
-import com.gabbymaybelle.cozycore.mixin.GameRulesAccessor;
 import com.gabbymaybelle.cozycore.platform.Services;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.GameRules;
@@ -10,20 +8,29 @@ import net.minecraft.world.level.GameRules;
  * The builder-kind rules, as ordinary game rules: they show in the Game Rules screen when a world
  * is made (under a "Cozy Core" heading on Fabric; with vanilla's own headings on NeoForge, which
  * has no way to add one), are set with {@code /gamerule cozy_core:...}, and are saved with the
- * world, so there is no settings file and nothing to sync. Every rule defaults to the kind
- * setting. The code that applies each one is in {@code mixin/}.
+ * world, so there is no settings file and nothing to sync. The code that applies each one is in
+ * {@code mixin/}.
+ *
+ * <p>Since 0.5.0 builds are kept safe at home: inside a Hearth Lantern's reach while
+ * {@link #HEARTHS_PROTECT_BUILDS} is on. The three "everywhere" switches start at vanilla's
+ * behaviour in new worlds, and turning one off spares blocks in the whole world as before.
+ * Worlds made with 0.4.0 or earlier saved every rule ({@code GameRules.createTag} writes them
+ * all), so they keep sparing blocks everywhere.
  */
 public final class Rules {
-	/** Creepers' and ghasts' explosions (anything in the {@code cozy_core:explosions_spare_blocks} tag) still hurt, but break nothing. */
+	/** Inside a Hearth Lantern's reach, creeper and ghast blasts, fire and endermen leave blocks alone. */
+	public static final GameRules.Key<GameRules.BooleanValue> HEARTHS_PROTECT_BUILDS =
+			Services.PLATFORM.booleanRule(name("hearths_protect_builds"), GameRules.Category.MOBS, true);
+	/** Off: creepers' and ghasts' explosions (anything in the {@code cozy_core:explosions_spare_blocks} tag) still hurt, but break nothing anywhere. */
 	public static final GameRules.Key<GameRules.BooleanValue> MOB_EXPLOSIONS_BREAK_BLOCKS =
-			Services.PLATFORM.booleanRule(name("mob_explosions_break_blocks"), GameRules.Category.MOBS, false);
-	/** Endermen don't pick blocks up. */
+			Services.PLATFORM.booleanRule(name("mob_explosions_break_blocks"), GameRules.Category.MOBS, true);
+	/** Off: endermen don't pick blocks up anywhere. */
 	public static final GameRules.Key<GameRules.BooleanValue> ENDERMEN_TAKE_BLOCKS =
-			Services.PLATFORM.booleanRule(name("endermen_take_blocks"), GameRules.Category.MOBS, false);
-	/** Fire still burns and goes out, but never spreads onto a block or destroys one. */
+			Services.PLATFORM.booleanRule(name("endermen_take_blocks"), GameRules.Category.MOBS, true);
+	/** Off: fire still burns and goes out, but never spreads onto a block or destroys one anywhere. */
 	public static final GameRules.Key<GameRules.BooleanValue> FIRE_BURNS_BLOCKS =
-			Services.PLATFORM.booleanRule(name("fire_burns_blocks"), GameRules.Category.UPDATES, false);
-	/** How far around a Hearth Lantern monsters don't spawn naturally (any height). 0 turns the lanterns off. */
+			Services.PLATFORM.booleanRule(name("fire_burns_blocks"), GameRules.Category.UPDATES, true);
+	/** How far a Hearth Lantern reaches (sideways, any height): no natural monster spawns, no phantoms, and builds kept safe. 0 turns the lanterns off. */
 	public static final GameRules.Key<GameRules.IntegerValue> HEARTH_LANTERN_RADIUS =
 			Services.PLATFORM.integerRule(name("hearth_lantern_radius"), GameRules.Category.SPAWNING, 32, 0, 128);
 	/** The hotbar, armour and off-hand stay with a player who dies; the rest drops. Vanilla's {@code keepInventory} keeps everything and wins when it's on. */
@@ -36,12 +43,12 @@ public final class Rules {
 	private Rules() {
 	}
 
-	/** Touching the class registers the rules; this also makes phantoms off the default for new worlds. */
+	/**
+	 * Touching the class registers the rules. (Up to 0.4.0 this also made vanilla's doInsomnia
+	 * start off in new worlds; since 0.5.0 phantoms only leave you alone at home, see
+	 * PhantomSpawnerMixin. Worlds made before keep the value they saved.)
+	 */
 	public static void register() {
-		// Vanilla's own doInsomnia rule does the job; only its default changes. A rule's type makes
-		// its starting value for every new world, and a saved world loads its own value over it, so
-		// worlds that already exist keep whatever they have.
-		GameRulesAccessor.cozyCore$types().put(GameRules.RULE_DOINSOMNIA, BooleanValueInvoker.cozyCore$create(false));
 	}
 
 	public static boolean is(ServerLevel level, GameRules.Key<GameRules.BooleanValue> rule) {

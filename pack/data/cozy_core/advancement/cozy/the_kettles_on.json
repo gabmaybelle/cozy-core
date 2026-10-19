@@ -6,6 +6,12 @@
       "conditions": {
         "recipe_id": "cozy_core:hearth_lantern"
       }
+    },
+    "soul_hearth_lantern": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipe_id": "cozy_core:soul_hearth_lantern"
+      }
     }
   },
   "display": {
@@ -23,7 +29,8 @@
   },
   "requirements": [
     [
-      "hearth_lantern"
+      "hearth_lantern",
+      "soul_hearth_lantern"
     ]
   ]
 }
