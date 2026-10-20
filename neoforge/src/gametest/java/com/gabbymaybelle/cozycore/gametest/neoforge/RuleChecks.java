@@ -448,8 +448,9 @@ final class RuleChecks {
 				level.setBlockAndUpdate(placed, Blocks.AIR.defaultBlockState());
 			}
 		};
-		// Let the light engine catch up with the new roof: the room has to read as dark.
-		helper.runAfterDelay(40, () -> orTidy(tidy, () -> {
+		// Let the light engine catch up with the new roof: the room has to read as dark, or nothing
+		// spawns whatever the lantern does.
+		whenDark(helper, level, room, 300, tidy, () -> orTidy(tidy, () -> {
 			helper.assertTrue(HearthLanterns.in(level).contains(near), "a placed Hearth Lantern should be on the world's list (" + HearthLanterns.in(level) + ")");
 			int first = spawn(level, room);
 			if (!kind) {
@@ -547,6 +548,24 @@ final class RuleChecks {
 		List<Monster> monsters = level.getEntitiesOfClass(Monster.class, new AABB(room).inflate(8));
 		monsters.forEach(Monster::discard);
 		return monsters.size();
+	}
+
+	/**
+	 * Runs {@code then} once the room's floor has no sky or block light, checking every tick for up to
+	 * {@code ticksLeft} ticks, and fails (after {@code tidy}) if it never goes dark. A fixed 40-tick
+	 * wait wasn't always enough: once in CI (2026-10-19, the heaviest wood-mod group) the sealed room
+	 * still read sky light 15, nothing spawned and the far-lantern check failed, while "nothing
+	 * spawns near a lantern" passed for the wrong reason.
+	 */
+	static void whenDark(GameTestHelper helper, ServerLevel level, BlockPos room, int ticksLeft, Runnable tidy, Runnable then) {
+		if (level.getBrightness(LightLayer.SKY, room) == 0 && level.getBrightness(LightLayer.BLOCK, room) == 0) {
+			System.out.println("[cozy_core_gametest] lantern room dark after " + (300 - ticksLeft) + " ticks");
+			then.run();
+		} else if (ticksLeft <= 0) {
+			orTidy(tidy, () -> helper.assertTrue(false, "the room should go dark under its roof (" + roomState(level, room) + ")"));
+		} else {
+			helper.runAfterDelay(1, () -> whenDark(helper, level, room, ticksLeft - 1, tidy, then));
+		}
 	}
 
 	/** What the room looks like to the spawner, for a failure message. */
