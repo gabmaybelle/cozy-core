@@ -30,7 +30,7 @@ it first, and add this session's row before ending.
   (recipes only, vanilla wood). The build stops if a mod-only file would reach the zip.
 - **The mods are Gradle's.** `./gradlew build` makes `fabric/build/libs/cozy-core-<version>-fabric.jar`
   and `neoforge/build/libs/cozy-core-<version>-neoforge.jar`; `node tools/build.js --jars` copies
-  them into `dist/`. Layout (the same as Beyond the Dragon's): `common/` holds the code, mixins,
+  them into `dist/`. Layout: `common/` holds the code, mixins,
   assets and the mod-only data (the lantern recipe and its unlock, the `explosions_spare_blocks`
   entity tag); `fabric/` and `neoforge/` compile `common/`'s sources and `pack/` straight into their
   jars, with their own entrypoint, `Platform` implementation and metadata. Common code reaches the
@@ -239,7 +239,7 @@ What differs from 26.3, and why (2026-10-17):
 ## Gabby's mods: who does what (the same in every repo)
 
 One job per mod, decided 2026-10-15, so nothing is done twice and each repo tells the same story.
-This repo's copy leaves out one mod and one modpack on purpose (Gabby's call); don't add them back.
+This repo's copy leaves out some mods on purpose (Gabby's call); don't add them back.
 
 - **Cozy Core** (cozy-core): the Hearth Lantern, which makes the ground around it home: no
   monsters or phantoms spawn there, and creeper and ghast blasts, fire and endermen leave its
@@ -251,12 +251,6 @@ This repo's copy leaves out one mod and one modpack on purpose (Gabby's call); d
 - **Pocket List** (pocket-list): the gathering checklist.
 - **Not Now, Shield** (not-now-shield): the shield drawn lower in first person; on 26.x also
   tools that change blocks while a shield is in the off-hand.
-- **Beyond the Dragon** (beyond-the-dragon): the end-game after the Ender Dragon: ruins at the
-  edge of the End, a dragon that comes back harder, and the aphelite metal.
-- **Forgemark** (forgemark): tempering the tools, weapons and armour you already have, from any
-  mod, for a small capped quality bonus.
-- **Cozy Core Pack** (cozy-core-pack): the builder-friendly modpack around Cozy Core, with Spawn
-  Gazebo, Nightfall Clock, Pocket List and Not Now, Shield.
 
 A new feature goes in the mod whose job it is. If none fits, ask Gabby before adding it anywhere.
 
@@ -275,7 +269,7 @@ computer and others in the cloud. These rules keep their work fitting together.
 the test, read its result (and the screenshot, for anything visual), then commit that one
 branch, then push it. A cherry-pick that conflicts stops the work until it is resolved by hand.
 A worldgen or balance change is tested on every terrain in the branch's matrix before it goes
-to any other branch. (Learned on Beyond the Dragon, 2026-10-14, when scripted chains committed
+to any other branch. (Learned on another mod, 2026-10-14, when scripted chains committed
 a conflicted cherry-pick, put one branch's files on another, and sent an untested ore change to
 all three branches.) For a Gradle game test use a game watcher that reports a verdict (in the world, error screen, crashed or hung),
 not a wait loop.
