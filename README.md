@@ -1,8 +1,10 @@
 # Cozy Core
 
-*Put the kettle on and build.*
+*Light a hearth. Home is safe.*
 
-Cozy Core takes the grind out of building in Minecraft. Your builds stay built, a lantern keeps the night quiet, and decorating needs fewer trips back to the crafting table. There's nothing new to learn and nothing running in the background.
+Light a Hearth Lantern and the ground around it becomes home. A creeper blows up beside your house and not a block breaks. No monsters spawn in the yard, fire can't creep into the walls, and endermen leave your roof alone. Out in the wild, Minecraft is as it always was.
+
+Cozy Core also takes the grind out of decorating, with wood in the stonecutter, re-dyeing and a few hard-to-find blocks. There's nothing new to learn and nothing running in the background.
 
 This is the version for **Minecraft 1.21.1**, on Fabric and NeoForge. It's the same Cozy Core as on 26.3; the few small differences are under [On 1.21.1](#on-1211).
 
@@ -11,19 +13,30 @@ This is the version for **Minecraft 1.21.1**, on Fabric and NeoForge. It's the s
 - **The mod** (Fabric with [Fabric API](https://modrinth.com/mod/fabric-api), or NeoForge): everything below.
 - **The data pack** (`.zip`): only the recipes, for a world on plain vanilla. Drop it in the world's `datapacks` folder and type `/reload`.
 
-## What it adds
+## Light a hearth
 
-**Builds stay built.** Near a Hearth Lantern (below), creeper and ghast explosions still hurt, but break no blocks. Endermen leave your blocks alone. Fire still burns, but never spreads to a block or destroys one. Phantoms don't come for you there. Out in the wild, Minecraft is as usual, or a game rule spares blocks everywhere.
+**The Hearth Lantern.** Make it from a lantern and four amethyst shards. Everything within 32 blocks of it, at any height, is home. There's the classic one and a soul one, made from a soul lantern, which works the same.
 
-**Keep your hotbar when you die.** Your hotbar, armour and off-hand stay with you. Everything else drops where you fell (into a grave, with a graves mod), so there's still a trip back.
+**Home is safe.** Inside a Hearth Lantern's reach:
 
-**The Hearth Lantern.** Make it from a lantern (or a soul lantern) and four amethyst shards. Within 32 blocks of it is home: your build is kept safe (above) and no monster spawns naturally, so a build site stays quiet at night without torches everywhere. Spawners and raids work as usual.
+- no monster spawns naturally and phantoms don't come for you (spawners and raids work as usual);
+- creeper and ghast explosions still hurt, but break no blocks, so a blast at the edge leaves a crater that stops where home begins;
+- fire still burns and goes out, but doesn't spread or burn blocks away;
+- endermen leave your blocks alone;
+- blasts, fire and lightning don't hurt your animals, pets or villagers, and lightning doesn't turn a villager into a witch, a pig into a zombified piglin or a mooshroom into the other colour;
+- you and your tamed pets take no fall damage, so a slip off the roof doesn't cost a trip back;
+- things you drop last an hour instead of five minutes;
+- glass and panes of every colour, ice, packed ice, blue ice and bookshelves drop themselves when you break them, as with Silk Touch (and ice leaves no water).
+
+**Welcome home.** Walking in shows "Home" above your hotbar, with a soft fireplace crackle. Rename a lantern on an anvil ("Willow Cottage") and you'll see that name instead; where two named homes overlap, the nearest one's name shows. While you hold a Hearth Lantern, small flames on the ground show where home ends.
+
+## Build with less grind
 
 **Wood in the stonecutter.** One plank makes one set of stairs, a fence, a gate, a door, a trapdoor, a button, a pressure plate or a sign, or two slabs. A log makes four times as much. Logs also cut into wood and stripped wood, and bamboo works too.
 
 **Slabs back into planks.** Two wooden slabs make one plank again.
 
-**Re-dyeing.** Eight blocks of terracotta, stained glass, glass panes or concrete powder around a dye, in any colours, make eight of the dye's colour.
+**Re-dyeing.** Eight blocks of terracotta, stained glass, glass panes, concrete powder or candles around a dye, in any colours, make eight of the dye's colour.
 
 **A few hard-to-find blocks to craft:**
 
@@ -36,7 +49,13 @@ This is the version for **Minecraft 1.21.1**, on Fabric and NeoForge. It's the s
 
 **Traders with building blocks.** The wandering trader can sell azaleas, fungus and calcite. Masons sell tuff, mud bricks, calcite and packed mud.
 
-The rules, the lantern and the trades are in the mod only, since they need a little code. New recipes show up in your recipe book as you pick up what they need.
+## Also in Cozy Core
+
+**Keep your hotbar when you die.** Your hotbar, armour and off-hand stay with you. Everything else drops where you fell (into a grave, with a graves mod), so there's still a trip back.
+
+**A Cozy Core advancements tab** that opens when you pick up planks, with seven steps along the way. One of them is "Safe and sound": a creeper explodes at home, and nothing breaks. There are no rewards. The data pack has the steps that don't need the mod.
+
+The hearth, the trades and keeping your hotbar are in the mod only, since they need a little code. New recipes show up in your recipe book as you pick up what they need.
 
 ## Changing the rules
 
@@ -44,16 +63,16 @@ Each rule is an ordinary game rule: it shows in the Game Rules screen when you m
 
 | Game rule | New worlds |
 |---|---|
-| `cozy_core:hearths_protect_builds` | true (blasts, fire and endermen spare blocks near a Hearth Lantern) |
+| `cozy_core:hearths_protect_builds` | true (blasts, fire and endermen spare blocks at home, and animals are safe there) |
+| `cozy_core:hearth_lantern_radius` | 32 (how far home reaches; 0 switches lanterns off) |
+| `cozy_core:hearth_item_minutes` | 60 (how long dropped items last at home; 5 is the usual five minutes) |
+| `cozy_core:keep_hotbar_on_death` | true |
 | `cozy_core:mob_explosions_break_blocks` | true (false: explosions break nothing anywhere) |
 | `cozy_core:endermen_take_blocks` | true (false: endermen take nothing anywhere) |
 | `cozy_core:fire_burns_blocks` | true (false: fire burns nothing anywhere) |
-| `cozy_core:keep_hotbar_on_death` | true |
-| `cozy_core:hearth_lantern_radius` | 32 (how far home reaches; 0 switches lanterns off) |
-| `cozy_core:hearth_item_minutes` | 60 (how long dropped items last at home; 5 is the usual five minutes) |
-| `doInsomnia` (vanilla's own phantoms rule) | true (phantoms don't come for you near a Hearth Lantern) |
+| `doInsomnia` (vanilla's own phantoms rule) | true (phantoms don't come for you at home either way; false turns them off everywhere) |
 
-Worlds you already have keep the settings they were made with.
+Want the whole world kept safe? Turn off the three "anywhere" rules. Worlds you already have keep the settings they were made with.
 
 ## Other mods
 
