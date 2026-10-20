@@ -21,9 +21,9 @@ it first, and add this session's row before ending.
 - **`public`** is the live branch and the one to push: its history starts fresh with one commit
   (2026-10-13). Work here.
 - **`main`** keeps the earlier local history, which has a personal detail in it. Never push `main`.
-- **`1.21.1`** (Fabric + NeoForge) gets ports of new releases. **`1.20.1`** (Fabric + Forge) is
-  frozen at 0.6.0 (Gabby, 2026-10-19): don't port new features to it unless she asks because
-  players want it. Bug fixes for a crash there are fine.
+- **`1.21.1`** (Fabric + NeoForge) gets ports of new releases.
+- **1.20.1 was dropped** (Gabby, 2026-10-19): its releases and branch are gone. Don't port to it
+  or bring it back unless she asks.
 
 ## Layout
 
