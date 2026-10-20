@@ -8,7 +8,7 @@ which checks fail, code put back), what was learned, and what was deliberately n
 
 - **Done:** Cozy Core 0.3.0: the recipes and trades that take the grind out of decorating, five kind rules (builds stay built, and since 0.3.0 you keep your hotbar, armour and off-hand on death), and the Hearth Lantern (no natural monster spawns within 32 blocks), as a Fabric and a NeoForge mod plus the plain data pack; CI builds all of it and runs load tests on Fabric, NeoForge and vanilla, the stonecutter screen check, and the NeoForge game test. The live branch is `public`, pushed to the remote `public` as `main`; `main` is old local history and is never pushed.
 - **Broken:** Nothing known as of this writing (not re-verified).
-- **Next:** 0.6.0+1.21.1 (Home comforts) is built and tested on `claude/home-comforts-1.21.1`: commit, push and release. Then 1.20.1.
+- **Next:** nothing planned; 0.6.0+1.21.1 (Home comforts) is released. 1.20.1 was dropped (Gabby, 2026-10-19), so nothing is ported further down.
 
 ## Log
 
