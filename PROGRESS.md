@@ -6,9 +6,10 @@ which checks fail, code put back), what was learned, and what was deliberately n
 
 ## Where things stand
 
-- **Done:** Cozy Core 0.3.0: the recipes and trades that take the grind out of decorating, five kind rules (builds stay built, and since 0.3.0 you keep your hotbar, armour and off-hand on death), and the Hearth Lantern (no natural monster spawns within 32 blocks), as a Fabric and a NeoForge mod plus the plain data pack; CI builds all of it and runs load tests on Fabric, NeoForge and vanilla, the stonecutter screen check, and the NeoForge game test. The live branch is `public`, pushed to the remote `public` as `main`; `main` is old local history and is never pushed.
-- **Broken:** Nothing known as of this writing (not re-verified).
-- **Next:** 0.6.0 (Home comforts) is built and tested on `claude/home-comforts`: commit, push and release, then the 1.21.1 and 1.20.1 ports.
+- **Done:** the Hearth ("Light a hearth. Home is safe."): inside a Hearth Lantern's reach no monster or phantom spawns, blasts, fire and endermen leave blocks alone, animals and pets are safe, items last longer, no fall damage and glass, ice and bookshelves drop themselves; six lantern styles, a named home, the "Home" sign; keep your hotbar on death; cheap wood in the stonecutter, re-dyeing and builder trades; an advancements tab. Fabric and NeoForge jars plus the plain data pack, every change released (versions: the GitHub releases). CI builds all of it and runs the load tests, the game tests and the NeoForge game test on every push. The live branch is `public`, pushed to the remote `public` as `main`; `main` is old local history and is never pushed.
+- **Broken:** nothing known.
+- **Next:** nothing planned in code; listing on CurseForge and Modrinth comes first (Gabby's). New features need Gabby's pick before they're built.
+- **Version lines (Gabby, 2026-10-19):** 26.3 (`public`) and 1.21.1 get updates. **1.20.1 is frozen at 0.6.0**: it stays released and gets listed, but no new 1.20.1 versions unless players ask. Why: none of the supported wood and decoration mods stops at 1.20.1 (all reach 1.21.1, most 26.3), and 1.20.1 is the costliest line to keep (Forge, Java 17, its own harness). Its branch stays as the template for Forge server game tests.
 
 ## Log
 
