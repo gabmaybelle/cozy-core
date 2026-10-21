@@ -261,11 +261,16 @@ public class RulesTest implements ClientGameTest {
 		set(server, Rules.FIRE_BURNS_BLOCKS, true);
 		int[] vanilla = burn(ctx, server, at);
 		check(vanilla[0] > 0, "with the rule on, fire burns planks again (" + vanilla[0] + " of 49 gone)");
-		int reach = server.computeOnServer(s -> rules(s).getInt(Rules.HEARTH_LANTERN_RADIUS));
+		// At the 32-block reach this check was laid out for (the default until 0.7.0). With the lantern
+		// 64 blocks out, at the edge of the loaded test area, nothing burned on the wild side here
+		// (2026-10-21), while the NeoForge check burned 20 of 20 wild planks at 64: the mod's fine at 64.
+		set(server, Rules.HEARTH_LANTERN_RADIUS, 32);
+		int reach = 32;
 		BlockPos hearth = at.offset(-reach, 0, 0);
 		placeHearth(server, hearth);
 		int[] edge = burn(ctx, server, at, true);
 		removeHearth(server, hearth);
+		set(server, Rules.HEARTH_LANTERN_RADIUS, 64);
 		check(edge[2] > 0 && edge[0] == 0, "on the edge of home, fire burns no planks at home (" + edge[0] + " of " + edge[2] + " gone)");
 		check(edge[1] > 0, "on the edge of home, the wild half still burns (" + edge[1] + " planks gone)");
 	}
