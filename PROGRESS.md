@@ -6,9 +6,9 @@ which checks fail, code put back), what was learned, and what was deliberately n
 
 ## Where things stand
 
-- **Done:** Cozy Core 0.3.0: the recipes and trades that take the grind out of decorating, five kind rules (builds stay built, and since 0.3.0 you keep your hotbar, armour and off-hand on death), and the Hearth Lantern (no natural monster spawns within 32 blocks), as a Fabric and a NeoForge mod plus the plain data pack; CI builds all of it and runs load tests on Fabric, NeoForge and vanilla, the stonecutter screen check, and the NeoForge game test. The live branch is `public`, pushed to the remote `public` as `main`; `main` is old local history and is never pushed.
-- **Broken:** Nothing known as of this writing (not re-verified).
-- **Next:** 0.7.0+1.21.1 (Home comes alive) is on branch `home-alive-1.21.1`, not merged or released: it needs a merge to `1.21.1` and a release alongside 26.3's 0.7.0. 1.20.1 was dropped (Gabby, 2026-10-19), so nothing is ported further down.
+- **Done:** this branch carries 26.3's features to Minecraft 1.21.1 (what differs: CLAUDE.md, "On the 1.21.1 branch"): the Hearth Lantern and its home (64 blocks in new worlds: no monster spawns, builds, animals and pets safe, home comforts, and since home came alive, candles at dusk, pets by the hearth and a garden), keep your hotbar on death, cheap wood in the stonecutter, re-dyeing and builder trades, as Fabric and NeoForge jars plus the plain data pack; every change released (versions: the GitHub releases). CI builds all of it and runs the load tests and both game tests. The branch is pushed to the remote `public` as `1.21.1`.
+- **Broken:** nothing known.
+- **Next:** ports of 26.3's next features as they're released. 1.20.1 was dropped (Gabby, 2026-10-19), so nothing is ported further down.
 
 ## Log
 
