@@ -25,10 +25,15 @@ NAME = 'cozy-core-short'
 # ("*word*" in orange) and where the caption's top sits. A scene can appear twice with different
 # frames, to change its caption partway (the roof: the glass, then the fall).
 SCENES = [
-    ('s_porch', 0, None, ['HOME IS *SAFE*'], 390),
+    # The opening is the payoff and the refuge in one picture (Gabby, 2026-10-20): a blast on the
+    # edge of home tears up the wild half of the lawn and stops at a line, with the lantern behind.
+    ('s_edge', 0, None, ['HOME IS *SAFE*'], 390),
+    # Why it's safe (Gabby, 2026-10-20: before, nothing in the video showed the Hearth Lantern was
+    # the cause): the lantern hung on the post, "Home" above the hotbar.
+    ('s_home', 0, None, ['LIGHT A *HEARTH*'], 390),
     ('s_name', 0, None, ['WELCOME *HOME*'], 390),
-    ('s_roof', 0, 27, ['GLASS COMES', '*BACK*'], 390),
-    ('s_roof', 28, None, ['NO FALL', '*DAMAGE*'], 390),
+    # The porch blast and the roof (glass, no fall damage) wait for the longer video: two perks in
+    # three seconds read as a feature list, not as a refuge.
     # Below the stonecutter screen, still above the bottom fifth YouTube covers.
     ('s_cut', 0, None, ['ONE LOG,', 'FOUR *STAIRS*'], 1360),
     ('s_wide', 0, None, None, 0),
@@ -186,8 +191,8 @@ run('ffmpeg', '-y', '-i', silent, '-i', audio, '-map', '0:v', '-map', '1:a', '-c
     '-shortest', '-movflags', '+faststart', os.path.join(out, NAME + '.mp4'))
 
 # The thumbnail: a clean frame from the opening scene, just after the blast, with the mod's name large.
-raw = sorted(n for n in os.listdir(frames_dir) if n.startswith('s_porch_'))
-stripped = [f for s, f, k, _ in actions if s == 's_porch' and k == 'boom']
+raw = sorted(n for n in os.listdir(frames_dir) if n.startswith(SCENES[0][0] + '_'))
+stripped = [f for s, f, k, _ in actions if s == SCENES[0][0] and k == 'boom']
 pick = min(len(raw) - 1, (stripped[0] + 20) if stripped else len(raw) * 2 // 3)
 thumb = Image.open(os.path.join(frames_dir, raw[pick])).convert('RGBA').resize((W, H), Image.LANCZOS)
 d = ImageDraw.Draw(thumb)
