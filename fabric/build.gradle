@@ -60,6 +60,39 @@ fabricApi {
 	}
 }
 
+//
+// `./gradlew :fabric:runClientGameTest -PvideoTour` also films the Short (VideoTour), frames in
+// build/run/clientGameTest/video_tour. Every other -Pvideo... property is passed on to it:
+// -PvideoScenes=<scene,scene,w_*> films only those scenes, -PvideoScout takes one still per scene,
+// -PvideoSeed=<seed> picks the world, -PvideoWorld=<zip> films in a saved world, -PvideoStage
+// saves the staged world. Without -PvideoTour the game test runs as usual.
+if (project.hasProperty("videoTour")) {
+	tasks.matching { it.name == 'runClientGameTest' }.configureEach {
+		systemProperty 'cozycore.videoTour', 'true'
+		// -PvideoShaders=<shader pack zip>: film with that Iris shader pack switched on (Iris and
+		// Sodium come in with -PwoodMods=<folder of jars>). Copied into the run folder before launch,
+		// since Iris reads its settings as the game starts.
+		if (project.hasProperty('videoShaders')) {
+			def pack = file(project.videoShaders)
+			// The game's own folder, where Iris looks (the task's working directory is the project
+			// folder, and shaders copied there were never picked up).
+			def run = file('build/run/clientGameTest')
+			doFirst {
+				copy { from pack; into new File(run, 'shaderpacks') }
+				def config = new File(run, 'config/iris.properties')
+				config.parentFile.mkdirs()
+				config.text = "enableShaders=true\nshaderPack=${pack.name}\n"
+			}
+		}
+		project.properties.each { name, value ->
+			if (name.startsWith('video') && name != 'videoTour') {
+				// A bare flag (-PvideoScout) arrives empty: pass it on as true.
+				systemProperty "cozycore.${name}", value.toString().isEmpty() ? 'true' : value.toString()
+			}
+		}
+	}
+}
+
 tasks.withType(JavaExec).configureEach {
 	if (project.hasProperty("expect")) {
 		// Relative to the repo root, so `-Pexpect=pack` works from anywhere.
