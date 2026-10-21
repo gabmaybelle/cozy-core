@@ -12,9 +12,11 @@
 		"ItemEntityMixin",
 		"LivingEntityMixin",
 		"NaturalSpawnerMixin",
+		"PetGoalsMixin",
 		"PhantomSpawnerMixin",
 		"ServerExplosionMixin",
 		"ServerPlayerMixin",
+		"SpreadingSnowyBlockMixin",
 		"ThunderHitMixin"
 	],
 	"injectors": {

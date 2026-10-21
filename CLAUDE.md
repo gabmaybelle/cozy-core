@@ -6,12 +6,18 @@ one plank, re-dyeing terracotta, glass, panes and concrete powder, a few hard-to
 recipes, and builder trades (wandering trader, mason). The mod version (Fabric and NeoForge jars
 from one codebase) adds the little code a data pack can't: the Hearth Lantern (since 0.5.0 its
 centrepiece, "Light a hearth. Home is safe."): inside its reach no monster spawns naturally and
-creeper/ghast blasts, fire and endermen leave blocks alone, while the wild stays vanilla; six
+creeper/ghast blasts, fire and endermen leave blocks alone, while the wild stays vanilla; the
 `cozy_core:` game rules (hearths protect builds; world-wide switches for mob explosions, endermen
-and fire; the lantern's reach; keep your hotbar on death), and no phantoms over a player at home
+and fire; the lantern's reach, 64 since 0.7.0; how long drops last at home; keep your hotbar on
+death; and 0.7.0's lights, garden and pets), and no phantoms over a player at home
 (until 0.4.0 phantoms were off by default in new worlds; Gabby's call 2026-10-19). Nothing runs on a timer on the server: the rules are hooks, the lantern is a block entity
-that only reports where it is, and keep-on-death is two hooks around dying and respawning. The
+that only reports where it is, keep-on-death is two hooks around dying and respawning, and 0.7.0's
+home life rides on vanilla's random ticks and a pet goal. The
 client has one tick hook (`client/HearthClient`) for the "Home" sign and the edge flames.
+
+**The feel (Gabby, 2026-10-21): slow-paced, peaceful, cute.** Since 0.7.0 every new feature is
+tested against those three words before it's built: home should feel like a refuge that comes
+alive, not only a place where bad things don't happen.
 
 `PROGRESS.md` says what's done, what's broken and what's next, with a row per session: read
 it first, and add this session's row before ending.
@@ -84,6 +90,22 @@ it first, and add this session's row before ending.
   skips the melt). Candles re-dye in the generator's `REDYE` list. Gabby's calls, 2026-10-19:
   every passive animal and pet plus villagers; players and their tamed pets; every glass block and
   pane, ice, packed and blue ice, and bookshelves.
+- **Home comes alive (0.7.0, `HomeLife.java`; Gabby's picks, 2026-10-21):** three things home
+  does on its own, each with a game rule (on).
+  - *Lights at dusk* (`hearth_lights`): `BlockBehaviourMixin` makes every candle and candle cake
+    randomly tick (`isRandomlyTicking`, asked once per block state at start-up) and catches their
+    tick in `BlockBehaviour.randomTick`'s empty default. At home, an unlit candle lights from
+    sunset (12000) to dawn (23000), and a lit one goes out only from dawn to 2000, so a candle lit
+    by hand at noon stays lit. The time of day is `getDefaultClockTime() % 24000` (26.3 keeps time
+    in clocks).
+  - *A garden* (`hearth_garden`): `SpreadingSnowyBlockMixin` adds to grass's own random tick. One
+    tick in 40,000 (`GARDEN_CHANCE`), open grass at home with air and sky above grows a flower
+    from the biome's bone-meal features, unless its 5x5 patch already has `GARDEN_CAP` (2).
+  - *Pets come home* (`pets_come_home`): `PetGoalsMixin` adds `SettleByHearthGoal` to cats and
+    wolves at priority 5, above their follow-owner goal (6). From 13000 to 23000, with the owner
+    at home and the pet within 48 blocks of the nearest lantern, not sitting, leashed or riding, the
+    pet walks to the ground under the lantern (or beside one standing on something) and settles:
+    a cat lies down, a dog sits. `HearthLanterns.nearest` finds the lantern.
 - `art/icon.ase`: Gabby's own 32x32 sprite; `art/icon.png` is it at 512x512 (nearest-neighbour).
   The build puts it in the zip as `pack.png` and Gradle puts it in the jars as `icon.png` (Fabric
   `icon`, NeoForge `logoFile`). Never replace it with generated art; re-export from the .ase.
@@ -166,10 +188,17 @@ it first, and add this session's row before ending.
   environment per check that places lanterns (`HomeChecks.java`: blasts and fire at home and on the
   edge, endermen, every style's drop, name and sync, phantoms (vanilla's own `PhantomSpawner` run
   100 times at midnight over a sleepless mock player, with and without a lantern), the spawning
-  room), and 0.6.0's comforts (`ComfortsChecks.java`: items, animals, lightning, falls, glass).
-  The item and lightning checks keep every spot inside the test's own (48-block) area: items only
-  age, and a mob only turns into another, where entities tick, which the test server only promises
-  near a test (a forced chunk wasn't enough). **Vanilla runs each
+  room), 0.6.0's comforts (`ComfortsChecks.java`: items, animals, lightning, falls, glass) and
+  0.7.0's home life (`LifeChecks.java`: the 64-block reach in a new world; candles through their
+  real random tick at dusk, in the morning, lit by hand at noon, in the wild and with the rule off;
+  the garden, at chance 1 and once at play's odds through grass's own random tick, plus the wild,
+  the cap and the rule off; a tamed cat at night leaving its owner to lie by the lantern, then
+  getting up at noon). The "home_..." environments pin the reach to 32: their checks were laid out
+  for it (a spot 45 or 60 blocks out stands in the wild). The item, lightning and pet checks keep
+  every spot inside the test's own area and use the "lanterns" template, not the 1-block "empty":
+  items only age, a mob only turns into another, and a mob's mind only runs where entities tick,
+  which the test server only promises near a test, sized by its template (a forced chunk wasn't
+  enough; a cat 10 blocks from an "empty" test never moved, 2026-10-21). **Vanilla runs each
   environment as its own batch, one after another, in the same part of the world**, so a lantern
   or stand-in player left by one check would guard or quiet a later batch's test: every check
   removes them even when it fails (`RuleChecks.orTidy`; learned 2026-10-19, when a failed proof

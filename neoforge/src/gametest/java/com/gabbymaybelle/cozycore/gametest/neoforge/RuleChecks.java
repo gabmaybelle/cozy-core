@@ -76,7 +76,7 @@ final class RuleChecks {
 		helper.assertTrue(rules.get(Rules.MOB_EXPLOSIONS_BREAK_BLOCKS), "out in the wild, mob explosions should break blocks by default");
 		helper.assertTrue(rules.get(Rules.ENDERMEN_TAKE_BLOCKS), "out in the wild, endermen should take blocks by default");
 		helper.assertTrue(rules.get(Rules.FIRE_BURNS_BLOCKS), "out in the wild, fire should burn blocks by default");
-		helper.assertValueEqual(rules.get(Rules.HEARTH_LANTERN_RADIUS), 32, "the Hearth Lantern radius");
+		helper.assertValueEqual(rules.get(Rules.HEARTH_LANTERN_RADIUS), 64, "the Hearth Lantern radius");
 		helper.assertTrue(rules.get(GameRules.SPAWN_PHANTOMS), "phantoms should be vanilla in a new world (they leave you alone at home instead)");
 		helper.assertTrue(rules.get(Rules.KEEP_HOTBAR_ON_DEATH), "the hotbar should be kept on death by default");
 		helper.assertTrue(rules.availableRules().anyMatch(rule -> rule.category() == Rules.CATEGORY), "the rules should have the Cozy Core heading");

@@ -69,6 +69,10 @@ public final class CozyCoreGameTests {
 		FUNCTIONS.put("lantern_off_at_radius_zero", helper -> RuleChecks.lanterns(helper, false));
 		FUNCTIONS.put("hotbar_kept_on_death", helper -> RuleChecks.keepOnDeath(helper, true));
 		FUNCTIONS.put("hotbar_dropped_on_death", helper -> RuleChecks.keepOnDeath(helper, false));
+		FUNCTIONS.put("reach_is_64", LifeChecks::reach);
+		FUNCTIONS.put("candles_light_at_dusk", LifeChecks::lights);
+		FUNCTIONS.put("garden_grows_at_home", LifeChecks::garden);
+		FUNCTIONS.put("pets_settle_by_the_hearth", LifeChecks::pets);
 	}
 
 	public CozyCoreGameTests(IEventBus modBus) {
@@ -116,37 +120,39 @@ public final class CozyCoreGameTests {
 		test(event, "endermen_take_blocks_in_the_wild", kind, EMPTY, 20);
 		test(event, "fire_spares_blocks_everywhere", everywhere, id("fire"), 2000);
 		test(event, "fire_burns_blocks_in_the_wild", kind, id("fire"), 2000);
-		test(event, "explosions_spare_home", environment(event, "home_explosions", rules -> {
-		}), id("explosions"), 100);
+		test(event, "explosions_spare_home", home(event, "home_explosions"), id("explosions"), 100);
 		test(event, "explosions_break_with_hearths_off", hearthsOff, id("explosions"), 100);
-		test(event, "explosions_stop_at_the_edge", environment(event, "home_explosion_edge", rules -> {
-		}), id("explosions"), 100);
-		test(event, "fire_spares_home", environment(event, "home_fire", rules -> {
-		}), id("fire"), 2000);
-		test(event, "fire_stops_at_the_edge", environment(event, "home_fire_edge", rules -> {
-		}), id("fire"), 2000);
-		test(event, "endermen_leave_home", environment(event, "home_endermen", rules -> {
-		}), EMPTY, 20);
-		test(event, "lantern_styles", environment(event, "home_styles", rules -> {
-		}), EMPTY, 20);
-		test(event, "phantoms_leave_home_alone", environment(event, "home_phantoms", rules -> {
-		}), EMPTY, 100);
+		test(event, "explosions_stop_at_the_edge", home(event, "home_explosion_edge"), id("explosions"), 100);
+		test(event, "fire_spares_home", home(event, "home_fire"), id("fire"), 2000);
+		test(event, "fire_stops_at_the_edge", home(event, "home_fire_edge"), id("fire"), 2000);
+		test(event, "endermen_leave_home", home(event, "home_endermen"), EMPTY, 20);
+		test(event, "lantern_styles", home(event, "home_styles"), EMPTY, 20);
+		test(event, "phantoms_leave_home_alone", home(event, "home_phantoms"), EMPTY, 100);
 		// 0.6.0's home comforts (ComfortsChecks), each alone in its batch too.
-		test(event, "items_last_at_home", environment(event, "home_items", rules -> {
-		}), id("lanterns"), 100);
-		test(event, "animals_safe_at_home", environment(event, "home_animals", rules -> {
-		}), EMPTY, 100);
-		test(event, "lightning_spares_home", environment(event, "home_lightning", rules -> {
-		}), id("lanterns"), 20);
-		test(event, "no_falls_at_home", environment(event, "home_falls", rules -> {
-		}), EMPTY, 20);
-		test(event, "glass_comes_back_at_home", environment(event, "home_glass", rules -> {
-		}), EMPTY, 20);
-		test(event, "lantern_keeps_the_night_quiet", environment(event, "home_spawning", rules -> {
-		}), id("lanterns"), 400);
+		test(event, "items_last_at_home", home(event, "home_items"), id("lanterns"), 100);
+		test(event, "animals_safe_at_home", home(event, "home_animals"), EMPTY, 100);
+		test(event, "lightning_spares_home", home(event, "home_lightning"), id("lanterns"), 20);
+		test(event, "no_falls_at_home", home(event, "home_falls"), EMPTY, 20);
+		test(event, "glass_comes_back_at_home", home(event, "home_glass"), EMPTY, 20);
+		test(event, "lantern_keeps_the_night_quiet", home(event, "home_spawning"), id("lanterns"), 400);
 		test(event, "lantern_off_at_radius_zero", vanilla, id("lanterns"), 400);
 		test(event, "hotbar_kept_on_death", kind, id("explosions"), 100);
 		test(event, "hotbar_dropped_on_death", vanilla, id("explosions"), 100);
+		// 0.7.0, home comes alive (LifeChecks): the reach in a new world, then each new thing alone in its batch.
+		test(event, "reach_is_64", environment(event, "reach", rules -> {
+		}), EMPTY, 20);
+		test(event, "candles_light_at_dusk", home(event, "home_lights"), EMPTY, 20);
+		test(event, "garden_grows_at_home", home(event, "home_garden"), EMPTY, 20);
+		test(event, "pets_settle_by_the_hearth", home(event, "home_pets"), id("lanterns"), 400);
+	}
+
+	/**
+	 * A "home_..." environment: the kind rules, with the reach at 32 blocks. These checks were laid
+	 * out for the 32-block reach the lantern had until 0.7.0 (a spot 45 or 60 blocks out stands in the
+	 * wild, which a 64-block reach would take in), so they keep it; "defaults" checks the new 64.
+	 */
+	private static Holder<TestEnvironmentDefinition<?>> home(RegisterGameTestsEvent event, String name) {
+		return environment(event, name, rules -> rules.set(Rules.HEARTH_LANTERN_RADIUS, 32));
 	}
 
 	/**
