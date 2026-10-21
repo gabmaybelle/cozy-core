@@ -66,6 +66,8 @@ public class VideoTour implements FabricClientGameTest {
 	private static final int SUNRISE = 23850, MORNING = 1000;
 
 	private Film film;
+	/** Whether walks run at the world's pace: the player gets two of their own ticks per frame otherwise. */
+	private boolean realPace;
 	/** The cottage's spot: the end of its front path, facing north; y is the ground the player stands on. */
 	private int sx, sy, sz;
 
@@ -197,6 +199,12 @@ public class VideoTour implements FabricClientGameTest {
 
 	/** The Short's scenes (tall), then the showcase's (wide), in running order. */
 	private static final List<String> SHORT = List.of("s_edge", "s_porch", "s_name", "s_roof", "s_dye", "s_cut", "s_wide", "s_home", "s_storm");
+	/**
+	 * The Short "Light a hearth" (Gabby, 2026-10-21): tall, about 15 s. She hangs the Hearth Lantern
+	 * at sunset, night comes and nothing spawns on the lawn, the porch rests quiet, and at sunrise she
+	 * looks up at the lantern from the first shot's spot, so the Short loops.
+	 */
+	private static final List<String> TALL = List.of("t_home", "t_night", "t_calm", "t_morning");
 	private static final List<String> DAY = List.of("d_dawn", "d_home", "d_cut", "d_dye", "d_roof", "d_trader", "d_anvil", "d_name", "d_styles",
 			"d_night", "d_storm", "d_porch", "d_morning");
 
@@ -211,10 +219,20 @@ public class VideoTour implements FabricClientGameTest {
 			film.scene("s_roof", () -> roof(SUNSET));
 			film.scene("s_dye", () -> dye(SUNSET));
 			film.scene("s_cut", () -> stonecutter(SUNSET));
-			film.scene("s_wide", this::wide);
+			film.scene("s_wide", () -> wide(DUSK));
 			// Filmed for the second Short.
 			film.scene("s_home", () -> home(SUNSET));
 			film.scene("s_storm", () -> storm(DUSK));
+		}
+		if (TALL.stream().anyMatch(film::want)) {
+			film.window(1080, 1920, 3);
+			// Walks at the world's pace (kit README: the player otherwise moves at double speed in a take).
+			realPace = true;
+			film.scene("t_home", () -> home(SUNSET));
+			film.scene("t_night", this::night);
+			film.scene("t_calm", this::calm);
+			film.scene("t_morning", this::hearthMorning);
+			realPace = false;
 		}
 		if (DAY.stream().anyMatch(film::want)) {
 			showcase();
@@ -521,9 +539,60 @@ public class VideoTour implements FabricClientGameTest {
 		Film.check(pig, "the pig is still a pig");
 	}
 
-	/** A quiet wide shot of the cottage at dusk, easing in to the opening shot's angle, so the Short loops. */
-	private void wide() {
-		reset(true, DUSK);
+	/**
+	 * Night at home, quiet: the cat asleep on the porch step, the lanterns glowing, the camera
+	 * easing in. Nothing happens, which is the point.
+	 */
+	private void calm() {
+		reset(true, NIGHT + 800);
+		film.hud(false);
+		film.spectator();
+		film.thirdPerson(false, 4);
+		BlockPos step = at(-1, 1, -4);
+		porchCat(step);
+		Vec3 from = porchEye().add(2, 1, 3);
+		film.camera(from, porchLook());
+		film.ctx.waitTicks(10);
+		film.dolly(70, from, porchEye(), porchLook(), porchLook());
+		boolean cat = film.server.computeOnServer(s -> near(s, Cat.class, step) != null);
+		Film.check(cat, "the cat is on the porch");
+	}
+
+	/**
+	 * Sunrise, third person, from the first shot's spot by the lamp post: the Hearth Lantern still
+	 * hangs there, lit, and her gaze rises from the foot of the post to the chain, ending where the
+	 * first shot begins, so the Short loops.
+	 */
+	private void hearthMorning() {
+		reset(true, SUNRISE + 300);
+		film.hud(true);
+		film.survival();
+		cmd("clear @a");
+		BlockPos p = chain();
+		Vec3 top = new Vec3(p.getX() + 0.45, p.getY() + 0.02, p.getZ() + 0.5);
+		film.camera(new Vec3(p.getX() + 0.5, sy, p.getZ() + 2.6), top);
+		film.ctx.waitTicks(45);
+		film.thirdPerson(true, 6);
+		film.bigGui();
+		Vec3 foot = Vec3.atBottomCenterOf(post()).add(1.2, 0, 0.6), start = top.add(-0.8, -0.6, 0);
+		film.turnHead(foot);
+		film.ctx.waitTicks(2);
+		film.record(16);
+		for (int i = 1; i <= 24; i++) {
+			film.turnHead(foot.lerp(start, Film.ease(i / 24.0)));
+			film.record(1);
+		}
+		film.record(20);
+		boolean hanging = film.server.computeOnServer(s -> s.overworld().getBlockState(lantern()).is(HearthLantern.BLOCK.get()));
+		film.note("morning", "lantern on the post " + hanging);
+		Film.check(hanging, "the Hearth Lantern still hangs on the post");
+		film.normalGui();
+		film.thirdPerson(false, 4);
+	}
+
+	/** A quiet wide shot of the cottage, easing in to the opening shot's angle, so the first Short loops. */
+	private void wide(int time) {
+		reset(true, time);
 		film.hud(false);
 		film.spectator();
 		film.thirdPerson(false, 4);
@@ -566,9 +635,15 @@ public class VideoTour implements FabricClientGameTest {
 		// frames once took her up the steps to the door, out of the short reach): about 8 blocks, then
 		// a few frames to come to a stop.
 		double halfway = point(0, 0, 1.5).z;
+		if (realPace) {
+			walkSpeed(0.05);
+		}
 		film.ctx.getInput().holdKey(o -> o.keyUp);
 		film.until(mc -> mc.player.getZ() <= halfway);
 		film.ctx.getInput().releaseKey(o -> o.keyUp);
+		if (realPace) {
+			walkSpeed(0.1);
+		}
 		film.record(wide(10, 60));
 		String shown = film.ctx.computeOnClient(mc -> String.valueOf(HearthLanterns.homeAt(mc.level, mc.player.blockPosition()) != null));
 		Film.check(shown.equals("true"), "the walk ended at home");
@@ -804,6 +879,19 @@ public class VideoTour implements FabricClientGameTest {
 		return film.ctx.computeOnClient(mc -> mc.getWindow().getWidth() > mc.getWindow().getHeight());
 	}
 
+	/**
+	 * The player's walking speed (vanilla's is 0.1), on the server and on the client, which moves the
+	 * player itself; with the speed's field-of-view change off, so a slower walk doesn't narrow the
+	 * view mid-shot (kit README, "A slow walk").
+	 */
+	private void walkSpeed(double speed) {
+		cmd("attribute @a minecraft:movement_speed base set %s", speed);
+		film.ctx.runOnClient(mc -> {
+			mc.options.fovEffectScale().set(0.0);
+			mc.player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED).setBaseValue(speed);
+		});
+	}
+
 	/** {@code tall} frames in the Short, {@code wide} in the showcase, which holds each moment longer. */
 	private int wide(int tall, int wide) {
 		return isWide() ? wide : tall;
@@ -959,8 +1047,16 @@ public class VideoTour implements FabricClientGameTest {
 		BlockPos spawn = film.server.computeOnServer(s -> s.overworld().getRespawnData().pos());
 		cmd("setworldspawn %d %d %d", sx + 400, sy, sz + 400);
 		int[] count = new int[2];
+		// The tall Short: the same high camera (spawning needs every spot 24 blocks from the player,
+		// who is the camera) with a narrow view onto the edge of home, and monsters tried only where
+		// it can see, so they read as monsters, not specks (scout, 2026-10-21).
+		boolean tall = !isWide();
+		int fov = film.ctx.computeOnClient(mc -> mc.options.fov().get());
+		if (tall) {
+			film.ctx.runOnClient(mc -> mc.options.fov().set(62));
+		}
 		try {
-			Vec3 eyeFrom = point(8, 27, 26), eyeTo = point(6, 25.5, 23), look = point(5, 0, 5);
+			Vec3 eyeFrom = point(8, 27, 26), eyeTo = point(6, 25.5, 23), look = tall ? point(7, 0, 9) : point(5, 0, 5);
 			film.camera(eyeFrom, look);
 			film.ctx.waitTicks(10);
 			film.rolling();
@@ -969,10 +1065,11 @@ public class VideoTour implements FabricClientGameTest {
 			for (int i = 0; i < frames; i++) {
 				// One try every few frames: a scattered few out in the meadow, not a crowd (four a
 				// frame filled the lawn with 239 in the scout).
-				if (i < 130 && i % 4 == 0) {
+				if (i < 130 && i % (tall ? 3 : 4) == 0) {
 					List<BlockPos> spots = new ArrayList<>();
 					for (int k = 0; k < 1; k++) {
-						spots.add(new BlockPos(sx - 6 + random.nextInt(37), sy, sz + 1 + random.nextInt(19)));
+						spots.add(tall ? new BlockPos(sx - 1 + random.nextInt(18), sy, sz + 2 + random.nextInt(15))
+								: new BlockPos(sx - 6 + random.nextInt(37), sy, sz + 1 + random.nextInt(19)));
 					}
 					film.server.runOnServer(s -> {
 						var level = s.overworld();
@@ -992,6 +1089,7 @@ public class VideoTour implements FabricClientGameTest {
 			Film.check(count[1] >= 4, "monsters spawned in the wild (" + count[1] + ")");
 		} finally {
 			cmd("setworldspawn %d %d %d", spawn.getX(), spawn.getY(), spawn.getZ());
+			film.ctx.runOnClient(mc -> mc.options.fov().set(fov));
 		}
 	}
 

@@ -4,8 +4,8 @@ python assemble.py <video_tour dir> <sounds dir> <out dir>
 (sounds from get_sounds.py; set CAPTION_FONT to a heavy font file if none of the usual ones is found)
 
 Makes cozy-core-short.mp4 (the game's own sounds), cozy-core-short-silent.mp4 and
-cozy-core-short-thumbnail.png, 1080x1920. It opens on a creeper going off at the edge of a Hearth
-Lantern's reach, and its last shot leads back into the first, so a replay loops; no title or end card.
+cozy-core-short-thumbnail.png, 1080x1920. It opens on a creeper going off by the porch at night,
+nothing breaking, and its last shot leads back into the first, so a replay loops; no title or end card.
 
 Captions are bold white capitals with a black outline straight on the footage, one word in the
 Hearth's warm orange. A small Cozy Core badge stays in one place all the way through. If a
@@ -21,29 +21,36 @@ repo = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
 
 W, H, SIZE, STROKE, LEAD = 1080, 1920, 84, 7, 104
 NAME = 'cozy-core-short'
-# "Coming home at dusk": scene, the frames kept (first, last; None = to the end), caption lines
-# ("*word*" in orange) and where the caption's top sits. A scene can appear twice with different
-# frames, to change its caption partway (the roof: the glass, then the fall).
+# "Light a hearth" (Gabby, 2026-10-21; the earlier "coming home at dusk" cut is shelved): scene, the
+# frames kept (first, last; None = to the end), caption lines ("*word*" in orange) and where the
+# caption's top sits. One feeling, the hearth making home a refuge; no creeper.
 SCENES = [
-    # The opening is the payoff and the refuge in one picture (Gabby, 2026-10-20): a blast on the
-    # edge of home tears up the wild half of the lawn and stops at a line, with the lantern behind.
-    ('s_edge', 0, None, ['HOME IS *SAFE*'], 390),
-    # Why it's safe (Gabby, 2026-10-20: before, nothing in the video showed the Hearth Lantern was
-    # the cause): the lantern hung on the post, "Home" above the hotbar.
-    ('s_home', 0, None, ['LIGHT A *HEARTH*'], 390),
-    ('s_name', 0, None, ['WELCOME *HOME*'], 390),
-    # The porch blast and the roof (glass, no fall damage) wait for the longer video: two perks in
-    # three seconds read as a feature list, not as a refuge.
-    # Below the stonecutter screen, still above the bottom fifth YouTube covers.
-    ('s_cut', 0, None, ['ONE LOG,', 'FOUR *STAIRS*'], 1360),
-    ('s_wide', 0, None, None, 0),
+    # Frame 1: she hangs the Hearth Lantern at sunset, and "Home" (lifted, below) fills the middle.
+    ('t_home', 0, 45, ['LIGHT A *HEARTH*'], 1380),
+    # Night: monsters turn up out in the meadow, none on the lawn. The mod stops spawning at home,
+    # it doesn't wall monsters out, so the caption says exactly that.
+    ('t_night', 80, 170, ['NOTHING SPAWNS', 'AT *HOME*'], 1320),
+    # A quiet beat: the cat asleep on the porch, the lanterns glowing.
+    ('t_calm', 0, None, ['YOUR HOME', 'IS *SAFE*'], 1320),
+    # Sunrise from the first shot's spot, ending where frame 1 begins, so a replay loops.
+    ('t_morning', 0, None, None, 0),
 ]
+RAIN = set()
+# The night from above is dark under the shader on a phone: lift it, as the showcase does.
+BRIGHTEN = {'t_night': 1.6}
+# The mod's own text ("Home") is drawn in the bottom band YouTube covers, so it is cut out by colour
+# and shown large in the middle (after Nightfall Clock's Short). At GUI scale 5 in a 1080x1920
+# window the overlay line sits about 1540-1620 px down, white with a quarter-bright shadow, and fades.
+LIFT = {'t_home'}
+LIFT_BAND = (120, 1530, W - 120, 1630)
+LIFT_GUI = 5
+LIFT_Y = 720
 BADGE_BOX = (40, 250, 540, 350)
 # The call to follow (Gabby, 2026-10-20: viewers on phones rarely open the description). It sits on
 # the closing wide shot (long enough to read), low in the safe zone,
 # so the Short still loops straight into its first frame with no end card.
 CTA = ['FOLLOW FOR MORE', '*COZY* MODS']
-CTA_TOP = 1250
+CTA_TOP = 1380
 
 FONTS = [os.environ.get('CAPTION_FONT', ''), 'C:/Windows/Fonts/ariblk.ttf', '/usr/share/fonts/truetype/msttcorefonts/Arial_Black.ttf',
          '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf']
@@ -102,6 +109,34 @@ def badge():
 
 BADGE = badge()
 
+
+def lift(game):
+    """The overlay line's text, cut out by colour and enlarged a whole number of times, or None."""
+    import numpy as np
+    from PIL import ImageFilter
+    band = np.asarray(game.crop(LIFT_BAND).convert('RGB')).astype(int)
+    grey = (band.max(axis=2) - band.min(axis=2)) < 14
+    text = grey & (band.min(axis=2) > 170)
+    under = np.zeros_like(text)
+    under[LIFT_GUI:, LIFT_GUI:] = text[:-LIFT_GUI, :-LIFT_GUI]
+    mask = text | (grey & (band.max(axis=2) < 90) & under)
+    if text.sum() < 40:
+        return None
+    rows, cols = np.where(mask.any(axis=1))[0], np.where(mask.any(axis=0))[0]
+    y0, y1, x0, x1 = rows[0], rows[-1] + 1, cols[0], cols[-1] + 1
+    out = Image.fromarray(band[y0:y1, x0:x1].astype('uint8')).convert('RGBA')
+    out.putalpha(Image.fromarray(mask[y0:y1, x0:x1].astype('uint8') * 255))
+    per = max(LIFT_GUI, min(14, 760 * LIFT_GUI // max(1, int(x1 - x0))))
+    out = out.resize(((x1 - x0) * per // LIFT_GUI, (y1 - y0) * per // LIFT_GUI), Image.NEAREST)
+    pad = per * 2
+    glow = Image.new('L', (out.width + pad * 2, out.height + pad * 2), 0)
+    glow.paste(out.getchannel('A'), (pad, pad))
+    glow = glow.filter(ImageFilter.MaxFilter(9)).filter(ImageFilter.GaussianBlur(per))
+    layer = Image.new('RGBA', glow.size, (0, 0, 0, 0))
+    layer.putalpha(glow.point(lambda v: int(v * 0.7)))
+    layer.alpha_composite(out, (pad, pad))
+    return layer
+
 with open(os.path.join(frames_dir, 'actions.tsv')) as f:
     actions = [(r[0], int(r[1]), r[2], r[3]) for r in csv.reader(f, delimiter='\t')]
 
@@ -129,6 +164,12 @@ for index, (scene, first, last, lines, top) in enumerate(SCENES):
         img = Image.open(os.path.join(frames_dir, names[n])).convert('RGBA')
         if img.size != (W, H):
             img = img.resize((W, H), Image.LANCZOS)
+        if scene in BRIGHTEN:
+            from PIL import ImageEnhance
+            img = ImageEnhance.Brightness(img).enhance(BRIGHTEN[scene])
+        big = lift(img) if scene in LIFT else None
+        if big is not None:
+            img.alpha_composite(big, ((W - big.width) // 2, LIFT_Y - big.height // 2))
         img.alpha_composite(BADGE)
         if cap is not None and not (cta_from is not None and i >= cta_from):
             a = min(1.0, (i + 1) / FADE_IN)
@@ -140,7 +181,7 @@ for index, (scene, first, last, lines, top) in enumerate(SCENES):
             layer = cta.copy()
             layer.putalpha(layer.getchannel('A').point(lambda v: int(v * a)))
             img.alpha_composite(layer)
-        img.convert('RGB').save(os.path.join(dest, '%04d.png' % i))
+        img.convert('RGB').save(os.path.join(dest, '%04d.png' % i), compress_level=1)
 
 clips, starts, t = [], {}, 0.0
 for key, (scene, first, end) in kept.items():
@@ -163,8 +204,13 @@ SOUND = {'fuse': ['fuse'], 'boom': ['boom1', 'boom2'], 'place': ['place1'], 'cra
          'thunder': ['thunder'], 'break': ['glass'], 'click': ['click']}
 cues = []
 for key, (scene, first, end) in kept.items():
-    if scene == 's_name' and first == 0:
+    if scene in ('s_name', 't_name') and first == 0:
         cues.append((starts[key] + 0.1, random.choice(SOUND['crackle']), 1.0, 0.7))
+    if scene in RAIN:
+        at = starts[key]
+        while at < starts[key] + (end - first) / FPS - 0.5:
+            cues.append((at, random.choice(['rain1', 'rain2', 'rain3', 'rain4']), 0.95 + random.random() * 0.1, 0.3))
+            at += 0.8
 for scene, frame, kind, what in actions:
     if kind not in SOUND:
         continue
