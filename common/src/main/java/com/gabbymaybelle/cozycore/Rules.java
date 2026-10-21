@@ -36,12 +36,22 @@ public final class Rules {
 	public static final GameRule<Boolean> ENDERMEN_TAKE_BLOCKS = bool("endermen_take_blocks", true);
 	/** Off: fire still burns and goes out, but never spreads onto a block or destroys one anywhere. */
 	public static final GameRule<Boolean> FIRE_BURNS_BLOCKS = bool("fire_burns_blocks", true);
-	/** How far a Hearth Lantern reaches (sideways, any height): no natural monster spawns, and builds kept safe. 0 turns the lanterns off. */
-	public static final GameRule<Integer> HEARTH_LANTERN_RADIUS = integer("hearth_lantern_radius", 32, 0, 128);
+	/**
+	 * How far a Hearth Lantern reaches (sideways, any height): no natural monster spawns, and builds
+	 * kept safe. 0 turns the lanterns off. 64 since 0.7.0 (Gabby, 2026-10-21; it was 32); worlds made
+	 * before keep the value they saved.
+	 */
+	public static final GameRule<Integer> HEARTH_LANTERN_RADIUS = integer("hearth_lantern_radius", 64, 0, 128);
 	/** How many minutes a dropped item lasts at home (inside a Hearth Lantern's reach); 5 is vanilla's five minutes. */
 	public static final GameRule<Integer> HEARTH_ITEM_MINUTES = integer("hearth_item_minutes", 60, 5, 1440);
 	/** The hotbar, armour and off-hand stay with a player who dies; the rest drops. Vanilla's {@code keep_inventory} keeps everything and wins when it's on. */
 	public static final GameRule<Boolean> KEEP_HOTBAR_ON_DEATH = bool("keep_hotbar_on_death", true);
+	/** At home, candles light themselves after sunset and go out in the early morning ({@link HomeLife}). */
+	public static final GameRule<Boolean> HEARTH_LIGHTS = bool("hearth_lights", true);
+	/** At home, now and then a flower grows on the grass, a few at most in any patch ({@link HomeLife}). */
+	public static final GameRule<Boolean> HEARTH_GARDEN = bool("hearth_garden", true);
+	/** At night, with their owner at home, tamed cats and dogs settle by the Hearth Lantern ({@link HomeLife}). */
+	public static final GameRule<Boolean> PETS_COME_HOME = bool("pets_come_home", true);
 
 	private Rules() {
 	}

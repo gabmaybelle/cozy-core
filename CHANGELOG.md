@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.7.0: Home comes alive
+
+Home does a few gentle things on its own now, inside a Hearth Lantern's reach.
+
+- **Lights at dusk.** Candles at home light themselves one by one after sunset and go out in the
+  early morning. A candle you light during the day stays lit. Game rule `cozy_core:hearth_lights`.
+- **Pets come home.** At night, while you're home, your tamed cats and dogs settle by the nearest
+  Hearth Lantern instead of following you around; cats curl up. In the morning they follow you
+  again. Pets told to sit stay where they are. Game rule `cozy_core:pets_come_home`.
+- **A garden that grows.** Now and then a flower that suits the biome grows on open grass at
+  home, never more than a few in one patch, so over the days the garden fills in a little. Game
+  rule `cozy_core:hearth_garden`.
+- **Home reaches further.** A Hearth Lantern now reaches 64 blocks (it was 32), room for a garden,
+  a barn and a pond. Worlds you already have keep 32; `/gamerule cozy_core:hearth_lantern_radius 64`
+  changes it.
+
 ## 0.6.0: Home comforts
 
 Small kindnesses of being at home, inside a Hearth Lantern's reach.
