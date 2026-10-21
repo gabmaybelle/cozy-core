@@ -80,7 +80,7 @@ final class RuleChecks {
 		helper.assertTrue(rules.getBoolean(Rules.MOB_EXPLOSIONS_BREAK_BLOCKS), "out in the wild, mob explosions should break blocks by default");
 		helper.assertTrue(rules.getBoolean(Rules.ENDERMEN_TAKE_BLOCKS), "out in the wild, endermen should take blocks by default");
 		helper.assertTrue(rules.getBoolean(Rules.FIRE_BURNS_BLOCKS), "out in the wild, fire should burn blocks by default");
-		helper.assertValueEqual(rules.getInt(Rules.HEARTH_LANTERN_RADIUS), 32, "the Hearth Lantern radius");
+		helper.assertValueEqual(rules.getInt(Rules.HEARTH_LANTERN_RADIUS), 64, "the Hearth Lantern radius");
 		helper.assertTrue(rules.getBoolean(GameRules.RULE_DOINSOMNIA), "phantoms should be vanilla in a new world");
 		helper.assertTrue(new GameRules().getBoolean(GameRules.RULE_DOINSOMNIA), "phantoms should be vanilla in a brand-new set of rules");
 		helper.assertTrue(rules.getBoolean(Rules.KEEP_HOTBAR_ON_DEATH), "the hotbar should be kept on death by default");

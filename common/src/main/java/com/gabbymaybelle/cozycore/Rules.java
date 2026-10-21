@@ -30,15 +30,24 @@ public final class Rules {
 	/** Off: fire still burns and goes out, but never spreads onto a block or destroys one anywhere. */
 	public static final GameRules.Key<GameRules.BooleanValue> FIRE_BURNS_BLOCKS =
 			Services.PLATFORM.booleanRule(name("fire_burns_blocks"), GameRules.Category.UPDATES, true);
-	/** How far a Hearth Lantern reaches (sideways, any height): no natural monster spawns, no phantoms, and builds kept safe. 0 turns the lanterns off. */
+	/** How far a Hearth Lantern reaches (sideways, any height): no natural monster spawns, no phantoms, and builds kept safe. 0 turns the lanterns off. 64 since 0.7.0 (it was 32); worlds made before keep theirs. */
 	public static final GameRules.Key<GameRules.IntegerValue> HEARTH_LANTERN_RADIUS =
-			Services.PLATFORM.integerRule(name("hearth_lantern_radius"), GameRules.Category.SPAWNING, 32, 0, 128);
+			Services.PLATFORM.integerRule(name("hearth_lantern_radius"), GameRules.Category.SPAWNING, 64, 0, 128);
 	/** How many minutes a dropped item lasts at home (inside a Hearth Lantern's reach); 5 is vanilla's five minutes. */
 	public static final GameRules.Key<GameRules.IntegerValue> HEARTH_ITEM_MINUTES =
 			Services.PLATFORM.integerRule(name("hearth_item_minutes"), GameRules.Category.DROPS, 60, 5, 1440);
 	/** The hotbar, armour and off-hand stay with a player who dies; the rest drops. Vanilla's {@code keepInventory} keeps everything and wins when it's on. */
 	public static final GameRules.Key<GameRules.BooleanValue> KEEP_HOTBAR_ON_DEATH =
 			Services.PLATFORM.booleanRule(name("keep_hotbar_on_death"), GameRules.Category.PLAYER, true);
+	/** At home, candles light themselves after sunset and go out in the early morning ({@link HomeLife}). */
+	public static final GameRules.Key<GameRules.BooleanValue> HEARTH_LIGHTS =
+			Services.PLATFORM.booleanRule(name("hearth_lights"), GameRules.Category.UPDATES, true);
+	/** At home, now and then a flower grows on the grass, a few at most in any patch ({@link HomeLife}). */
+	public static final GameRules.Key<GameRules.BooleanValue> HEARTH_GARDEN =
+			Services.PLATFORM.booleanRule(name("hearth_garden"), GameRules.Category.UPDATES, true);
+	/** At night, with their owner at home, tamed cats and dogs settle by the Hearth Lantern ({@link HomeLife}). */
+	public static final GameRules.Key<GameRules.BooleanValue> PETS_COME_HOME =
+			Services.PLATFORM.booleanRule(name("pets_come_home"), GameRules.Category.MOBS, true);
 
 	/** The lowest and highest {@link #HEARTH_LANTERN_RADIUS} counts; NeoForge's rules have no bounds, so a value outside is read as the nearest end. */
 	public static final int MIN_RADIUS = 0, MAX_RADIUS = 128;

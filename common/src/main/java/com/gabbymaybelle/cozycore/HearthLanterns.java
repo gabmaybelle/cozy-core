@@ -71,6 +71,25 @@ public final class HearthLanterns {
 		return lanterns != null && !lanterns.isEmpty();
 	}
 
+	/** On the server: the nearest lantern whose reach takes in this spot, or null when the spot isn't home. */
+	public static @Nullable BlockPos nearest(ServerLevel level, BlockPos pos) {
+		Map<BlockPos, HearthLanternBlockEntity> lanterns = BY_LEVEL.get(level);
+		int radius = Rules.get(level, Rules.HEARTH_LANTERN_RADIUS);
+		if (lanterns == null || radius <= 0) {
+			return null;
+		}
+		BlockPos nearest = null;
+		long best = (long) radius * radius;
+		for (BlockPos lantern : lanterns.keySet()) {
+			long d = distanceSqr(lantern, pos);
+			if (d <= best) {
+				nearest = lantern;
+				best = d;
+			}
+		}
+		return nearest;
+	}
+
 	private static boolean within(ServerLevel level, BlockPos pos, int extra) {
 		Map<BlockPos, HearthLanternBlockEntity> lanterns = BY_LEVEL.get(level);
 		if (lanterns == null || lanterns.isEmpty()) {

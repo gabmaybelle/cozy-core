@@ -90,7 +90,7 @@ public class RulesTest implements ClientGameTest {
 		check(server.computeOnServer(s -> rules(s).getBoolean(Rules.MOB_EXPLOSIONS_BREAK_BLOCKS)), "out in the wild, mob explosions break blocks by default");
 		check(server.computeOnServer(s -> rules(s).getBoolean(Rules.ENDERMEN_TAKE_BLOCKS)), "out in the wild, endermen take blocks by default");
 		check(server.computeOnServer(s -> rules(s).getBoolean(Rules.FIRE_BURNS_BLOCKS)), "out in the wild, fire burns blocks by default");
-		check(server.computeOnServer(s -> rules(s).getInt(Rules.HEARTH_LANTERN_RADIUS) == 32), "the Hearth Lantern radius defaults to 32");
+		check(server.computeOnServer(s -> rules(s).getInt(Rules.HEARTH_LANTERN_RADIUS) == 64), "the Hearth Lantern radius defaults to 64");
 		check(server.computeOnServer(s -> rules(s).getBoolean(GameRules.RULE_DOINSOMNIA)), "phantoms are vanilla in a new world (they leave you alone at home instead)");
 		check(server.computeOnServer(s -> rules(s).getBoolean(Rules.KEEP_HOTBAR_ON_DEATH)), "the hotbar is kept on death by default");
 		check(CustomGameRuleCategory.getCategory(Rules.FIRE_BURNS_BLOCKS).orElse(null) == FabricPlatform.CATEGORY, "the rules have the Cozy Core heading");
@@ -347,7 +347,7 @@ public class RulesTest implements ClientGameTest {
 
 	/**
 	 * A dark stone room where monsters can spawn. With a Hearth Lantern 10 blocks away nothing
-	 * spawns; with the radius at 0, with the lantern 40 blocks away, or with it broken, monsters
+	 * spawns; with the radius at 0, with the lantern 40 blocks away (at a 32-block reach), or with it broken, monsters
 	 * do. The world's record of lanterns follows placing and breaking.
 	 */
 	private void lanterns(ClientGameTestContext ctx, TestServerContext server, BlockPos room) {
@@ -377,6 +377,7 @@ public class RulesTest implements ClientGameTest {
 		check(guarded == 0, "no monster spawns 10 blocks from a Hearth Lantern (" + guarded + " spawned)");
 		set(server, Rules.HEARTH_LANTERN_RADIUS, 0);
 		int off = spawn(ctx, server, room);
+		// The far lantern below is laid out for a 32-block reach (the default until 0.7.0).
 		set(server, Rules.HEARTH_LANTERN_RADIUS, 32);
 		check(off > 0, "with the radius at 0, monsters spawn by the lantern (" + off + " spawned; " + roomState(server, room) + ")");
 
@@ -402,6 +403,7 @@ public class RulesTest implements ClientGameTest {
 		int above = spawn(ctx, server, room);
 		check(above == 0, "a hanging lantern above the room keeps it quiet (" + above + " spawned)");
 		server.runOnServer(s -> s.overworld().setBlockAndUpdate(room.offset(0, 7, 0), Blocks.AIR.defaultBlockState()));
+		set(server, Rules.HEARTH_LANTERN_RADIUS, 64);
 	}
 
 	/** Asks vanilla's natural spawner for monsters at the room's centre 80 times, then counts (and removes) what appeared. */

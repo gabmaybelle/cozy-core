@@ -182,6 +182,14 @@ What differs from 26.3, and why (2026-10-17):
   `CompoundTag`; 1.21.1's class locations (`animal.Pig`, `animal.horse.Llama`, `npc.Villager`...);
   `getType().is(...)` for the blast-mob tag. All `@Inject`. `hearth_item_minutes` is clamped to
   5..1440 in `Rules.get`, as NeoForge's number rules have no bounds.
+- **Home comes alive (0.7.0)** is 26.3's (`HomeLife.java`: candles that light at dusk, pets that
+  settle by the hearth, a garden; the reach 64), with: `getDayTime()` for the time of day (26.3
+  keeps time in clocks); the garden's flower from the biome's first flower feature, as 1.21.1's
+  bone meal picks it (26.3 has bone-meal features); `SpreadingSnowyDirtBlockMixin` (26.3's
+  `SpreadingSnowyBlock`); `animal.Cat` and `animal.Wolf`; the three new rules under UPDATES and
+  MOBS on NeoForge. All `@Inject`. The NeoForge "home_..." batches set the reach to 32, which
+  their checks were laid out for; the pet check uses the "lanterns" template so the cat's mind
+  ticks.
 - **Keep-on-death** saves with `CompoundTag` and the codec through `RegistryOps` (no `ValueOutput` in 1.21.1).
 - **Trades are code.** 1.21.1 has no `villager_trade` data, so `Trades.java` lists them and
   `Platform` adds them (Fabric `TradeOfferHelper`, NeoForge `VillagerTradesEvent`/`WandererTradesEvent`);

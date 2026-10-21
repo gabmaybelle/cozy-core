@@ -15,7 +15,7 @@ This is the version for **Minecraft 1.21.1**, on Fabric and NeoForge. It's the s
 
 ## Light a hearth
 
-**The Hearth Lantern.** Make it from a lantern and four amethyst shards. Everything within 32 blocks of it, at any height, is home. There's the classic one and a soul one, made from a soul lantern, which works the same.
+**The Hearth Lantern.** Make it from a lantern and four amethyst shards. Everything within 64 blocks of it, at any height, is home. There's the classic one and a soul one, made from a soul lantern, which works the same.
 
 **Home is safe.** Inside a Hearth Lantern's reach:
 
@@ -64,8 +64,11 @@ Each rule is an ordinary game rule: it shows in the Game Rules screen when you m
 | Game rule | New worlds |
 |---|---|
 | `cozy_core:hearths_protect_builds` | true (blasts, fire and endermen spare blocks at home, and animals are safe there) |
-| `cozy_core:hearth_lantern_radius` | 32 (how far home reaches; 0 switches lanterns off) |
+| `cozy_core:hearth_lantern_radius` | 64 (how far home reaches; 0 switches lanterns off) |
 | `cozy_core:hearth_item_minutes` | 60 (how long dropped items last at home; 5 is the usual five minutes) |
+| `cozy_core:hearth_lights` | true (candles at home light after sunset and go out in the early morning) |
+| `cozy_core:hearth_garden` | true (now and then a flower grows on open grass at home) |
+| `cozy_core:pets_come_home` | true (at night, your cats and dogs settle by the hearth while you're home) |
 | `cozy_core:keep_hotbar_on_death` | true |
 | `cozy_core:mob_explosions_break_blocks` | true (false: explosions break nothing anywhere) |
 | `cozy_core:endermen_take_blocks` | true (false: endermen take nothing anywhere) |

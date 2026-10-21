@@ -39,9 +39,11 @@ public final class CozyCoreGameTests {
 			HOME_PHANTOMS = "home_phantoms", HOME_SPAWNING = "home_spawning";
 	private static final String HOME_ITEMS = "home_items", HOME_ANIMALS = "home_animals", HOME_LIGHTNING = "home_lightning",
 			HOME_FALLS = "home_falls", HOME_GLASS = "home_glass";
+	private static final String REACH = "reach", HOME_LIGHTS = "home_lights", HOME_GARDEN = "home_garden", HOME_PETS = "home_pets";
 	/** The rules a batch may change; each batch starts from a new world's values of them. */
 	private static final List<GameRules.Key<?>> RULES = List.of(Rules.HEARTHS_PROTECT_BUILDS, Rules.MOB_EXPLOSIONS_BREAK_BLOCKS,
-			Rules.ENDERMEN_TAKE_BLOCKS, Rules.FIRE_BURNS_BLOCKS, Rules.HEARTH_LANTERN_RADIUS, Rules.KEEP_HOTBAR_ON_DEATH, GameRules.RULE_DOINSOMNIA, Rules.HEARTH_ITEM_MINUTES);
+			Rules.ENDERMEN_TAKE_BLOCKS, Rules.FIRE_BURNS_BLOCKS, Rules.HEARTH_LANTERN_RADIUS, Rules.KEEP_HOTBAR_ON_DEATH, GameRules.RULE_DOINSOMNIA, Rules.HEARTH_ITEM_MINUTES,
+			Rules.HEARTH_LIGHTS, Rules.HEARTH_GARDEN, Rules.PETS_COME_HOME);
 
 	public CozyCoreGameTests(IEventBus modBus) {
 		modBus.addListener(RegisterGameTestsEvent.class, event -> event.register(CozyCoreGameTests.class));
@@ -228,67 +230,120 @@ public final class CozyCoreGameTests {
 	// Each home batch has a new world's rules; it's a batch of its own only so it runs alone.
 	@BeforeBatch(batch = HOME_EXPLOSIONS)
 	public static void homeExplosions(ServerLevel level) {
-		kind(level);
+		home(level);
 	}
 
 	@BeforeBatch(batch = HOME_EDGE)
 	public static void homeEdge(ServerLevel level) {
-		kind(level);
+		home(level);
 	}
 
 	@BeforeBatch(batch = HOME_FIRE)
 	public static void homeFire(ServerLevel level) {
-		kind(level);
+		home(level);
 	}
 
 	@BeforeBatch(batch = HOME_FIRE_EDGE)
 	public static void homeFireEdge(ServerLevel level) {
-		kind(level);
+		home(level);
 	}
 
 	@BeforeBatch(batch = HOME_ENDERMEN)
 	public static void homeEndermen(ServerLevel level) {
-		kind(level);
+		home(level);
 	}
 
 	@BeforeBatch(batch = HOME_STYLES)
 	public static void homeStyles(ServerLevel level) {
-		kind(level);
+		home(level);
 	}
 
 	@BeforeBatch(batch = HOME_PHANTOMS)
 	public static void homePhantoms(ServerLevel level) {
-		kind(level);
+		home(level);
 	}
 
 	@BeforeBatch(batch = HOME_ITEMS)
 	public static void homeItems(ServerLevel level) {
-		kind(level);
+		home(level);
 	}
 
 	@BeforeBatch(batch = HOME_ANIMALS)
 	public static void homeAnimals(ServerLevel level) {
-		kind(level);
+		home(level);
 	}
 
 	@BeforeBatch(batch = HOME_LIGHTNING)
 	public static void homeLightning(ServerLevel level) {
-		kind(level);
+		home(level);
 	}
 
 	@BeforeBatch(batch = HOME_FALLS)
 	public static void homeFalls(ServerLevel level) {
-		kind(level);
+		home(level);
 	}
 
 	@BeforeBatch(batch = HOME_GLASS)
 	public static void homeGlass(ServerLevel level) {
-		kind(level);
+		home(level);
 	}
 
 	@BeforeBatch(batch = HOME_SPAWNING)
 	public static void homeSpawning(ServerLevel level) {
+		home(level);
+	}
+
+	// 0.7.0, home comes alive (LifeChecks): the reach in a new world, then each new thing alone in its batch.
+	@GameTest(template = "empty", batch = REACH)
+	public static void reach_is_64(GameTestHelper helper) {
+		LifeChecks.reach(helper);
+	}
+
+	@GameTest(template = "empty", batch = HOME_LIGHTS)
+	public static void candles_light_at_dusk(GameTestHelper helper) {
+		LifeChecks.lights(helper);
+	}
+
+	@GameTest(template = "empty", batch = HOME_GARDEN)
+	public static void garden_grows_at_home(GameTestHelper helper) {
+		LifeChecks.garden(helper);
+	}
+
+	// The "lanterns" template, not "empty": a mob's mind only runs where entities tick, which the test
+	// server sizes by the template (a cat 10 blocks from an "empty" test never moved, on 26.3).
+	@GameTest(template = "lanterns", batch = HOME_PETS, timeoutTicks = 400)
+	public static void pets_settle_by_the_hearth(GameTestHelper helper) {
+		LifeChecks.pets(helper);
+	}
+
+	@BeforeBatch(batch = REACH)
+	public static void reach(ServerLevel level) {
 		kind(level);
+	}
+
+	@BeforeBatch(batch = HOME_LIGHTS)
+	public static void homeLights(ServerLevel level) {
+		home(level);
+	}
+
+	@BeforeBatch(batch = HOME_GARDEN)
+	public static void homeGarden(ServerLevel level) {
+		home(level);
+	}
+
+	@BeforeBatch(batch = HOME_PETS)
+	public static void homePets(ServerLevel level) {
+		home(level);
+	}
+
+	/**
+	 * A home batch: a new world's rules with the reach at 32 blocks. These checks were laid out for
+	 * the 32-block reach the lantern had until 0.7.0 (a spot 45 or 60 blocks out stands in the wild,
+	 * which a 64-block reach would take in), so they keep it; "defaults" checks the new 64.
+	 */
+	private static void home(ServerLevel level) {
+		kind(level);
+		level.getGameRules().getRule(Rules.HEARTH_LANTERN_RADIUS).set(32, level.getServer());
 	}
 
 	@AfterBatch(batch = VANILLA)

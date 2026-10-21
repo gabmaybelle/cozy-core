@@ -13,8 +13,10 @@
 		"ItemEntityMixin",
 		"LivingEntityMixin",
 		"NaturalSpawnerMixin",
+		"PetGoalsMixin",
 		"PhantomSpawnerMixin",
 		"ServerPlayerMixin",
+		"SpreadingSnowyDirtBlockMixin",
 		"ThunderHitMixin",
 		"VillagerMixin",
 		"WanderingTraderMixin"
