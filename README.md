@@ -101,4 +101,4 @@ loader. The data pack is for plain Minecraft 1.21.1. For Minecraft 26.3, see the
 
 [MIT](LICENSE).
 
-Cozy Core is made by Gabby with help from Claude, an AI assistant. The icon is Gabby's own pixel art: `art/icon.ase` is the source, and `art/icon.png` is it at 512 pixels, each pixel kept sharp. The Hearth Lantern's textures are drawn by `tools/generate-art.js`.
+Cozy Core is made by Gabby with help from Claude, an AI assistant. The Hearth Lantern's textures are drawn by `tools/generate-art.js`.

@@ -55,7 +55,7 @@ dependencies {
 processResources {
 	def version = project.version
 	inputs.property "version", version
-	// The mod icon is Gabby's own sprite (art/icon.ase exported at 512x512); the jar carries it as icon.png.
+	// The mod icon (art/icon.png, Gabby's pick); the jar carries it as icon.png.
 	from(rootProject.file('art/icon.png'))
 
 	filesMatching("fabric.mod.json") {

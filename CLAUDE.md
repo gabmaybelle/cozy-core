@@ -52,9 +52,9 @@ it first, and add this session's row before ending.
   (`clearRemoved`) and when it isn't (`setRemoved`). The chunk is the only record of where lanterns
   are: no saved data (26.3's `SavedDataType` needs a non-null `DataFixTypes`, and none fits a mod).
   `protects(level, pos)` is a horizontal-distance check against that set, any height.
-- `art/icon.ase`: Gabby's own 32x32 sprite; `art/icon.png` is it at 512x512 (nearest-neighbour).
-  The build puts it in the zip as `pack.png` and Gradle puts it in the jars as `icon.png` (Fabric
-  `icon`, NeoForge `logoFile`). Never replace it with generated art; re-export from the .ase.
+- `art/icon.png`: the mod's icon, three candles on a wooden board (512x512; Gabby's pick, 2026-10-21,
+  the same as the listings'; it replaced the first lantern sprite). The build puts it in the zip as `pack.png` and Gradle puts it in the jars as `icon.png` (Fabric
+  `icon`, NeoForge `logoFile`). Change it only when Gabby gives a new one.
   `tools/generate-art.js` draws the Hearth Lantern's block and item textures (original pixel art,
   laid out like vanilla's lantern texture so the vanilla lantern models can be the parents).
 - **The advancements tab** (`cozy_core:cozy/...`, Gabby's picks and wording, 2026-10-17) is made by
