@@ -190,6 +190,13 @@ What differs from 26.3, and why (2026-10-17):
   MOBS on NeoForge. All `@Inject`. The NeoForge "home_..." batches set the reach to 32, which
   their checks were laid out for; the pet check uses the "lanterns" template so the cat's mind
   ticks.
+- **A visitor at your door (0.8.0)** is 26.3's (`HomeLife`: the lantern's random tick, `VisitGoal`,
+  `VisitorGoalsMixin`, rule `hearth_visitors` under MOBS on NeoForge), with: the biome's creature list
+  from `Biome.getMobSettings().getMobs(...)` (26.3 reads the `NATURAL_MOB_SPAWNS` environment
+  attribute); `getTags()` (26.3 `entityTags()`); `EntityType.create(level)`, `moveTo` and
+  `MobSpawnType.EVENT`; `animal.Cat`, `animal.Rabbit`, `animal.Fox`. The test world here is flat ground
+  far below sea level, so the arrival check puts its lantern on the test's own ground (a visitor
+  only comes to a yard within 12 blocks of the lantern's height).
 - **Keep-on-death** saves with `CompoundTag` and the codec through `RegistryOps` (no `ValueOutput` in 1.21.1).
 - **Trades are code.** 1.21.1 has no `villager_trade` data, so `Trades.java` lists them and
   `Platform` adds them (Fabric `TradeOfferHelper`, NeoForge `VillagerTradesEvent`/`WandererTradesEvent`);

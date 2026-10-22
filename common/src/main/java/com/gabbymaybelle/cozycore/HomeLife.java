@@ -1,31 +1,45 @@
 package com.gabbymaybelle.cozycore;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.Cat;
+import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.block.AbstractCandleBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * 0.7.0's "home comes alive" (Gabby, 2026-10-21: Cozy Core should feel slow-paced, peaceful and
- * cute): three gentle things home does on its own, inside a Hearth Lantern's reach. None runs on a
- * timer: the candles and the grass use the game's own random ticks, and the pets a goal that only
- * runs while the pet itself ticks.
+ * cute): gentle things home does on its own, inside a Hearth Lantern's reach. None runs on a
+ * timer: the candles, the grass and the lantern use the game's own random ticks, and the pets and
+ * visitors a goal that only runs while the animal itself ticks.
  * <ul>
  * <li>Lights at dusk: candles light themselves after sunset and go out in the early morning.</li>
  * <li>A garden: now and then a flower that suits the biome grows on open grass.</li>
  * <li>Pets come home: at night, with their owner at home, tamed cats and dogs settle by the lantern.</li>
+ * <li>A visitor at your door (0.8.0, Gabby, 2026-10-22): now and then in the evening a stray cat,
+ * or a rabbit or fox where they live, walks up to the lantern; it leaves in the morning unless
+ * it's tamed, on a lead or named.</li>
  * </ul>
  */
 public final class HomeLife {
@@ -260,6 +274,220 @@ public final class HomeLife {
 				return null;
 			}
 			return stand;
+		}
+	}
+
+	// ------------------------------------------------------------------ a visitor at your door
+
+	/** Evening, when a visitor may come: from sunset until a little after dark. */
+	static final int VISIT_FROM = 12000, VISIT_UNTIL = 14000;
+	/**
+	 * One random tick of a Hearth Lantern in the evening in this many brings a visitor. A block gets a
+	 * random tick about once every 1,365 game ticks, so a lantern gets one or two in the evening and a
+	 * visitor comes about one evening in three (Gabby, 2026-10-22: about every three days).
+	 */
+	public static final int VISIT_CHANCE = 4;
+	/** The mark on a visitor (saved with it), so a home has one at a time and it leaves in the morning. */
+	public static final String VISITOR_TAG = "cozy_core_visitor";
+
+	/**
+	 * A Hearth Lantern's random tick (it ticks, see {@code HearthLanternBlock}): in the evening, one
+	 * time in {@code chance}, while someone is home and this is the lantern nearest them, a visitor
+	 * comes, unless this home already has one. Returns the visitor, or null when none came.
+	 */
+	public static @Nullable Mob tickLantern(ServerLevel level, BlockPos lantern, RandomSource random, int chance) {
+		if (random.nextInt(chance) != 0 || !Rules.is(level, Rules.HEARTH_VISITORS)) {
+			return null;
+		}
+		int time = timeOfDay(level);
+		int radius = Rules.get(level, Rules.HEARTH_LANTERN_RADIUS);
+		if (time < 0 || !between(time, VISIT_FROM, VISIT_UNTIL) || radius <= 0) {
+			return null;
+		}
+		// The lantern nearest someone at home, so a home with several lanterns isn't visited more often.
+		boolean home = level.players().stream().anyMatch(p -> !p.isSpectator() && lantern.equals(HearthLanterns.nearest(level, p.blockPosition())));
+		if (!home || !visitorsNear(level, lantern, radius).isEmpty()) {
+			return null;
+		}
+		for (int i = 0; i < 12; i++) {
+			// Out in the yard, 16 to 24 blocks from the lantern, so it has a little way to walk in.
+			double angle = random.nextDouble() * Math.PI * 2;
+			int distance = Math.min(radius - 2, 16 + random.nextInt(9));
+			int x = lantern.getX() + (int) Math.round(Math.cos(angle) * distance), z = lantern.getZ() + (int) Math.round(Math.sin(angle) * distance);
+			BlockPos spot = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
+			// The yard, not a roof or a cave: close to the lantern's height, on solid dry ground, no one right there.
+			if (Math.abs(spot.getY() - lantern.getY()) > 12 || !level.getFluidState(spot).isEmpty() || !level.getFluidState(spot.below()).isEmpty()
+					|| !level.getBlockState(spot.below()).isFaceSturdy(level, spot.below(), Direction.UP)
+					|| !HearthLanterns.protects(level, spot) || level.getNearestPlayer(x + 0.5, spot.getY(), z + 0.5, 12, false) != null) {
+				continue;
+			}
+			Mob visitor = visit(level, spot, visitorFor(level, spot, random));
+			if (visitor != null) {
+				return visitor;
+			}
+		}
+		return null;
+	}
+
+	/** The visitors within this lantern's reach (one that has become yours no longer counts). */
+	public static List<Mob> visitorsNear(ServerLevel level, BlockPos lantern, int radius) {
+		return level.getEntitiesOfClass(Mob.class, new AABB(lantern).inflate(radius), HomeLife::isVisitor);
+	}
+
+	/**
+	 * Whether this animal is still a visitor. One that is tamed, on a lead or named is yours: its
+	 * mark comes off here, so it stays, and the home can have a new visitor.
+	 */
+	public static boolean isVisitor(Mob mob) {
+		if (!mob.getTags().contains(VISITOR_TAG)) {
+			return false;
+		}
+		if ((mob instanceof TamableAnimal pet && pet.isTame()) || mob.isLeashed() || mob.hasCustomName()) {
+			mob.removeTag(VISITOR_TAG);
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Who comes: a stray cat two times in three. Otherwise a rabbit or a fox, if this biome is one
+	 * where they live (its creature spawns name them); a cat if it's neither.
+	 */
+	public static EntityType<? extends Mob> visitorFor(ServerLevel level, BlockPos at, RandomSource random) {
+		if (random.nextInt(3) != 0) {
+			return EntityType.CAT;
+		}
+		List<EntityType<? extends Mob>> wild = new ArrayList<>();
+		for (MobSpawnSettings.SpawnerData spawn : level.getBiome(at).value().getMobSettings().getMobs(MobCategory.CREATURE).unwrap()) {
+			if (spawn.type == EntityType.RABBIT && !wild.contains(EntityType.RABBIT)) {
+				wild.add(EntityType.RABBIT);
+			} else if (spawn.type == EntityType.FOX && !wild.contains(EntityType.FOX)) {
+				wild.add(EntityType.FOX);
+			}
+		}
+		return wild.isEmpty() ? EntityType.CAT : Util.getRandom(wild, random);
+	}
+
+	/** A visitor of this kind arrives at this spot, dressed for the biome (a cat's coat, a fox's colour), marked as a visitor. */
+	public static @Nullable Mob visit(ServerLevel level, BlockPos spot, EntityType<? extends Mob> type) {
+		Mob visitor = type.create(level);
+		if (visitor == null) {
+			return null;
+		}
+		visitor.moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, level.getRandom().nextFloat() * 360, 0);
+		if (!level.noCollision(visitor)) {
+			visitor.discard();
+			return null;
+		}
+		visitor.finalizeSpawn(level, level.getCurrentDifficultyAt(spot), MobSpawnType.EVENT, null);
+		visitor.addTag(VISITOR_TAG);
+		// It leaves in the morning by itself; until then it shouldn't vanish like a far-off stray.
+		visitor.setPersistenceRequired();
+		level.addFreshEntity(visitor);
+		return visitor;
+	}
+
+	/**
+	 * A visitor's evening and morning: in the evening and at night it walks to the ground under the
+	 * nearest Hearth Lantern and rests there (a cat lies down, a fox sits). In the morning it walks
+	 * off and is gone once no one is near. A visitor that is tamed, on a lead or named is yours: it
+	 * stops being a visitor and stays. Added to cats, rabbits and foxes.
+	 */
+	public static final class VisitGoal extends Goal {
+		private final Mob mob;
+		private @Nullable BlockPos spot;
+		private boolean leaving;
+		private int recheck;
+
+		public VisitGoal(Mob mob) {
+			this.mob = mob;
+			setFlags(EnumSet.of(Flag.MOVE, Flag.JUMP));
+		}
+
+		@Override
+		public boolean canUse() {
+			if (!(mob.level() instanceof ServerLevel level) || !isVisitor(mob)) {
+				return false;
+			}
+			int time = timeOfDay(level);
+			leaving = time < 0 || !between(time, VISIT_FROM, MORNING_FROM);
+			if (leaving) {
+				if (level.getNearestPlayer(mob, 24) == null) {
+					mob.discard();
+					return false;
+				}
+				return true;
+			}
+			spot = restingSpot(level);
+			return spot != null;
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			if (--recheck > 0) {
+				return true;
+			}
+			recheck = 40;
+			return canUse();
+		}
+
+		@Override
+		public void start() {
+			recheck = 40;
+		}
+
+		@Override
+		public void stop() {
+			spot = null;
+			mob.getNavigation().stop();
+			rest(false);
+		}
+
+		@Override
+		public boolean requiresUpdateEveryTick() {
+			return false;
+		}
+
+		@Override
+		public void tick() {
+			if (leaving) {
+				rest(false);
+				if (mob.getNavigation().isDone()) {
+					// Away from home: straight out from the nearest lantern, or any way if none is near.
+					BlockPos from = mob.level() instanceof ServerLevel level ? HearthLanterns.nearest(level, mob.blockPosition()) : null;
+					double dx = from == null ? 1 : mob.getX() - (from.getX() + 0.5), dz = from == null ? 0 : mob.getZ() - (from.getZ() + 0.5);
+					double length = Math.max(0.1, Math.sqrt(dx * dx + dz * dz));
+					mob.getNavigation().moveTo(mob.getX() + dx / length * 16, mob.getY(), mob.getZ() + dz / length * 16, 1.0);
+				}
+				return;
+			}
+			if (spot == null) {
+				return;
+			}
+			double d = mob.distanceToSqr(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5);
+			if (d > 2.5 * 2.5) {
+				rest(false);
+				if (mob.getNavigation().isDone()) {
+					mob.getNavigation().moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, 0.9);
+				}
+			} else {
+				mob.getNavigation().stop();
+				rest(true);
+			}
+		}
+
+		private void rest(boolean on) {
+			if (mob instanceof Cat cat) {
+				cat.setLying(on);
+			} else if (mob instanceof Fox fox) {
+				fox.setSitting(on);
+			}
+		}
+
+		/** The ground by the nearest lantern whose reach takes in this visitor, or null away from home. */
+		private @Nullable BlockPos restingSpot(ServerLevel level) {
+			BlockPos lantern = HearthLanterns.nearest(level, mob.blockPosition());
+			return lantern == null ? null : SettleByHearthGoal.groundUnder(level, lantern);
 		}
 	}
 }

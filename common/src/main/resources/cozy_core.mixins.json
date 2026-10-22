@@ -18,6 +18,7 @@
 		"ServerPlayerMixin",
 		"SpreadingSnowyDirtBlockMixin",
 		"ThunderHitMixin",
+		"VisitorGoalsMixin",
 		"VillagerMixin",
 		"WanderingTraderMixin"
 	],

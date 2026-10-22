@@ -48,6 +48,9 @@ public final class Rules {
 	/** At night, with their owner at home, tamed cats and dogs settle by the Hearth Lantern ({@link HomeLife}). */
 	public static final GameRules.Key<GameRules.BooleanValue> PETS_COME_HOME =
 			Services.PLATFORM.booleanRule(name("pets_come_home"), GameRules.Category.MOBS, true);
+	/** Now and then in the evening a visitor (a stray cat, or a rabbit or fox) walks up to the Hearth Lantern ({@link HomeLife}). */
+	public static final GameRules.Key<GameRules.BooleanValue> HEARTH_VISITORS =
+			Services.PLATFORM.booleanRule(name("hearth_visitors"), GameRules.Category.MOBS, true);
 
 	/** The lowest and highest {@link #HEARTH_LANTERN_RADIUS} counts; NeoForge's rules have no bounds, so a value outside is read as the nearest end. */
 	public static final int MIN_RADIUS = 0, MAX_RADIUS = 128;

@@ -40,10 +40,11 @@ public final class CozyCoreGameTests {
 	private static final String HOME_ITEMS = "home_items", HOME_ANIMALS = "home_animals", HOME_LIGHTNING = "home_lightning",
 			HOME_FALLS = "home_falls", HOME_GLASS = "home_glass";
 	private static final String REACH = "reach", HOME_LIGHTS = "home_lights", HOME_GARDEN = "home_garden", HOME_PETS = "home_pets";
+	private static final String HOME_VISITOR = "home_visitor", HOME_VISITOR_NIGHT = "home_visitor_night", HOME_VISITOR_BIOME = "home_visitor_biome";
 	/** The rules a batch may change; each batch starts from a new world's values of them. */
 	private static final List<GameRules.Key<?>> RULES = List.of(Rules.HEARTHS_PROTECT_BUILDS, Rules.MOB_EXPLOSIONS_BREAK_BLOCKS,
 			Rules.ENDERMEN_TAKE_BLOCKS, Rules.FIRE_BURNS_BLOCKS, Rules.HEARTH_LANTERN_RADIUS, Rules.KEEP_HOTBAR_ON_DEATH, GameRules.RULE_DOINSOMNIA, Rules.HEARTH_ITEM_MINUTES,
-			Rules.HEARTH_LIGHTS, Rules.HEARTH_GARDEN, Rules.PETS_COME_HOME);
+			Rules.HEARTH_LIGHTS, Rules.HEARTH_GARDEN, Rules.PETS_COME_HOME, Rules.HEARTH_VISITORS);
 
 	public CozyCoreGameTests(IEventBus modBus) {
 		modBus.addListener(RegisterGameTestsEvent.class, event -> event.register(CozyCoreGameTests.class));
@@ -333,6 +334,37 @@ public final class CozyCoreGameTests {
 
 	@BeforeBatch(batch = HOME_PETS)
 	public static void homePets(ServerLevel level) {
+		home(level);
+	}
+
+	// 0.8.0, a visitor at your door (VisitChecks), each in a batch of its own.
+	@GameTest(template = "lanterns", batch = HOME_VISITOR, timeoutTicks = 40)
+	public static void visitor_comes_at_dusk(GameTestHelper helper) {
+		VisitChecks.arrives(helper);
+	}
+
+	@GameTest(template = "lanterns", batch = HOME_VISITOR_NIGHT, timeoutTicks = 600)
+	public static void visitor_settles_then_leaves(GameTestHelper helper) {
+		VisitChecks.staysTheNight(helper);
+	}
+
+	@GameTest(template = "empty", batch = HOME_VISITOR_BIOME, timeoutTicks = 20)
+	public static void visitor_suits_the_biome(GameTestHelper helper) {
+		VisitChecks.biome(helper);
+	}
+
+	@BeforeBatch(batch = HOME_VISITOR)
+	public static void homeVisitor(ServerLevel level) {
+		home(level);
+	}
+
+	@BeforeBatch(batch = HOME_VISITOR_NIGHT)
+	public static void homeVisitorNight(ServerLevel level) {
+		home(level);
+	}
+
+	@BeforeBatch(batch = HOME_VISITOR_BIOME)
+	public static void homeVisitorBiome(ServerLevel level) {
 		home(level);
 	}
 
