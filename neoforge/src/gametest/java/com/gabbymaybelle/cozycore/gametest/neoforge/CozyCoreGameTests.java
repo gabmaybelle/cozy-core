@@ -73,6 +73,9 @@ public final class CozyCoreGameTests {
 		FUNCTIONS.put("candles_light_at_dusk", LifeChecks::lights);
 		FUNCTIONS.put("garden_grows_at_home", LifeChecks::garden);
 		FUNCTIONS.put("pets_settle_by_the_hearth", LifeChecks::pets);
+		FUNCTIONS.put("visitor_comes_at_dusk", VisitChecks::arrives);
+		FUNCTIONS.put("visitor_settles_then_leaves", VisitChecks::staysTheNight);
+		FUNCTIONS.put("visitor_suits_the_biome", VisitChecks::biome);
 	}
 
 	public CozyCoreGameTests(IEventBus modBus) {
@@ -144,6 +147,10 @@ public final class CozyCoreGameTests {
 		test(event, "candles_light_at_dusk", home(event, "home_lights"), EMPTY, 20);
 		test(event, "garden_grows_at_home", home(event, "home_garden"), EMPTY, 20);
 		test(event, "pets_settle_by_the_hearth", home(event, "home_pets"), id("lanterns"), 400);
+		// 0.8.0, a visitor at your door (VisitChecks), each in a batch of its own.
+		test(event, "visitor_comes_at_dusk", home(event, "home_visitor"), id("lanterns"), 40);
+		test(event, "visitor_settles_then_leaves", home(event, "home_visitor_night"), id("lanterns"), 600);
+		test(event, "visitor_suits_the_biome", home(event, "home_visitor_biome"), EMPTY, 20);
 	}
 
 	/**

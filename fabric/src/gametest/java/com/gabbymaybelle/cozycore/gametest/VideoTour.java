@@ -2,6 +2,14 @@ package com.gabbymaybelle.cozycore.gametest;
 
 import com.gabbymaybelle.cozycore.HearthLantern;
 import com.gabbymaybelle.cozycore.HearthLanterns;
+import com.gabbymaybelle.cozycore.HomeLife;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.Holder;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.fox.Fox;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -212,8 +220,23 @@ public class VideoTour implements FabricClientGameTest {
 	 * flower turns up in the garden at sunrise, and the sunrise shot of the lantern loops to the start.
 	 */
 	private static final List<String> VOICE = List.of("v_home", "v_candles", "v_cat", "v_flower", "v_morning");
+	/**
+	 * The Short "A visitor at dusk" (0.8.0; plan: mods-media cozy-core/VISITOR-SHORT-PLAN.md): tall,
+	 * about 15 s. A stray cat comes up the path at dusk while she stands on it, curls up by the Hearth
+	 * Lantern, a rabbit and a fox visit a home in a taiga, and at sunrise she tames the cat so it stays.
+	 * Each visitor is brought by the mod's own {@code HomeLife.visit} and walks in on its own goal.
+	 */
+	private static final List<String> VISITOR = List.of("vis_arrive", "vis_curl", "vis_rabbit", "vis_fox", "vis_tame");
 	private static final List<String> DAY = List.of("d_dawn", "d_home", "d_cut", "d_dye", "d_roof", "d_trader", "d_anvil", "d_name", "d_styles",
 			"d_night", "d_storm", "d_porch", "d_morning");
+	/**
+	 * The trailer "When the sun goes down" (0.8.0; plan: mods-media cozy-core/TRAILER-PLAN.md): wide,
+	 * about 38 s, her voice, one evening at the cottage. She walks home at sunset, the candles light, her
+	 * cat comes home, a stray wanders up the path, a creeper goes off at night and nothing breaks, and at
+	 * sunrise she tames the visitor and a flower has grown. Something moves in every shot.
+	 */
+	private static final List<String> TRAILER = List.of("tr_walk", "tr_candles", "tr_cat", "tr_visitor", "tr_creeper", "tr_tame",
+			"tr_flower", "tr_end");
 
 	private void scenes() {
 		readSet();
@@ -251,8 +274,31 @@ public class VideoTour implements FabricClientGameTest {
 			film.scene("v_morning", this::hearthMorning);
 			realPace = false;
 		}
+		if (VISITOR.stream().anyMatch(film::want)) {
+			film.window(1080, 1920, 3);
+			realPace = true;
+			film.scene("vis_arrive", this::visitorArrives);
+			film.scene("vis_curl", this::visitorCurlsUp);
+			film.scene("vis_rabbit", () -> wildVisitor(EntityTypes.RABBIT));
+			film.scene("vis_fox", () -> wildVisitor(EntityTypes.FOX));
+			film.scene("vis_tame", this::visitorTamed);
+			realPace = false;
+		}
 		if (DAY.stream().anyMatch(film::want)) {
 			showcase();
+		}
+		if (TRAILER.stream().anyMatch(film::want)) {
+			film.window(1920, 1080, 3);
+			realPace = true;
+			film.scene("tr_walk", this::walkHome);
+			film.scene("tr_candles", this::candles);
+			film.scene("tr_cat", this::catComesHome);
+			film.scene("tr_visitor", this::visitorArrives);
+			film.scene("tr_creeper", this::nightBlast);
+			film.scene("tr_tame", this::visitorTamed);
+			film.scene("tr_flower", this::flower);
+			film.scene("tr_end", () -> dawn(true));
+			realPace = false;
 		}
 	}
 
@@ -728,6 +774,371 @@ public class VideoTour implements FabricClientGameTest {
 		film.note("flower", "grew " + grew + ": " + what);
 		set(grass.above(), "minecraft:air");
 		Film.check(grew, "a flower grew in the garden at home (" + what + ")");
+	}
+
+	// ------------------------------------------------------------------ "A visitor at dusk" (0.8.0)
+
+	/** Dusk for the visitor scenes: inside the mod's visiting hours (12000 until morning), the sky still warm. */
+	private static final int VISIT_DUSK = 12600;
+
+	/** The first of these spots with open air on solid ground, or null. */
+	private BlockPos firstOpen(BlockPos... spots) {
+		for (BlockPos p : spots) {
+			if (openOnGround(p)) {
+				return p;
+			}
+		}
+		return null;
+	}
+
+	/** A visitor of this kind, brought to this spot by the mod's own visit (marked, dressed for the biome), or null. */
+	private Mob visitor(EntityType<? extends Mob> type, BlockPos spot) {
+		return film.server.computeOnServer(s -> HomeLife.visit(s.overworld(), spot, type));
+	}
+
+	/**
+	 * The same orange cat in every cat shot, so the Short reads as one visitor (the mod picks a coat at
+	 * random; a black one vanished in the dusk shots of the first take).
+	 */
+	private Mob orange(Mob mob) {
+		if (mob instanceof Cat cat) {
+			cmd("data merge entity %s {variant:\"minecraft:red\"}", cat.getStringUUID());
+			String coat = film.server.computeOnServer(s -> cat.getVariant().getRegisteredName());
+			Film.check(coat.equals("minecraft:red"), "the visiting cat is the orange one (" + coat + ")");
+		}
+		return mob;
+	}
+
+	/** Whether this visitor has settled by its lantern: a cat lies down, a fox sits, a rabbit stops beside it. */
+	private boolean resting(Mob mob, BlockPos lantern) {
+		return film.server.computeOnServer(s -> {
+			if (mob instanceof Cat cat) {
+				return cat.isLying();
+			}
+			if (mob instanceof Fox fox) {
+				return fox.isSitting();
+			}
+			return mob.getNavigation().isDone() && mob.distanceToSqr(Vec3.atBottomCenterOf(lantern)) < 3.5 * 3.5;
+		});
+	}
+
+	/** Films until the visitor rests by the lantern, or {@code max} frames; whether it did. */
+	private boolean filmUntilResting(Mob mob, BlockPos lantern, int max) {
+		boolean done = false;
+		for (int i = 0; i < max && !done; i++) {
+			film.record(1);
+			done = resting(mob, lantern);
+		}
+		return done;
+	}
+
+	/**
+	 * Dusk, low on the front path: a stray cat is already trotting up it toward the Hearth Lantern and
+	 * the lit cottage, and curls up under the lantern. It walks on its own visitor goal; nothing steers
+	 * it. No one stands on the path: a stray cat keeps away from a player within 16 blocks (vanilla's
+	 * own goal, above the visit), so it only settles while she is off somewhere (scout, 2026-10-22).
+	 * Its first second or so also closes the Short, so the loop reads as the next evening's visitor.
+	 */
+	private void visitorArrives() {
+		reset(true, VISIT_DUSK);
+		film.hud(false);
+		film.spectator();
+		film.thirdPerson(false, 4);
+		Vec3 look = Vec3.atCenterOf(lantern()).add(0, -1.6, 0);
+		film.camera(point(0.6, 1.0, 11.5), look);
+		film.ctx.waitTicks(10);
+		// Just ahead of the camera, so it is big in shot from the first frame and has the whole path to
+		// walk (the first take's cat started halfway up and settled in a second and a half).
+		BlockPos spot = firstOpen(at(0, 0, 9), at(1, 0, 9), at(-1, 0, 9), at(0, 0, 8), at(1, 0, 8));
+		Film.check(spot != null, "open lawn ahead of the camera for the cat to start from");
+		Mob cat = orange(visitor(EntityTypes.CAT, spot));
+		Film.check(cat != null, "the mod brought a visitor to the path");
+		film.log("visit", "cat");
+		film.rolling();
+		boolean rested = filmUntilResting(cat, lantern(), 200);
+		film.record(20);
+		boolean marked = film.server.computeOnServer(s -> HomeLife.isVisitor(cat));
+		film.note("arrive", "rested " + rested + ", still a visitor " + marked);
+		film.server.runOnServer(s -> cat.discard());
+		Film.check(rested, "the visitor walked up the path and curled up by the Hearth Lantern");
+		Film.check(marked, "the cat is a visitor (the mod's mark), not a pet");
+	}
+
+	/**
+	 * Dusk, close and low by the lamp post: a stray cat walks in from the lawn, turns and curls up under
+	 * the Hearth Lantern, a few blocks from where she watches.
+	 */
+	private void visitorCurlsUp() {
+		reset(true, VISIT_DUSK + 300);
+		film.hud(false);
+		film.spectator();
+		film.thirdPerson(false, 4);
+		Vec3 look = Vec3.atBottomCenterOf(lantern().below(2)).add(0.6, 0.2, 0.8);
+		// Wide enough for the 2.5 blocks round the lantern where it settles (the first take's cat lay
+		// 3 blocks out, just off the edge of a tighter shot).
+		Vec3 eye = look.add(3.2, 1.7, 4.2);
+		film.camera(eye, look);
+		film.ctx.waitTicks(10);
+		// Off to the side, so it walks into the shot.
+		BlockPos spot = firstOpen(at(4, 0, 5), at(3, 0, 6), at(5, 0, 4), at(-6, 0, 5), at(-5, 0, 6));
+		Film.check(spot != null, "open lawn for the cat to start from");
+		Mob cat = orange(visitor(EntityTypes.CAT, spot));
+		Film.check(cat != null, "the mod brought a visitor");
+		film.log("visit", "cat");
+		film.rolling();
+		boolean rested = filmUntilResting(cat, lantern(), 240);
+		film.record(40);
+		double away = film.server.computeOnServer(s -> Math.sqrt(cat.distanceToSqr(Vec3.atBottomCenterOf(lantern()))));
+		film.note("curl", "lying " + rested + ", " + String.format(Locale.ROOT, "%.1f", away) + " blocks from the lantern");
+		film.server.runOnServer(s -> cat.discard());
+		Film.check(rested, "the visitor curled up by the hearth");
+		Film.check(away < 4, "the visitor settled by the lantern (" + away + " blocks away)");
+	}
+
+	/**
+	 * Dusk at a little home in the nearest taiga (a lantern on a fence post), where the mod sends rabbits
+	 * and foxes as well as cats: first the test asks the mod's own pick, many times, that this kind
+	 * visits here; then one walks in and settles by the lantern. The home is taken down afterwards.
+	 */
+	private void wildVisitor(EntityType<? extends Mob> type) {
+		reset(true, VISIT_DUSK);
+		film.hud(false);
+		film.spectator();
+		film.thirdPerson(false, 4);
+		BlockPos found = film.server.computeOnServer(s -> {
+			Pair<BlockPos, Holder<Biome>> near = s.overworld().findClosestBiome3d(b -> b.is(Biomes.TAIGA), at(0, 0, 0), 4000, 32, 64);
+			return near == null ? null : near.getFirst();
+		});
+		Film.check(found != null, "a taiga within 4000 blocks of the cottage");
+		// A clearing in it: no leaves over a 7x7 patch, so the camera sees the visitor (the first take's
+		// rabbit was hidden behind a spruce).
+		int[] open = film.server.computeOnServer(s -> {
+			var level = s.overworld();
+			for (int r = 0; r <= 40; r += 4) {
+				for (int dx = -r; dx <= r; dx += 4) {
+					for (int dz = -r; dz <= r; dz += 4) {
+						if (Math.max(Math.abs(dx), Math.abs(dz)) != r) {
+							continue;
+						}
+						int x = found.getX() + dx, z = found.getZ() + dz;
+						level.getChunk(x >> 4, z >> 4);
+						boolean clear = level.getBiome(new BlockPos(x, level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z)).is(Biomes.TAIGA);
+						for (int ax = -3; ax <= 3 && clear; ax++) {
+							for (int az = -3; az <= 3 && clear; az++) {
+								clear = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, x + ax, z + az)
+										== level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x + ax, z + az);
+							}
+						}
+						if (clear) {
+							return new int[] {x, z};
+						}
+					}
+				}
+			}
+			return new int[] {found.getX(), found.getZ()};
+		});
+		int gx = open[0], gz = open[1];
+		BlockPos post = new BlockPos(gx, film.ground(gx, gz), gz);
+		BlockPos lamp = post.above();
+		Vec3 look = Vec3.atBottomCenterOf(post).add(1, 0.4, 0.5);
+		Vec3 eye = look.add(3.0, 1.6, 3.6);
+		film.camera(eye, look);
+		film.ctx.waitTicks(40);
+		set(post, "minecraft:spruce_fence");
+		set(lamp, HearthLantern.ID + "[hanging=false]");
+		String biome = film.server.computeOnServer(s -> s.overworld().getBiome(post).getRegisteredName());
+		int[] picks = film.server.computeOnServer(s -> {
+			int[] n = new int[2];
+			for (int i = 0; i < 300; i++) {
+				EntityType<? extends Mob> pick = HomeLife.visitorFor(s.overworld(), post, s.overworld().getRandom());
+				n[pick == type ? 0 : 1]++;
+			}
+			return n;
+		});
+		film.note("picks", biome + ": " + picks[0] + " of 300 picks were " + type.toShortString());
+		BlockPos spot = null;
+		for (int[] d : new int[][] {{5, 3}, {4, 5}, {6, 1}, {-5, 3}, {-4, 5}, {3, 6}}) {
+			int x = gx + d[0], z = gz + d[1];
+			BlockPos p = new BlockPos(x, film.ground(x, z), z);
+			if (openOnGround(p)) {
+				spot = p;
+				break;
+			}
+		}
+		Film.check(spot != null, "open ground near the taiga home for the visitor to start from");
+		Mob animal = visitor(type, spot);
+		Film.check(animal != null, "the mod brought a " + type.toShortString());
+		film.log("visit", type.toShortString());
+		film.rolling();
+		boolean rested = filmUntilResting(animal, lamp, 200);
+		film.record(30);
+		film.note(type.toShortString(), "settled by the lantern " + rested);
+		film.server.runOnServer(s -> animal.discard());
+		set(lamp, "minecraft:air");
+		set(post, "minecraft:air");
+		Film.check(picks[0] > 0, "in " + biome + " the mod sends a " + type.toShortString() + " (" + picks[0] + " of 300 picks)");
+		Film.check(rested, "the " + type.toShortString() + " settled by the lantern");
+	}
+
+	/**
+	 * Sunrise, third person: the visitor that spent the night by the lantern gets up to go, as the mod's
+	 * visitors do in the morning, but she holds a fish; it comes to her, she feeds it until it trusts
+	 * her (vanilla taming, hearts and all), and with that it's hers and stays. She stands still and
+	 * looks at the ground where it will stop: a tempted cat is scared off if the player moves or turns
+	 * her head (vanilla's tempt goal; the scout's first try followed it with her head and lost it).
+	 */
+	private void visitorTamed() {
+		reset(true, SUNRISE);
+		film.hud(false);
+		film.survival();
+		cmd("clear @a");
+		cmd("item replace entity @a hotbar.0 with minecraft:cod 32");
+		film.ctx.getInput().pressKey(o -> o.keyHotbarSlots[0]);
+		// About 8 blocks from the lantern: vanilla's tempt goal only notes where the player looks once the
+		// cat is more than 6 blocks off, so a cat tempted from closer is "scared" on its first check
+		// (TemptGoal.canContinueToUse; the third scout's cat never came).
+		Vec3 rest = Vec3.atBottomCenterOf(lantern().below(2)), her = point(3.5, 0, 7.5);
+		// She faces the cottage, a little to the right of the lantern, so the cat comes in from the side
+		// of the shot instead of behind her (the first take's cat was hidden by her back).
+		Vec3 aim = her.add(-0.8, 0.4, -4);
+		film.camera(her, aim);
+		film.ctx.waitTicks(45);
+		film.thirdPerson(true, 6);
+		BlockPos spot = firstOpen(lantern().below(2), lantern().below(2).east(), lantern().below(2).south());
+		Film.check(spot != null, "open ground under the lantern for the visitor");
+		Mob mob = orange(visitor(EntityTypes.CAT, spot));
+		Film.check(mob instanceof Cat, "the mod brought a cat");
+		Cat cat = (Cat) mob;
+		film.log("visit", "cat");
+		film.rolling();
+		boolean tame = false;
+		double closest = 99;
+		int feeds = 0;
+		for (int i = 0; i < 400 && !tame; i++) {
+			double d = film.server.computeOnServer(s -> Math.sqrt(cat.distanceToSqr(s.getPlayerList().getPlayers().getFirst())));
+			closest = Math.min(closest, d);
+			if (i % 8 == 7 && d < 3.5) {
+				// What a right-click on the cat does (Minecraft.startUseItem): the same interaction sent for
+				// the cat in front of her, and the arm's swing. The crosshair rarely sits exactly on a cat that
+				// stopped a little off the line, and turning her head to it would scare it off.
+				boolean fed = film.ctx.computeOnClient(mc -> {
+					net.minecraft.world.entity.Entity mine = mc.level.getEntity(cat.getId());
+					if (mine == null || !mc.player.isWithinEntityInteractionRange(mine, 0.0)) {
+						return false;
+					}
+					ItemStack held = mc.player.getMainHandItem();
+					var hit = new net.minecraft.world.phys.EntityHitResult(mine, mine.getBoundingBox().getCenter());
+					if (mc.gameMode.interact(mc.player, mine, hit, InteractionHand.MAIN_HAND) instanceof net.minecraft.world.InteractionResult.Success success) {
+						if (success.swingSource() == net.minecraft.world.InteractionResult.SwingSource.PREDICTED) {
+							mc.player.swing(InteractionHand.MAIN_HAND, held.getInteractAnimation(), false);
+						}
+						return true;
+					}
+					return false;
+				});
+				if (fed) {
+					film.log("feed", "cod");
+					feeds++;
+				}
+			}
+			film.record(1);
+			tame = film.server.computeOnServer(s -> cat.isTame());
+		}
+		film.log("tame", "cat");
+		film.record(50);
+		boolean stays = film.server.computeOnServer(s -> !HomeLife.isVisitor(cat) && !cat.isRemoved());
+		film.note("tame", "tamed " + tame + ", stays " + stays + ", came within " + String.format(Locale.ROOT, "%.1f", closest) + " blocks, fed " + feeds + " times");
+		film.server.runOnServer(s -> cat.discard());
+		film.thirdPerson(false, 4);
+		Film.check(tame, "she tamed the visiting cat with fish");
+		Film.check(stays, "tamed, it is no longer a visitor, so it stays");
+	}
+
+	// ------------------------------------------------------------------ the trailer's own scenes
+
+	/**
+	 * The trailer's opening, in motion from the first frame: sunset, third person, she is already walking
+	 * up the front path toward the cottage and its glowing Hearth Lantern, and "Gabby's Cottage" shows
+	 * as she steps into home. Like {@link #name}, with a short reach set by the mod's own rule so the
+	 * edge crosses the path on camera; unlike it, no held moment before the walk (the Shorts lose
+	 * viewers at a shot that waits).
+	 */
+	private void walkHome() {
+		reset(false, SUNSET);
+		cmd("gamerule cozy_core:hearth_lantern_radius 6");
+		set(lantern(), HearthLantern.ID + "[hanging=true]{CustomName:\"Gabby's Cottage\"}");
+		film.hud(true);
+		film.survival();
+		cmd("clear @a");
+		// Out of home first, so stepping in counts as arriving.
+		film.camera(point(0.5, 0, 60.5), point(0.5, 1.6, 0));
+		film.ctx.waitTicks(20);
+		// name()'s start: from further back (13.5) the camera began in the sunflowers south of the path
+		// (scout, 2026-10-22).
+		Vec3 start = point(0.5, 0, 9.5), door = point(0.5, 1.6, -6);
+		film.camera(start, door);
+		film.thirdPerson(true, 6);
+		film.bigGui();
+		film.turnHead(door);
+		film.rolling();
+		walkSpeed(0.05);
+		film.ctx.getInput().holdKey(o -> o.keyUp);
+		// Stopped by where she is, short of the porch steps (see name()).
+		double stop = point(0, 0, 1.5).z;
+		film.until(mc -> mc.player.getZ() <= stop);
+		film.ctx.getInput().releaseKey(o -> o.keyUp);
+		walkSpeed(0.1);
+		film.record(20);
+		String shown = film.ctx.computeOnClient(mc -> String.valueOf(HearthLanterns.homeAt(mc.level, mc.player.blockPosition()) != null));
+		film.note("walk", "at home " + shown);
+		Film.check(shown.equals("true"), "the walk ended at home");
+		film.normalGui();
+		film.thirdPerson(false, 4);
+	}
+
+	/**
+	 * The trailer's one quiet creeper (Gabby, 2026-10-22): night, the cat asleep on the porch step, the
+	 * camera gliding in toward the cottage the whole time; a creeper on the garden path goes off partway
+	 * along the glide and the smoke clears on the same cottage. Like {@link #porch}, but the camera never
+	 * stops, so the blast is a beat in the glide rather than a shot of its own.
+	 */
+	private void nightBlast() {
+		reset(true, NIGHT + 600);
+		film.hud(false);
+		film.spectator();
+		film.thirdPerson(false, 4);
+		BlockPos step = at(-1, 1, -4), path = at(1, 0, -1);
+		porchCat(step);
+		Vec3 from = porchEye().add(3, 1.2, 4), to = porchEye().lerp(porchLook(), 0.15);
+		film.camera(from, porchLook());
+		film.ctx.waitTicks(10);
+		int before = cottage();
+		cmd("summon minecraft:creeper %d %d %d {NoAI:1b,Fuse:30,Rotation:[200f,0f]}", path.getX(), path.getY(), path.getZ());
+		film.rolling();
+		// One glide from the first frame to the last; the fuse is lit a second in, and the glide runs on
+		// past the blast until the smoke has cleared.
+		int frames = 160;
+		boolean boom = false;
+		for (int i = 0; i < frames; i++) {
+			film.camera(from.lerp(to, Film.ease(i / (frames - 1.0))), porchLook());
+			if (i == 20) {
+				light(path);
+			}
+			film.record(1);
+			if (!boom && i > 20 && film.server.computeOnServer(s -> near(s, Creeper.class, path) == null)) {
+				boom = true;
+				film.log("boom", "");
+			}
+		}
+		int after = cottage();
+		float lost = film.server.computeOnServer(s -> {
+			Cat c = near(s, Cat.class, step);
+			return c == null ? -1f : c.getMaxHealth() - c.getHealth();
+		});
+		film.note("creeper", "went off " + boom + "; cottage " + before + " -> " + after + " blocks; cat " + (lost < 0 ? "gone" : "lost " + lost + " health"));
+		Film.check(boom, "the creeper went off during the glide");
+		Film.check(after == before, "the blast on the path broke nothing (" + before + " -> " + after + ")");
+		Film.check(lost == 0, "the cat is unhurt (" + (lost < 0 ? "gone" : "lost " + lost) + ")");
 	}
 
 	/** A quiet wide shot of the cottage, easing in to the opening shot's angle, so the first Short loops. */

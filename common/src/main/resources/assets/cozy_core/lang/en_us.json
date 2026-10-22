@@ -27,6 +27,8 @@
   "gamerule.cozy_core.hearth_garden.description": "On: now and then a flower that suits the biome grows on open grass inside a Hearth Lantern's reach, never more than a few in one patch.",
   "gamerule.cozy_core.pets_come_home": "Pets settle by the hearth at night",
   "gamerule.cozy_core.pets_come_home.description": "On: at night, while you're at home, your tamed cats and dogs settle by the nearest Hearth Lantern instead of following you. Pets told to sit stay put.",
+  "gamerule.cozy_core.hearth_visitors": "Visitors come to your door",
+  "gamerule.cozy_core.hearth_visitors.description": "On: now and then in the evening, while you're at home, a stray cat (or a rabbit or fox, where they live) walks up to your Hearth Lantern. It leaves in the morning unless you tame it, put it on a lead or name it.",
   "advancements.cozy_core.cozy.root.title": "Cozy Core",
   "advancements.cozy_core.cozy.root.description": "Pick up some planks and start building",
   "advancements.cozy_core.cozy.the_kettles_on.title": "The kettle's on",

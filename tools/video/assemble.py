@@ -49,9 +49,26 @@ VOICE = [
     ('v_flower', 0, 82, ['A GARDEN', 'THAT *GROWS*'], 1320, 0),
     ('v_morning', 0, None, None, 0, 32),
 ]
-SCENES = [tuple(sc) + (0,) for sc in TALL] if CUT == 'tall' else VOICE
+# "A visitor at dusk" (0.8.0; plan: mods-media cozy-core/VISITOR-SHORT-PLAN.md), about 15 s: frame
+# 1 moves (a stray cat already trotting past her up the path), the second shot keeps it going close
+# by the lantern, a rabbit and a fox visit a taiga home one second each, she tames the cat at sunrise,
+# and the opening's first second closes it, so the loop reads as the next evening's visitor. Frame
+# ranges are from take 09 (2026-10-22): the rabbit and fox once they're in shot; the taming cut from
+# the cat coming for the fish to the last feed and the hearts (it took 13 tries, vanilla's 1 in 3).
+VISITOR = [
+    ('vis_arrive', 0, None, ['SOMEONE *VISITS*', 'AT DUSK'], 420, 0),
+    ('vis_curl', 0, None, ['A STRAY *CAT*...'], 420, 0),
+    ('vis_rabbit', 50, None, ['...OR WHOEVER', '*LIVES* NEAR'], 420, 0),
+    ('vis_fox', 26, None, ['...OR WHOEVER', '*LIVES* NEAR'], 420, 0),
+    ('vis_tame', 0, 34, ['*TAME* IT', 'AND IT STAYS'], 420, 0),
+    ('vis_tame', 118, None, ['*TAME* IT', 'AND IT STAYS'], 420, 0),
+    ('vis_arrive', 0, 29, None, 0, 0),
+]
+SCENES = {'tall': [tuple(sc) + (0,) for sc in TALL], 'voice': VOICE, 'visitor': VISITOR}[CUT]
 if CUT == 'voice':
     NAME = 'cozy-core-short-voice'
+if CUT == 'visitor':
+    NAME = 'cozy-core-short-visitor'
 RAIN = set()
 # The night from above is dark under the shader on a phone: lift it, as the showcase does.
 BRIGHTEN = {'t_night': 1.6, 'v_cat': 1.45}
@@ -220,7 +237,7 @@ run('ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', os.path.join(work, 'list
 # comes with "Home" (the walk opens just as it plays), the window breaking and the stonecutter click.
 random.seed(7)
 SOUND = {'fuse': ['fuse'], 'boom': ['boom1', 'boom2'], 'place': ['place1'], 'crackle': ['crackle1', 'crackle2'],
-         'thunder': ['thunder'], 'break': ['glass'], 'click': ['click'], 'grow': ['pop']}
+         'thunder': ['thunder'], 'break': ['glass'], 'click': ['click'], 'grow': ['pop'], 'tame': ['meow']}
 cues = []
 for key, (scene, first, end, hold) in kept.items():
     if scene in ('s_name', 't_name') and first == 0:

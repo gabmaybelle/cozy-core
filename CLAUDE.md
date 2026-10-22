@@ -106,9 +106,20 @@ it first, and add this session's row before ending.
     at home and the pet within 48 blocks of the nearest lantern, not sitting, leashed or riding, the
     pet walks to the ground under the lantern (or beside one standing on something) and settles:
     a cat lies down, a dog sits. `HearthLanterns.nearest` finds the lantern.
-- `art/icon.ase`: Gabby's own 32x32 sprite; `art/icon.png` is it at 512x512 (nearest-neighbour).
-  The build puts it in the zip as `pack.png` and Gradle puts it in the jars as `icon.png` (Fabric
-  `icon`, NeoForge `logoFile`). Never replace it with generated art; re-export from the .ase.
+- **A visitor at your door (0.8.0, `HomeLife`; Gabby's picks, 2026-10-22):** game rule
+  `hearth_visitors` (on). `HearthLanternBlock` ticks randomly; from 12000 to 14000, one tick in
+  `VISIT_CHANCE` (4, about one evening in three) on the lantern nearest a player at home brings a
+  visitor 16 to 24 blocks out on open ground, unless the home has one (`visitorsNear`). Two in three
+  are stray cats, otherwise a rabbit or fox if the biome's natural creature spawns (the
+  `NATURAL_MOB_SPAWNS` environment attribute; 26.3 has no `Biome.getMobSettings`) name it. A visitor
+  carries the entity tag `cozy_core_visitor` and is persistent; `VisitorGoalsMixin` gives cats (priority
+  5, so fish still tempts them), rabbits and foxes (3, above fleeing players) `VisitGoal`: rest by the
+  lantern until 23000, then walk off and be removed once no player is within 24. `isVisitor` takes the
+  tag off a tamed, leashed or named one, so it stays and stops counting (a goal's `canUse` isn't called
+  while a same-priority goal holds its flags, so the count has to check too: found 2026-10-22).
+- `art/icon.png`: the mod's icon, three candles on a wooden board (512x512; Gabby's pick, 2026-10-21,
+  the same as the listings'; it replaced the first lantern sprite). The build puts it in the zip as `pack.png` and Gradle puts it in the jars as `icon.png` (Fabric
+  `icon`, NeoForge `logoFile`). Change it only when Gabby gives a new one.
   `tools/generate-art.js` draws every Hearth Lantern style's block and item textures (original
   pixel art, laid out like vanilla's lantern texture so the vanilla lantern models can be the
   parents; the classic palette is unchanged since 0.2.0, the others take their frame and flame

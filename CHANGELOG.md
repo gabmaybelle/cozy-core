@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.0: A visitor at your door
+
+- **A visitor at your door.** Now and then in the evening, while you're home, a stray cat walks up to
+  your Hearth Lantern and curls up beside it. Where rabbits or foxes live, it's sometimes one of them
+  instead. It leaves in the morning, unless you tame it, put it on a lead or name it; then it's yours
+  and stays. One visitor at a time, about one evening in three. Game rule `cozy_core:hearth_visitors`.
+- A new icon in the mod menu and the data pack list: three candles, the same as the mod's pages.
+
 ## 0.7.0: Home comes alive
 
 Home does a few gentle things on its own now, inside a Hearth Lantern's reach.

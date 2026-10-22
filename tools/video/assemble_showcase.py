@@ -1,6 +1,6 @@
 """Builds the showcase video, "a day at the cottage", from VideoTour's wide (d_) frames.
 
-python assemble_showcase.py <video_tour dir> <sounds dir> <out dir>
+python assemble_showcase.py <video_tour dir> <sounds dir> <out dir> [showcase | trailer]
 (sounds from get_sounds.py; set CAPTION_FONT to a heavy font file if none of the usual ones is found)
 
 Makes, at 1920x1080: cozy-core-showcase.mp4 (the game's own sounds), cozy-core-showcase-silent.mp4,
@@ -11,16 +11,18 @@ ends on the next sunrise with the end card.
 No captions explain the features (Gabby, 2026-10-20): the pictures and the game's sounds show what
 happens. The only words on screen are the title, the end card and the mod's own "Home" text.
 """
-import csv, os, random, shutil, subprocess, sys
+import csv, json, os, random, shutil, subprocess, sys
 from concurrent.futures import ThreadPoolExecutor
 from PIL import Image, ImageDraw, ImageEnhance, ImageFont
 
 # Absolute: ffmpeg's concat list resolves relative paths against its own folder.
 frames_dir, sounds_dir, out = (os.path.abspath(p) for p in sys.argv[1:4])
+# 'showcase' (the d_ scenes) or 'trailer' (the tr_ scenes): an optional fourth argument.
+CUT = sys.argv[4] if len(sys.argv) > 4 else 'showcase'
 FPS = 20
 W, H = 1920, 1080
 ORANGE = (255, 170, 70)  # the Hearth's flame
-NAME = 'cozy-core-showcase'
+NAME = 'cozy-core-' + CUT
 repo = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
 
 # Running order: scene, chapter it opens (or None), first frame kept and last (None = to the end).
@@ -40,13 +42,34 @@ SCENES = [
     ('d_porch', None, 0, None),
     ('d_morning', None, 0, None),
 ]
+# The trailer "When the sun goes down" (0.8.0; plan: mods-media cozy-core/TRAILER-PLAN.md): one evening,
+# in motion from the first frame, no title card and no chapters; her voice is laid over it afterwards
+# with add_voice.py, and the shots are held to her lines. The end card closes it.
+# Frame ranges from take 02 (2026-10-22), cut to her recorded lines (TRAILER-PLAN.md, "Cut to her lines").
+TRAILER = [
+    ('tr_walk', None, 0, None),
+    ('tr_candles', None, 40, None),
+    ('tr_cat', None, 0, None),
+    ('tr_visitor', None, 0, None),
+    ('tr_creeper', None, 0, 139),
+    ('tr_tame', None, 0, None),
+    ('tr_flower', None, 0, None),
+    ('tr_end', None, 120, None),
+]
+# Scenes played slower than filmed: the stray settles in under two seconds, too short for its line.
+SPEED = {}
+if CUT == 'trailer':
+    SCENES = TRAILER
+    SPEED = {'tr_visitor': 0.55}
 # The night shot from high above is dark enough under the shader that the monsters are hard to see.
-BRIGHTEN = {'d_night': 1.5}
+BRIGHTEN = {'d_night': 1.5, 'tr_cat': 1.45, 'tr_creeper': 1.35}
 # Scenes under steady rain: a bed of the game's rain sounds under them.
 RAIN = {'d_storm', 'd_porch'}
 TITLE_FROM = 30  # frames into the opening before the title fades in
 NAME_LINE, PROMISE = '*Cozy Core*', 'Light a hearth: your home stays safe, cozy and easy to build.'
 END = ['*Cozy Core*', 'Fabric and NeoForge', 'Minecraft 26.3 and 1.21.1', 'plus a data pack of the recipes for plain vanilla']
+if CUT == 'trailer':
+    END = ['*Cozy Core*', 'Fabric and NeoForge, Minecraft 26.3 and 1.21.1', 'Search "Cozy Core" on CurseForge']
 FADE = 6  # frames: captions fade in; a chapter fades in from black and the video fades out at the end
 
 FONTS = [os.environ.get('CAPTION_FONT', ''), 'C:/Windows/Fonts/ariblk.ttf', '/usr/share/fonts/truetype/msttcorefonts/Arial_Black.ttf',
@@ -123,7 +146,7 @@ with open(os.path.join(frames_dir, 'frames.tsv')) as f:
 with open(os.path.join(frames_dir, 'actions.tsv')) as f:
     actions = [(r[0], int(r[1]), r[2], r[3]) for r in csv.reader(f, delimiter='\t')]
 
-work = os.path.join(out, 'work-showcase')
+work = os.path.join(out, 'work-' + CUT)
 shutil.rmtree(work, ignore_errors=True)
 os.makedirs(work)
 TITLE_LAYER, END_LAYER = title(), end_card()
@@ -146,7 +169,7 @@ for index, (scene, chap, first, last) in enumerate(SCENES):
     os.makedirs(dest)
     # The title sits over the opening and fades out with its last frames; the end card over the close.
     title_span = (TITLE_FROM, end - first) if scene == 'd_dawn' else None
-    end_from = max(0, (end - first) - 90) if scene == 'd_morning' else None
+    end_from = max(0, (end - first) - 90) if scene == SCENES[-1][0] else None
     for i, n in enumerate(range(first, end)):
         jobs.append((scene, i, n, names[n], dest, title_span, end_from))
 
@@ -182,7 +205,8 @@ chapter_starts = {s for s, c, *_ in SCENES if c}
 clips, starts, t, encodes = [], {}, 0.0, []
 for scene in order:
     first, end = kept[scene]
-    secs = (end - first) / FPS
+    rate = FPS * SPEED.get(scene, 1.0)
+    secs = (end - first) / rate
     fades = []
     if scene in chapter_starts and scene != order[0]:
         fades.append('fade=t=in:st=0:d=0.3')
@@ -190,7 +214,7 @@ for scene in order:
         fades.append(f'fade=t=out:st={max(0.0, secs - 1.0):.3f}:d={min(1.0, secs):.3f}')
     vf = ','.join(fades + ['format=yuv420p'])
     clip = os.path.join(work, scene + '.mp4')
-    encodes.append(('ffmpeg', '-y', '-framerate', str(FPS), '-i', os.path.join(work, scene, '%04d.png'), '-vf', vf,
+    encodes.append(('ffmpeg', '-y', '-framerate', str(rate), '-i', os.path.join(work, scene, '%04d.png'), '-vf', vf,
                     '-r', '30', '-c:v', 'libx264', '-preset', 'slow', '-crf', '17', clip))
     starts[scene] = t
     t += secs
@@ -215,7 +239,7 @@ for scene, frame, kind, what in actions:
     first, end = kept[scene]
     if not first <= frame < end:
         continue
-    at = starts[scene] + (frame - first) / FPS
+    at = starts[scene] + (frame - first) / (FPS * SPEED.get(scene, 1.0))
     names, volume = SOUND[kind]
     cues.append((at, random.choice(names), 0.9 + random.random() * 0.2, volume))
     if kind == 'place':
@@ -226,8 +250,9 @@ for scene, frame, kind, what in actions:
     if what.endswith('_buy'):
         cues.append((at + 0.1, 'trader_yes' if what.startswith('trader') else 'villager_yes', 1.0, 0.6))
 # Arriving home: the crackle as "Gabby's Cottage" shows on the walk in.
-if 'd_name' in kept:
-    cues.append((starts['d_name'] + 0.4, 'crackle1', 1.0, 0.6))
+for walk in ('d_name', 'tr_walk'):
+    if walk in kept:
+        cues.append((starts[walk] + 0.4, 'crackle1', 1.0, 0.6))
 # Steady rain under the night's wet scenes: overlapping rain sounds about every 0.8 s.
 for scene in RAIN:
     if scene in kept:
@@ -248,6 +273,18 @@ audio = os.path.join(work, 'sound.wav')
 run('ffmpeg', '-y', *inputs, '-filter_complex', ';'.join(filters), '-map', '[a]', '-t', f'{total:.3f}', audio)
 run('ffmpeg', '-y', '-i', silent, '-i', audio, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k',
     '-shortest', '-movflags', '+faststart', os.path.join(out, NAME + '.mp4'))
+
+# Each scene's start, for add_voice.py (the same timeline.json the Shorts' assemble.py writes).
+with open(os.path.join(out, NAME + '-timeline.json'), 'w') as f:
+    json.dump(dict(starts, total=total), f, indent=1)
+if CUT == 'trailer':
+    raw = sorted(n for n in os.listdir(frames_dir) if n.startswith('tr_end_') and n[7:-4].isdigit())
+    Image.open(os.path.join(frames_dir, raw[len(raw) // 4])).convert('RGB').resize((1280, 720), Image.LANCZOS).save(
+        os.path.join(out, NAME + '-thumbnail-frame.png'))
+    print('total seconds', round(total, 2))
+    for scene in order:
+        print(f'  {scene}: starts {starts[scene]:.2f} s, {(kept[scene][1] - kept[scene][0]) / (FPS * SPEED.get(scene, 1.0)):.2f} s')
+    sys.exit(0)
 
 # YouTube's chapters: the first must start at 0:00 and each must last at least 10 s, so the opening
 # belongs to the first chapter and the closing shot to the last.
