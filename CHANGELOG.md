@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.8.0: A visitor at your door
 
 - **A visitor at your door.** Now and then in the evening, while you're home, a stray cat walks up to
   your Hearth Lantern and curls up beside it. Where rabbits or foxes live, it's sometimes one of them
