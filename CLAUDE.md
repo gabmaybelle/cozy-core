@@ -106,9 +106,9 @@ it first, and add this session's row before ending.
     at home and the pet within 48 blocks of the nearest lantern, not sitting, leashed or riding, the
     pet walks to the ground under the lantern (or beside one standing on something) and settles:
     a cat lies down, a dog sits. `HearthLanterns.nearest` finds the lantern.
-- `art/icon.ase`: Gabby's own 32x32 sprite; `art/icon.png` is it at 512x512 (nearest-neighbour).
-  The build puts it in the zip as `pack.png` and Gradle puts it in the jars as `icon.png` (Fabric
-  `icon`, NeoForge `logoFile`). Never replace it with generated art; re-export from the .ase.
+- `art/icon.png`: the mod's icon, three candles on a wooden board (512x512; Gabby's pick, 2026-10-21,
+  the same as the listings'; it replaced the first lantern sprite). The build puts it in the zip as `pack.png` and Gradle puts it in the jars as `icon.png` (Fabric
+  `icon`, NeoForge `logoFile`). Change it only when Gabby gives a new one.
   `tools/generate-art.js` draws every Hearth Lantern style's block and item textures (original
   pixel art, laid out like vanilla's lantern texture so the vanilla lantern models can be the
   parents; the classic palette is unchanged since 0.2.0, the others take their frame and flame

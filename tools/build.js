@@ -20,9 +20,7 @@ const ROOT = path.join(__dirname, '..');
 const PACK = path.join(ROOT, 'pack');
 const STAGE = path.join(ROOT, 'build');
 const DIST = path.join(ROOT, 'dist');
-// Gabby's own sprite (art/icon.ase, 32x32), exported at 512x512 with each pixel kept sharp.
-// It's the data pack's pack.png (and the mods' icon.png, from common/src/main/resources). Never
-// swap in generated art.
+// The mod's icon (512x512, Gabby's pick). It's the data pack's pack.png and the mods' icon.png.
 const ICON = path.join(ROOT, 'art', 'icon.png');
 
 function copyJars() {

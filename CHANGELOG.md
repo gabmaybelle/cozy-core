@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- A new icon in the mod menu and the data pack list: three candles, the same as the mod's pages.
+
 ## 0.7.0: Home comes alive
 
 Home does a few gentle things on its own now, inside a Hearth Lantern's reach.
