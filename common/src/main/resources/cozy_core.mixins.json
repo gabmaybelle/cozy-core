@@ -17,7 +17,8 @@
 		"ServerExplosionMixin",
 		"ServerPlayerMixin",
 		"SpreadingSnowyBlockMixin",
-		"ThunderHitMixin"
+		"ThunderHitMixin",
+		"VisitorGoalsMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

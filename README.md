@@ -67,6 +67,7 @@ Each rule is an ordinary game rule: it shows in the Game Rules screen when you m
 | `cozy_core:hearth_lights` | true (candles at home light after sunset and go out in the early morning) |
 | `cozy_core:hearth_garden` | true (now and then a flower grows on open grass at home) |
 | `cozy_core:pets_come_home` | true (at night, your cats and dogs settle by the hearth while you're home) |
+| `cozy_core:hearth_visitors` | true (now and then in the evening, a stray cat, rabbit or fox visits your Hearth Lantern) |
 | `cozy_core:keep_hotbar_on_death` | true |
 | `cozy_core:mob_explosions_break_blocks` | true (false: explosions break nothing anywhere) |
 | `cozy_core:endermen_take_blocks` | true (false: endermen take nothing anywhere) |

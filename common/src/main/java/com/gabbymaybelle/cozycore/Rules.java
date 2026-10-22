@@ -52,6 +52,8 @@ public final class Rules {
 	public static final GameRule<Boolean> HEARTH_GARDEN = bool("hearth_garden", true);
 	/** At night, with their owner at home, tamed cats and dogs settle by the Hearth Lantern ({@link HomeLife}). */
 	public static final GameRule<Boolean> PETS_COME_HOME = bool("pets_come_home", true);
+	/** Now and then in the evening a visitor (a stray cat, or a rabbit or fox) walks up to the Hearth Lantern ({@link HomeLife}). */
+	public static final GameRule<Boolean> HEARTH_VISITORS = bool("hearth_visitors", true);
 
 	private Rules() {
 	}
