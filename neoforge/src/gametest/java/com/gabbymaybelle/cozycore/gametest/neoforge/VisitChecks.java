@@ -58,7 +58,9 @@ final class VisitChecks {
 	@SuppressWarnings("removal") // makeMockServerPlayerInLevel: "someone home" needs a player in the world
 	static void arrives(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		BlockPos hearth = open(helper, level);
+		// On the test world's own ground: a visitor only comes to a yard near the lantern's height,
+		// and on 1.21.1 that ground is far below sea level.
+		BlockPos hearth = helper.absolutePos(new BlockPos(1, 1, 1));
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		RandomSource random = RandomSource.create(11);
 		Runnable tidy = () -> {
@@ -186,25 +188,40 @@ final class VisitChecks {
 		}
 	}
 
-	/** Over 300 picks, about two in three are cats, and every other visitor is one this biome spawns. */
+	/**
+	 * In snowy taiga, where rabbits and foxes both live: over 300 picks about two in three are cats,
+	 * some are rabbits or foxes, and every one that isn't a cat is one the biome spawns. The spot's
+	 * own biome is put back afterwards.
+	 */
 	static void biome(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		BlockPos at = open(helper, level);
-		RandomSource random = RandomSource.create(5);
-		Map<String, Integer> counts = new HashMap<>();
-		List<String> notHere = new ArrayList<>();
-		var spawns = level.environmentAttributes().getValue(EnvironmentAttributes.NATURAL_MOB_SPAWNS, at).getMobsToSpawn(MobCategory.CREATURE).unwrap();
-		for (int i = 0; i < 300; i++) {
-			EntityType<? extends Mob> type = HomeLife.visitorFor(level, at, random);
-			counts.merge(type.toShortString(), 1, Integer::sum);
-			if (type != EntityTypes.CAT && spawns.stream().noneMatch(s -> s.value().type() == type)) {
-				notHere.add(type.toShortString());
+		String was = level.getBiome(at).getRegisteredName();
+		// A block's biome is read from the 4x4x4 cells around it, so the whole neighbourhood changes.
+		String box = (at.getX() - 8) + " " + (at.getY() - 8) + " " + (at.getZ() - 8) + " " + (at.getX() + 8) + " " + (at.getY() + 8) + " " + (at.getZ() + 8);
+		Runnable tidy = () -> command(level, "fillbiome " + box + " " + was);
+		RuleChecks.orTidy(tidy, () -> command(level, "fillbiome " + box + " minecraft:snowy_taiga"));
+		RuleChecks.orTidy(tidy, () -> {
+			RandomSource random = RandomSource.create(5);
+			Map<String, Integer> counts = new HashMap<>();
+			List<String> notHere = new ArrayList<>();
+			String biome = level.getBiome(at).getRegisteredName();
+			var spawns = level.environmentAttributes().getValue(EnvironmentAttributes.NATURAL_MOB_SPAWNS, at).getMobsToSpawn(MobCategory.CREATURE).unwrap();
+			for (int i = 0; i < 300; i++) {
+				EntityType<? extends Mob> type = HomeLife.visitorFor(level, at, random);
+				counts.merge(type.toShortString(), 1, Integer::sum);
+				if (type != EntityTypes.CAT && spawns.stream().noneMatch(s -> s.value().type() == type)) {
+					notHere.add(type.toShortString());
+				}
 			}
-		}
-		int cats = counts.getOrDefault("cat", 0);
-		System.out.println("[cozy_core_gametest] visitor: in " + level.getBiome(at).getRegisteredName() + " 300 picks gave " + counts);
-		helper.assertTrue(cats >= 170 && cats < 300 || cats == 300 && counts.size() == 1, "about two visitors in three should be cats (" + counts + ")");
-		helper.assertTrue(notHere.isEmpty(), "every other visitor should be one this biome spawns (" + notHere + ")");
-		helper.succeed();
+			int cats = counts.getOrDefault("cat", 0);
+			System.out.println("[cozy_core_gametest] visitor: in " + biome + " (was " + was + ") 300 picks gave " + counts);
+			tidy.run();
+			helper.assertValueEqual(biome, "minecraft:snowy_taiga", "the biome the picks were made in");
+			helper.assertTrue(cats >= 170 && cats <= 230, "about two visitors in three should be cats (" + counts + ")");
+			helper.assertTrue(counts.containsKey("rabbit") && counts.containsKey("fox"), "in snowy taiga, rabbits and foxes should both visit (" + counts + ")");
+			helper.assertTrue(notHere.isEmpty(), "every other visitor should be one this biome spawns (" + notHere + ")");
+			helper.succeed();
+		});
 	}
 }
