@@ -205,6 +205,13 @@ public class VideoTour implements FabricClientGameTest {
 	 * looks up at the lantern from the first shot's spot, so the Short loops.
 	 */
 	private static final List<String> TALL = List.of("t_home", "t_night", "t_calm", "t_morning");
+	/**
+	 * The voiceover Short "Home comes alive" (Gabby, 2026-10-21; script: VOICEOVER-SHORT.md in the
+	 * listing folder): tall, about 20 s, 0.7.0's home life. She hangs the lantern at sunset, the porch
+	 * candles light one by one at dusk, at night a tamed cat leaves her to curl up under the lantern, a
+	 * flower turns up in the garden at sunrise, and the sunrise shot of the lantern loops to the start.
+	 */
+	private static final List<String> VOICE = List.of("v_home", "v_candles", "v_cat", "v_flower", "v_morning");
 	private static final List<String> DAY = List.of("d_dawn", "d_home", "d_cut", "d_dye", "d_roof", "d_trader", "d_anvil", "d_name", "d_styles",
 			"d_night", "d_storm", "d_porch", "d_morning");
 
@@ -232,6 +239,16 @@ public class VideoTour implements FabricClientGameTest {
 			film.scene("t_night", this::night);
 			film.scene("t_calm", this::calm);
 			film.scene("t_morning", this::hearthMorning);
+			realPace = false;
+		}
+		if (VOICE.stream().anyMatch(film::want)) {
+			film.window(1080, 1920, 3);
+			realPace = true;
+			film.scene("v_home", () -> home(SUNSET));
+			film.scene("v_candles", this::candles);
+			film.scene("v_cat", this::catComesHome);
+			film.scene("v_flower", this::flower);
+			film.scene("v_morning", this::hearthMorning);
 			realPace = false;
 		}
 		if (DAY.stream().anyMatch(film::want)) {
@@ -588,6 +605,129 @@ public class VideoTour implements FabricClientGameTest {
 		Film.check(hanging, "the Hearth Lantern still hangs on the post");
 		film.normalGui();
 		film.thirdPerson(false, 4);
+	}
+
+	// ------------------------------------------------------------------ the voiceover Short's own scenes
+
+	/** Open air on solid ground at this spot: room for a candle, a flower or a cat. */
+	private boolean openOnGround(BlockPos p) {
+		return film.server.computeOnServer(s -> s.overworld().getBlockState(p).isAir() && s.overworld().getBlockState(p.below()).isSolidRender());
+	}
+
+	/**
+	 * Dusk at the porch: unlit candles on the steps and the lawn's edge, and the mod lights them one
+	 * by one, through their own random ticks. Random ticks run faster for this shot only, so what
+	 * takes a minute or two in play fits a few seconds; the lighting itself is the mod's.
+	 */
+	private void candles() {
+		reset(true, 12100);
+		film.hud(false);
+		film.spectator();
+		film.thirdPerson(false, 4);
+		List<BlockPos> spots = new ArrayList<>();
+		for (BlockPos p : List.of(at(-1, 0, -1), at(2, 0, -1), at(-1, 0, 1), at(2, 0, 1), at(-2, 0, 0), at(3, 0, 0), at(-2, 0, -1), at(3, 0, -1))) {
+			if (openOnGround(p)) {
+				spots.add(p);
+				set(p, "minecraft:candle[candles=" + (1 + spots.size() % 3) + ",lit=false]");
+			}
+		}
+		Film.check(spots.size() >= 3, "room for at least three candles by the porch (" + spots.size() + ")");
+		Vec3 eye = point(0.5, 1.7, 4.5), look = point(0.5, 0.4, -1.5);
+		film.camera(eye, look);
+		film.ctx.waitTicks(10);
+		film.rolling();
+		film.record(10);
+		cmd("gamerule random_tick_speed 80");
+		int lit = 0;
+		for (int i = 0; i < 140 && lit < spots.size(); i++) {
+			film.camera(eye.lerp(eye.lerp(look, 0.25), Film.ease(i / 140.0)), look);
+			film.record(1);
+			lit = film.server.computeOnServer(s -> (int) spots.stream()
+					.filter(p -> s.overworld().getBlockState(p).getOptionalValue(net.minecraft.world.level.block.CandleBlock.LIT).orElse(false)).count());
+		}
+		cmd("gamerule random_tick_speed 3");
+		film.record(24);
+		film.note("candles", lit + " of " + spots.size() + " candles lit by the mod at dusk");
+		for (BlockPos p : spots) {
+			set(p, "minecraft:air");
+		}
+		Film.check(lit == spots.size(), "every candle at home lit itself at dusk (" + lit + " of " + spots.size() + ")");
+	}
+
+	/**
+	 * Night: a tamed cat by her side leaves her and walks to the ground under the lamp post's
+	 * Hearth Lantern, where it curls up (the mod's pet goal; nothing steers it).
+	 */
+	private void catComesHome() {
+		reset(true, NIGHT + 300);
+		film.hud(false);
+		film.spectator();
+		film.thirdPerson(false, 4);
+		BlockPos start = at(9, 0, 10);
+		Cat[] cat = new Cat[1];
+		film.server.runOnServer(s -> {
+			cat[0] = EntityTypes.CAT.create(s.overworld(), EntitySpawnReason.COMMAND);
+			cat[0].snapTo(start.getX() + 0.5, start.getY(), start.getZ() + 0.5, 90, 0);
+			cat[0].tame(s.getPlayerList().getPlayers().getFirst());
+			cat[0].setOrderedToSit(false);
+			cat[0].setPersistenceRequired();
+			s.overworld().addFreshEntity(cat[0]);
+		});
+		// She watches from the lawn, at home, a few blocks from where the cat starts.
+		Vec3 eye = point(-4.5, 1.7, -1.5), look = point(4, 0.2, 6);
+		film.camera(eye, look);
+		film.ctx.waitTicks(5);
+		film.rolling();
+		boolean[] lying = new boolean[1];
+		for (int i = 0; i < 300 && !lying[0]; i++) {
+			film.record(1);
+			lying[0] = film.server.computeOnServer(s -> cat[0].isLying());
+		}
+		film.record(40);
+		double away = film.server.computeOnServer(s -> Math.sqrt(cat[0].distanceToSqr(Vec3.atBottomCenterOf(lantern()))));
+		film.note("cat", "lying " + lying[0] + ", " + String.format(Locale.ROOT, "%.1f", away) + " blocks from the lantern");
+		film.server.runOnServer(s -> cat[0].discard());
+		Film.check(lying[0], "the cat curled up by the hearth");
+		Film.check(away < 4, "the cat settled by the lantern (" + away + " blocks away)");
+	}
+
+	/**
+	 * Sunrise in the garden: a patch of open grass at home, and a flower turns up on it, grown by the
+	 * mod's own garden step (forced to happen now; in play it's one grass tick in 40,000).
+	 */
+	private void flower() {
+		reset(true, SUNRISE + 200);
+		film.hud(false);
+		film.spectator();
+		film.thirdPerson(false, 4);
+		BlockPos spot = null;
+		for (BlockPos p : List.of(at(3, -1, 5), at(4, -1, 6), at(2, -1, 6), at(5, -1, 4), at(-4, -1, 5))) {
+			boolean ok = film.server.computeOnServer(s -> s.overworld().getBlockState(p).is(Blocks.GRASS_BLOCK)
+					&& s.overworld().getBlockState(p.above()).isAir() && s.overworld().canSeeSky(p.above())
+					&& com.gabbymaybelle.cozycore.HomeLife.flowersNear(s.overworld(), p.above()) < com.gabbymaybelle.cozycore.HomeLife.GARDEN_CAP);
+			if (ok) {
+				spot = p.immutable();
+				break;
+			}
+		}
+		Film.check(spot != null, "a patch of open grass in the garden");
+		BlockPos grass = spot;
+		Vec3 look = Vec3.atBottomCenterOf(grass.above());
+		Vec3 eye = look.add(1.6, 1.4, 2.4);
+		film.camera(eye, look);
+		film.ctx.waitTicks(10);
+		film.rolling();
+		film.record(30);
+		boolean grew = false;
+		for (int i = 0; i < 20 && !grew; i++) {
+			grew = film.server.computeOnServer(s -> com.gabbymaybelle.cozycore.HomeLife.tickGrass(s.overworld(), grass, s.overworld().getRandom(), 1));
+		}
+		film.log("grow", "flower");
+		film.dolly(60, eye, eye.lerp(look, 0.2), look, look);
+		String what = film.server.computeOnServer(s -> s.overworld().getBlockState(grass.above()).getBlock().toString());
+		film.note("flower", "grew " + grew + ": " + what);
+		set(grass.above(), "minecraft:air");
+		Film.check(grew, "a flower grew in the garden at home (" + what + ")");
 	}
 
 	/** A quiet wide shot of the cottage, easing in to the opening shot's angle, so the first Short loops. */

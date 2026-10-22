@@ -15,6 +15,8 @@ import csv, os, random, shutil, subprocess, sys
 from PIL import Image, ImageDraw, ImageFont
 
 frames_dir, sounds_dir, out = sys.argv[1:4]
+# Which cut: 'tall' ("Light a hearth", the default) or 'voice' ("Home comes alive", with Gabby's voice).
+CUT = sys.argv[4] if len(sys.argv) > 4 else 'tall'
 FPS = 20
 BLUE = (255, 170, 70)  # the Hearth's flame orange
 repo = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
@@ -24,7 +26,7 @@ NAME = 'cozy-core-short'
 # "Light a hearth" (Gabby, 2026-10-21; the earlier "coming home at dusk" cut is shelved): scene, the
 # frames kept (first, last; None = to the end), caption lines ("*word*" in orange) and where the
 # caption's top sits. One feeling, the hearth making home a refuge; no creeper.
-SCENES = [
+TALL = [
     # Frame 1: she hangs the Hearth Lantern at sunset, and "Home" (lifted, below) fills the middle.
     ('t_home', 0, 45, ['LIGHT A *HEARTH*'], 1380),
     # Night: monsters turn up out in the meadow, none on the lawn. The mod stops spawning at home,
@@ -35,13 +37,28 @@ SCENES = [
     # Sunrise from the first shot's spot, ending where frame 1 begins, so a replay loops.
     ('t_morning', 0, None, None, 0),
 ]
+# "Home comes alive" (Gabby, 2026-10-21), told by her voiceover (VOICEOVER-SHORT.md in the listing
+# folder; tools/video/add_voice.py lays her lines over it). The last field holds a shot's final frame
+# that many frames longer, to give a spoken line room where the take ran short. A negative first
+# frame holds the shot's opening frame that many frames first, so the picture waits for the words
+# (the candles light on "At sunset", the cat walks in on "comes home"; Gabby, 2026-10-21).
+VOICE = [
+    ('v_home', 0, 44, ['LIGHT A *HEARTH*'], 1380, 0),
+    ('v_candles', -16, None, ['CANDLES AT *DUSK*'], 420, 2),
+    ('v_cat', -16, None, ['PETS COME *HOME*'], 420, 8),
+    ('v_flower', 0, 82, ['A GARDEN', 'THAT *GROWS*'], 1320, 0),
+    ('v_morning', 0, None, None, 0, 32),
+]
+SCENES = [tuple(sc) + (0,) for sc in TALL] if CUT == 'tall' else VOICE
+if CUT == 'voice':
+    NAME = 'cozy-core-short-voice'
 RAIN = set()
 # The night from above is dark under the shader on a phone: lift it, as the showcase does.
-BRIGHTEN = {'t_night': 1.6}
+BRIGHTEN = {'t_night': 1.6, 'v_cat': 1.45}
 # The mod's own text ("Home") is drawn in the bottom band YouTube covers, so it is cut out by colour
 # and shown large in the middle (after Nightfall Clock's Short). At GUI scale 5 in a 1080x1920
 # window the overlay line sits about 1540-1620 px down, white with a quarter-bright shadow, and fades.
-LIFT = {'t_home'}
+LIFT = {'t_home', 'v_home'}
 LIFT_BAND = (120, 1530, W - 120, 1630)
 LIFT_GUI = 5
 LIFT_Y = 720
@@ -98,7 +115,7 @@ def badge():
     box = BADGE_BOX
     d.rounded_rectangle(box, 18, fill=(20, 20, 24, 225))
     side = box[3] - box[1] - 28
-    icon = Image.open(os.path.join(repo, 'art/icon.png')).convert('RGBA')
+    icon = Image.open(os.environ.get('BADGE_ICON') or os.path.join(repo, 'art/icon.png')).convert('RGBA')
     icon = icon.resize((side, side), Image.NEAREST)
     layer.alpha_composite(icon, (box[0] + 14, box[1] + 14))
     x = box[0] + side + 32
@@ -146,14 +163,14 @@ os.makedirs(work)
 
 FADE_IN = 4  # frames for a caption to fade in; scenes cut hard
 kept = {}  # segment key -> (scene, first frame, end frame)
-for index, (scene, first, last, lines, top) in enumerate(SCENES):
+for index, (scene, first, last, lines, top, hold) in enumerate(SCENES):
     names = sorted(n for n in os.listdir(frames_dir) if n.startswith(scene + '_') and n.endswith('.png') and n[len(scene) + 1:-4].isdigit())
     if not names:
         print('no frames for', scene, '(skipped)')
         continue
     end = len(names) if last is None else min(last + 1, len(names))
     key = f'{index:02d}-{scene}'
-    kept[key] = (scene, first, end)
+    kept[key] = (scene, first, end, hold)
     dest = os.path.join(work, key)
     os.makedirs(dest)
     cap = caption(lines, top) if lines else None
@@ -161,7 +178,7 @@ for index, (scene, first, last, lines, top) in enumerate(SCENES):
     cta = caption(CTA, CTA_TOP, font(FONTS, 64), int(W * 0.81), 80)
     cta_from = 0 if index == len(SCENES) - 1 else None
     for i, n in enumerate(range(first, end)):
-        img = Image.open(os.path.join(frames_dir, names[n])).convert('RGBA')
+        img = Image.open(os.path.join(frames_dir, names[max(n, 0)])).convert('RGBA')
         if img.size != (W, H):
             img = img.resize((W, H), Image.LANCZOS)
         if scene in BRIGHTEN:
@@ -182,14 +199,16 @@ for index, (scene, first, last, lines, top) in enumerate(SCENES):
             layer.putalpha(layer.getchannel('A').point(lambda v: int(v * a)))
             img.alpha_composite(layer)
         img.convert('RGB').save(os.path.join(dest, '%04d.png' % i), compress_level=1)
+    for h in range(hold):
+        shutil.copyfile(os.path.join(dest, '%04d.png' % (end - first - 1)), os.path.join(dest, '%04d.png' % (end - first + h)))
 
 clips, starts, t = [], {}, 0.0
-for key, (scene, first, end) in kept.items():
+for key, (scene, first, end, hold) in kept.items():
     clip = os.path.join(work, key + '.mp4')
     run('ffmpeg', '-y', '-framerate', str(FPS), '-i', os.path.join(work, key, '%04d.png'),
         '-vf', 'format=yuv420p', '-r', '30', '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', clip)
     starts[key] = t
-    t += (end - first) / FPS
+    t += (end - first + hold) / FPS
     clips.append(clip)
 total = t
 with open(os.path.join(work, 'list.txt'), 'w') as f:
@@ -201,9 +220,9 @@ run('ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', os.path.join(work, 'list
 # comes with "Home" (the walk opens just as it plays), the window breaking and the stonecutter click.
 random.seed(7)
 SOUND = {'fuse': ['fuse'], 'boom': ['boom1', 'boom2'], 'place': ['place1'], 'crackle': ['crackle1', 'crackle2'],
-         'thunder': ['thunder'], 'break': ['glass'], 'click': ['click']}
+         'thunder': ['thunder'], 'break': ['glass'], 'click': ['click'], 'grow': ['pop']}
 cues = []
-for key, (scene, first, end) in kept.items():
+for key, (scene, first, end, hold) in kept.items():
     if scene in ('s_name', 't_name') and first == 0:
         cues.append((starts[key] + 0.1, random.choice(SOUND['crackle']), 1.0, 0.7))
     if scene in RAIN:
@@ -214,7 +233,7 @@ for key, (scene, first, end) in kept.items():
 for scene, frame, kind, what in actions:
     if kind not in SOUND:
         continue
-    for key, (s2, first, end) in kept.items():
+    for key, (s2, first, end, hold) in kept.items():
         if s2 != scene or not first <= frame < end:
             continue
         at = starts[key] + (frame - first) / FPS
@@ -251,5 +270,9 @@ for i, parts in enumerate([[('COZY', (255, 255, 255))], [('CORE', BLUE)]]):
         x += d.textlength(text, font=big)
 thumb.convert('RGB').save(os.path.join(out, NAME + '-thumbnail.png'))
 print('total seconds', round(total, 2))
-for key, (scene, first, end) in kept.items():
-    print(f'  {key}: {(end - first) / FPS:.2f} s')
+for key, (scene, first, end, hold) in kept.items():
+    print(f'  {key}: {(end - first + hold) / FPS:.2f} s')
+# Where each shot starts in the finished video, for tools/video/add_voice.py.
+import json
+with open(os.path.join(out, NAME + '-timeline.json'), 'w') as f:
+    json.dump({kept[k][0]: round(starts[k], 3) for k in kept} | {'total': round(total, 3)}, f, indent=1)
