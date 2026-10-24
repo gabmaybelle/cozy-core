@@ -13,5 +13,8 @@
 	},
 	"depends": {
 		"cozy_core": "*"
-	}
+	},
+	"mixins": [
+		"cozy-core-gametest-film.mixins.json"
+	]
 }

@@ -679,20 +679,41 @@ public class VideoTour implements FabricClientGameTest {
 		}
 		Film.check(spots.size() >= 3, "room for at least three candles by the porch (" + spots.size() + ")");
 		Vec3 eye = point(0.5, 1.7, 4.5), look = point(0.5, 0.4, -1.5);
-		film.camera(eye, look);
+		boolean her = Boolean.getBoolean("cozycore.videoFront");
+		if (her) {
+			// The roundup's take (Gabby, 2026-10-23: her in third person, facing the camera): she stands on
+			// the path just below the porch, the candles catching round her feet and the cottage behind her,
+			// and the camera on the path looks at her from a little above her eyes.
+			film.hud(true);
+			film.survival();
+			cmd("clear @a");
+			film.camera(point(0.5, 0, 2.5), point(0.5, 1.6, 9));
+			film.turnHead(point(0.5, 0.3, 4.5));
+			eye = point(0.9, 2.0, 6.0);
+			look = point(0.5, 1.4, 2.5);
+			film.front(eye, look);
+		} else {
+			film.camera(eye, look);
+		}
 		film.ctx.waitTicks(10);
 		film.rolling();
 		film.record(10);
 		cmd("gamerule random_tick_speed 80");
 		int lit = 0;
 		for (int i = 0; i < 140 && lit < spots.size(); i++) {
-			film.camera(eye.lerp(eye.lerp(look, 0.25), Film.ease(i / 140.0)), look);
+			Vec3 at = eye.lerp(eye.lerp(look, 0.25), Film.ease(i / 140.0));
+			if (her) {
+				film.front(at, look);
+			} else {
+				film.camera(at, look);
+			}
 			film.record(1);
 			lit = film.server.computeOnServer(s -> (int) spots.stream()
 					.filter(p -> s.overworld().getBlockState(p).getOptionalValue(net.minecraft.world.level.block.CandleBlock.LIT).orElse(false)).count());
 		}
 		cmd("gamerule random_tick_speed 3");
 		film.record(24);
+		film.frontOff();
 		film.note("candles", lit + " of " + spots.size() + " candles lit by the mod at dusk");
 		for (BlockPos p : spots) {
 			set(p, "minecraft:air");
@@ -845,7 +866,23 @@ public class VideoTour implements FabricClientGameTest {
 		film.spectator();
 		film.thirdPerson(false, 4);
 		Vec3 look = Vec3.atCenterOf(lantern()).add(0, -1.6, 0);
-		film.camera(point(0.6, 1.0, 11.5), look);
+		boolean her = Boolean.getBoolean("cozycore.videoFront");
+		if (her) {
+			// The roundup's take (Gabby, 2026-10-23): she stands by the lamp post looking down the path, and
+			// the camera on the lawn looks up at her as the stray walks in past it to the lantern at her feet.
+			film.hud(true);
+			// Creative, not survival: a stray cat runs from any survival player within 16 blocks (vanilla's
+			// avoid goal passes over creative and spectator players), so twice it never settled.
+			cmd("gamemode creative @a");
+			cmd("clear @a");
+			// Two blocks off the lantern's foot, not on the spot the cat settles on.
+			Vec3 stand = Vec3.atBottomCenterOf(lantern().below(2)).add(2.6, 0, 0.4);
+			film.camera(stand, point(0.6, 1.5, 11.5));
+			film.turnHead(point(0.6, 0.6, 9.0));
+			film.front(point(2.8, 1.4, 8.2), stand.add(-0.6, 1.2, 0));
+		} else {
+			film.camera(point(0.6, 1.0, 11.5), look);
+		}
 		film.ctx.waitTicks(10);
 		// Just ahead of the camera, so it is big in shot from the first frame and has the whole path to
 		// walk (the first take's cat started halfway up and settled in a second and a half).
@@ -857,6 +894,7 @@ public class VideoTour implements FabricClientGameTest {
 		film.rolling();
 		boolean rested = filmUntilResting(cat, lantern(), 200);
 		film.record(20);
+		film.frontOff();
 		boolean marked = film.server.computeOnServer(s -> HomeLife.isVisitor(cat));
 		film.note("arrive", "rested " + rested + ", still a visitor " + marked);
 		film.server.runOnServer(s -> cat.discard());
@@ -1085,10 +1123,21 @@ public class VideoTour implements FabricClientGameTest {
 		film.ctx.getInput().holdKey(o -> o.keyUp);
 		// Stopped by where she is, short of the porch steps (see name()).
 		double stop = point(0, 0, 1.5).z;
-		film.until(mc -> mc.player.getZ() <= stop);
+		if (Boolean.getBoolean("cozycore.videoFront")) {
+			// The roundup's take (Gabby, 2026-10-23): the camera walks backwards up the path ahead of her and
+			// off to her right, so her face shows with the garden and the lamp post behind her.
+			for (int i = 0; i < 200 && film.ctx.computeOnClient(mc -> mc.player.getZ() > stop); i++) {
+				Vec3 at = film.ctx.computeOnClient(mc -> mc.player.position());
+				film.front(new Vec3(at.x - 1.4, at.y + 1.8, at.z - 3.4), at.add(0, 1.4, 0));
+				film.record(1);
+			}
+		} else {
+			film.until(mc -> mc.player.getZ() <= stop);
+		}
 		film.ctx.getInput().releaseKey(o -> o.keyUp);
 		walkSpeed(0.1);
 		film.record(20);
+		film.frontOff();
 		String shown = film.ctx.computeOnClient(mc -> String.valueOf(HearthLanterns.homeAt(mc.level, mc.player.blockPosition()) != null));
 		film.note("walk", "at home " + shown);
 		Film.check(shown.equals("true"), "the walk ended at home");
