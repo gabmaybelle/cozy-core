@@ -89,4 +89,4 @@ for your loader. For Minecraft 1.21.1, see the `1.21.1` branch and its releases.
 
 [MIT](LICENSE).
 
-Cozy Core is made by Gabby with help from Claude, an AI assistant. The Hearth Lantern's textures are drawn by `tools/generate-art.js`.
+Cozy Core is made by Gabby. The Hearth Lantern's textures are drawn by `tools/generate-art.js`.
