@@ -118,7 +118,8 @@ final class CozyCoreCommand implements BasicCommand {
 		String name = args.length >= 6 ? String.join(" ", Arrays.copyOfRange(args, 5, args.length)) : null;
 		World world = source.getLocation().getWorld();
 		Block block = world.getBlockAt(x, y, z);
-		if (!block.getType().isAir() && !block.isLiquid() && hearths.at(block) == null) {
+		// Anything a lantern placed by hand would replace (air, water, short grass, snow layers, flowers) is fine; a solid block is not.
+		if (!block.getType().isAir() && !block.isLiquid() && !block.isReplaceable() && hearths.at(block) == null) {
 			fail(sender, "Cozy Core: there is " + block.getType().getKey().getKey() + " at " + x + " " + y + " " + z + "; the lantern needs an empty spot.");
 			return;
 		}

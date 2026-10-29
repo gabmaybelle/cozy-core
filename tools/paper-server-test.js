@@ -193,6 +193,13 @@ async function main() {
 		await passed('the block is a soul lantern', `execute if block ${L.x} ${L.y} ${L.z} minecraft:soul_lantern`);
 		const refused = await server.command(`cozycore place ${L.x} ${Y} ${L.z}`, plain);
 		check('/cozycore place refuses a taken spot', /the lantern needs an empty spot/.test(refused), refused);
+		// Short grass, snow and flowers are replaced, the way placing the item by hand replaces them.
+		await server.command(`setblock 5 ${Y} 5 minecraft:stone`);
+		await server.command(`setblock 5 ${Y + 1} 5 minecraft:short_grass`);
+		const onGrass = await server.command(`cozycore place 5 ${Y + 1} 5`, plain);
+		check('/cozycore place replaces short grass', /placed a Hearth Lantern at 5 301 5/.test(onGrass), onGrass);
+		await passed('the grass gave way to a lantern', `execute if block 5 ${Y + 1} 5 minecraft:lantern`);
+		await server.command(`setblock 5 ${Y + 1} 5 minecraft:air`);
 
 		// The spawn rule, through the real spawn event, both sides of the edge.
 		const selftest = await server.command(`execute positioned ${L.x} ${L.y} ${L.z} run cozycore selftest`, /Cozy Core selftest:|Unknown or incomplete command|System chat: /);
