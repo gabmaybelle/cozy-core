@@ -49,7 +49,7 @@ const MACAWS = { mcwroofs: 'mcw-roofs', mcwfences: 'mcw-fences', mcwstairs: 'mcw
 	mcwfurnitures: 'mcw-furniture', mcwdoors: 'mcw-doors', mcwtrpdoors: 'mcw-trapdoors' };
 const DECOR_MODS = ['beautify', ...Object.keys(MACAWS)];
 const JAR_PREFIX = { biomesoplenty: 'BiomesOPlenty', ecologics: 'Ecologics', wilderwild: 'WilderWild', promenade: 'promenade',
-	beautify: 'beautify-fabric', ...MACAWS };
+	beautify: 'beautify', ...MACAWS };
 const MOD_CACHE = path.join(__dirname, `.mods-${MC_VERSION}`);
 const DEFAULT_MODS = path.join(ROOT, '..', 'cozy-core-test', 'mods'); // filled by tools/fetch-test-mods.js
 
