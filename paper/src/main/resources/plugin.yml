@@ -1,0 +1,11 @@
+name: CozyCore
+version: ${version}
+main: com.gabbymaybelle.cozycore.paper.CozyCorePlugin
+description: Light a hearth. Home is safe. The Hearth Lantern for Paper servers.
+author: Gabby
+website: https://github.com/gabmaybelle/cozy-core
+api-version: '26.3'
+permissions:
+  cozycore.admin:
+    description: /cozycore give, place and selftest
+    default: op

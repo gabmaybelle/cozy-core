@@ -17,5 +17,7 @@ rootProject.name = 'cozy-core'
 
 // `common` holds the code and data that don't care which loader they run on. `fabric` and
 // `neoforge` compile those sources (and the generated data pack in pack/) straight into their
-// own jars, so there is one codebase and two mod files.
-include 'common', 'fabric', 'neoforge'
+// own jars, so there is one codebase and two mod files. `paper` is the server plugin for Paper
+// servers: it uses only the Paper API (no Minecraft classes, nothing from `common`), so it is its
+// own small codebase, the Hearth as event handlers.
+include 'common', 'fabric', 'neoforge', 'paper'

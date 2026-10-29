@@ -1,0 +1,20 @@
+# Cozy Core (Paper). These are the mod's game rules as server settings; they apply when the server
+# starts (or after /reload). Inside a Hearth Lantern's reach is "home".
+
+# How many blocks around a Hearth Lantern, sideways at any height, count as home: no monsters spawn
+# naturally there, phantoms don't come for you there, and builds are kept safe. 0 switches the
+# lanterns off (up to 128).
+hearthLanternRadius: 64
+
+# Inside a Hearth Lantern's reach, creeper and ghast explosions break no blocks, fire doesn't spread
+# into home or burn it away, and endermen leave blocks alone. Out in the wild, nothing changes.
+hearthsProtectBuilds: true
+
+# The three world-wide switches. They start at vanilla's behaviour; set one to false and it spares
+# blocks everywhere, not just at home.
+# false: creeper and ghast explosions still hurt, but break no blocks anywhere. TNT and the wither are unchanged.
+mobExplosionsBreakBlocks: true
+# false: endermen never pick blocks up.
+endermenTakeBlocks: true
+# false: fire still burns and goes out, but never spreads onto a block or burns one away.
+fireBurnsBlocks: true

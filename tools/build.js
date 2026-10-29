@@ -1,7 +1,7 @@
 // Regenerates pack/ and builds the data pack download:
 //   dist/cozy-core-<version>.zip   the data pack: the recipes (vanilla wood only)
 // The mods, dist/cozy-core-<version>-fabric.jar and -neoforge.jar, are built by Gradle from the
-// same pack/ plus the code in common/ (`./gradlew build` after this, then `node tools/build.js
+// same pack/ plus the code in common/ (and the Paper plugin, -paper.jar, from paper/ alone) (`./gradlew build` after this, then `node tools/build.js
 // --jars` or CI copies them here). Three things are mod-only:
 // - compat/ recipes: plain vanilla can't skip them (it doesn't know load conditions) and refuses
 //   to load the world.
@@ -11,7 +11,7 @@
 //   2026-10-13). Without them the zip reloads live with /reload.
 // - the rules and the Hearth Lantern: code, so they live in common/ and never touch pack/.
 //   node tools/build.js [vanilla 26.3 server jar] [folder of wood-mod jars]
-//   node tools/build.js --jars      only copy Gradle's two jars into dist/
+//   node tools/build.js --jars      only copy Gradle's jars (Fabric, NeoForge, Paper) into dist/
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
 const zipDir = require('./zip');
 
@@ -26,7 +26,7 @@ const ICON = path.join(ROOT, 'art', 'icon.png');
 function copyJars() {
 	fs.mkdirSync(DIST, { recursive: true });
 	let found = 0;
-	for (const loader of ['fabric', 'neoforge']) {
+	for (const loader of ['fabric', 'neoforge', 'paper']) {
 		const jar = path.join(ROOT, loader, 'build', 'libs', `cozy-core-${VERSION}-${loader}.jar`);
 		if (!fs.existsSync(jar)) continue;
 		fs.copyFileSync(jar, path.join(DIST, path.basename(jar)));
