@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.9.0: Cozy Core on Paper servers
+
+- **A plugin for Paper servers.** Cozy Core now comes as a third file, `cozy-core-0.9.0-paper.jar`, for
+  servers that run [Paper](https://papermc.io/) 26.3. Drop it in the `plugins` folder; players need
+  nothing installed. It brings the Hearth Lantern in its six styles, made the same way (four amethyst
+  shards around the matching lantern), and home is safe around it: no monster spawns naturally,
+  phantoms don't come for you, creeper and ghast blasts break nothing, fire neither spreads into home
+  nor burns it away, and endermen leave blocks alone. Walking in shows "Home", or the name you gave
+  the lantern on an anvil. The lantern looks like the plain lantern it's made from, with a glint. The
+  lantern's reach, home keeping builds safe and the three world-wide switches are settings in
+  `plugins/CozyCore/config.yml`, and operators have `/cozycore give`, `/cozycore place` and
+  `/cozycore selftest`. Home comforts, home coming alive, keeping your hotbar, the trades and the
+  advancements are the mod's for now; for the recipes, add the data pack to the world as well.
+- **Beautify's bamboo and pale oak pieces.** Beautify 3.6.0's bamboo and pale oak blinds and trellises
+  cut in the stonecutter at the same rate as the other woods.
+
 ## 0.8.0: A visitor at your door
 
 - **A visitor at your door.** Now and then in the evening, while you're home, a stray cat walks up to
