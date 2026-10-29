@@ -8,6 +8,8 @@
   per cushion, and a cushion someone is sitting on is left to them. In the morning they get up
   again. If a cushion is picked up, its animal settles by the lantern as before. Cushions are new in
   Minecraft 26.3, so this is in the 26.3 version only.
+- With Beautify installed, its new bamboo and pale oak blinds and trellises go in the stonecutter too,
+  at the same rate as the other woods.
 
 ## 0.8.0: A visitor at your door
 
