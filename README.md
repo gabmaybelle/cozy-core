@@ -1,8 +1,10 @@
 # Cozy Core
 
-*Light a hearth. Home is safe.*
+*A slow, peaceful, cute home to come back to.*
 
-Light a Hearth Lantern and the ground around it becomes home. A creeper blows up beside your house and not a block breaks. No monsters spawn in the yard, fire can't creep into the walls, and endermen leave your roof alone. Out in the wild, Minecraft is as it always was.
+Light a Hearth Lantern and the ground around it becomes home, and home starts looking after itself. At sunset the candles light up one by one. At night your pets come home and curl up by the lantern. Every so often a new flower turns up in the garden, and some evenings a stray cat, rabbit or fox wanders up to your door.
+
+Home is safe, too. A creeper blows up beside your house and not a block breaks. No monsters spawn in the yard, fire can't creep into the walls, and endermen leave your roof alone. Out in the wild, Minecraft is as it always was.
 
 Cozy Core also takes the grind out of decorating, with wood in the stonecutter, re-dyeing and a few hard-to-find blocks. This is the version for Minecraft 26.3, with nothing new to learn and nothing running in the background.
 
