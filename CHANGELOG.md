@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.0: Cushion naps
+
+- **Cushion naps.** When an animal settles by your Hearth Lantern for the evening, your own cat or
+  dog, or a visiting stray cat, rabbit or fox, it rests on a free cushion near the lantern instead of
+  the ground. Cats curl up the way they do on beds; dogs and foxes sit. Any colour works; one animal
+  per cushion, and a cushion someone is sitting on is left to them. In the morning they get up
+  again. If a cushion is picked up, its animal settles by the lantern as before. Cushions are new in
+  Minecraft 26.3, so this is in the 26.3 version only.
+
 ## 0.8.0: A visitor at your door
 
 - **A visitor at your door.** Now and then in the evening, while you're home, a stray cat walks up to
