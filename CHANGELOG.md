@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.9.0: Cozy Core on Paper servers
+## 0.10.0: Cozy Core on Paper servers
 
-- **A plugin for Paper servers.** Cozy Core now comes as a third file, `cozy-core-0.9.0-paper.jar`, for
+- **A plugin for Paper servers.** Cozy Core now comes as a third file, `cozy-core-0.10.0-paper.jar`, for
   servers that run [Paper](https://papermc.io/) 26.3. Drop it in the `plugins` folder; players need
   nothing installed. It brings the Hearth Lantern in its six styles, made the same way (four amethyst
   shards around the matching lantern), and home is safe around it: no monster spawns naturally,
@@ -13,8 +13,17 @@
   `plugins/CozyCore/config.yml`, and operators have `/cozycore give`, `/cozycore place` and
   `/cozycore selftest`. Home comforts, home coming alive, keeping your hotbar, the trades and the
   advancements are the mod's for now; for the recipes, add the data pack to the world as well.
-- **Beautify's bamboo and pale oak pieces.** Beautify 3.6.0's bamboo and pale oak blinds and trellises
-  cut in the stonecutter at the same rate as the other woods.
+
+## 0.9.0: Cushion naps
+
+- **Cushion naps.** When an animal settles by your Hearth Lantern for the evening, your own cat or
+  dog, or a visiting stray cat, rabbit or fox, it rests on a free cushion near the lantern instead of
+  the ground. Cats curl up the way they do on beds; dogs and foxes sit. Any colour works; one animal
+  per cushion, and a cushion someone is sitting on is left to them. In the morning they get up
+  again. If a cushion is picked up, its animal settles by the lantern as before. Cushions are new in
+  Minecraft 26.3, so this is in the 26.3 version only.
+- With Beautify installed, its new bamboo and pale oak blinds and trellises go in the stonecutter too,
+  at the same rate as the other woods.
 
 ## 0.8.0: A visitor at your door
 

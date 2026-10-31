@@ -2,7 +2,7 @@
 
 *A slow, peaceful, cute home to come back to.*
 
-Light a Hearth Lantern and the ground around it becomes home, and home starts looking after itself. At sunset the candles light up one by one. At night your pets come home and curl up by the lantern. Every so often a new flower turns up in the garden, and some evenings a stray cat, rabbit or fox wanders up to your door.
+Light a Hearth Lantern and the ground around it becomes home, and home starts looking after itself. At sunset the candles light up one by one. At night your pets come home and curl up by the lantern, or on a cushion if there's one nearby. Every so often a new flower turns up in the garden, and some evenings a stray cat, rabbit or fox wanders up to your door.
 
 Home is safe, too. A creeper blows up beside your house and not a block breaks. No monsters spawn in the yard, fire can't creep into the walls, and endermen leave your roof alone. Out in the wild, Minecraft is as it always was.
 
@@ -69,8 +69,8 @@ Each rule is an ordinary game rule: it shows in the Game Rules screen when you m
 | `cozy_core:hearth_item_minutes` | 60 (how long dropped items last at home; 5 is the usual five minutes) |
 | `cozy_core:hearth_lights` | true (candles at home light after sunset and go out in the early morning) |
 | `cozy_core:hearth_garden` | true (now and then a flower grows on open grass at home) |
-| `cozy_core:pets_come_home` | true (at night, your cats and dogs settle by the hearth while you're home) |
-| `cozy_core:hearth_visitors` | true (now and then in the evening, a stray cat, rabbit or fox visits your Hearth Lantern) |
+| `cozy_core:pets_come_home` | true (at night, your cats and dogs settle by the hearth while you're home, on a free cushion near it if there is one) |
+| `cozy_core:hearth_visitors` | true (now and then in the evening, a stray cat, rabbit or fox visits your Hearth Lantern and rests by it, on a free cushion if there is one) |
 | `cozy_core:keep_hotbar_on_death` | true |
 | `cozy_core:mob_explosions_break_blocks` | true (false: explosions break nothing anywhere) |
 | `cozy_core:endermen_take_blocks` | true (false: endermen take nothing anywhere) |

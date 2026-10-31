@@ -21,6 +21,7 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.feline.Cat;
 import net.minecraft.world.entity.animal.fox.Fox;
+import net.minecraft.world.entity.decoration.Cushion;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.block.AbstractCandleBlock;
 import net.minecraft.world.level.block.Blocks;
@@ -42,6 +43,8 @@ import org.jspecify.annotations.Nullable;
  * <li>A visitor at your door (0.8.0, Gabby, 2026-10-22): now and then in the evening a stray cat,
  * or a rabbit or fox where they live, walks up to the lantern; it leaves in the morning unless
  * it's tamed, on a lead or named.</li>
+ * <li>Cushion naps (0.9.0, Gabby, 2026-10-30): an animal settling by the lantern, a pet cat or dog
+ * or a visiting cat, rabbit or fox, rests on a free cushion near it instead of the ground.</li>
  * </ul>
  */
 public final class HomeLife {
@@ -158,7 +161,7 @@ public final class HomeLife {
 	 */
 	public static final class SettleByHearthGoal extends Goal {
 		private final TamableAnimal pet;
-		private @Nullable BlockPos spot;
+		private @Nullable BlockPos spot, lantern;
 		private int recheck;
 
 		public SettleByHearthGoal(TamableAnimal pet) {
@@ -169,6 +172,10 @@ public final class HomeLife {
 		@Override
 		public boolean canUse() {
 			spot = restingSpot();
+			if (spot == null && pet.getVehicle() instanceof Cushion) {
+				// Still on a cushion from last night (a world loaded in the morning): time to get up.
+				rest(false);
+			}
 			return spot != null;
 		}
 
@@ -210,6 +217,9 @@ public final class HomeLife {
 			if (spot == null) {
 				return;
 			}
+			if (pet.level() instanceof ServerLevel level && lantern != null && napOn(cushionFor(level, lantern, pet), pet, 1.0)) {
+				return;
+			}
 			double d = pet.distanceToSqr(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5);
 			if (d > 2.5 * 2.5) {
 				rest(false);
@@ -223,16 +233,16 @@ public final class HomeLife {
 		}
 
 		private void rest(boolean on) {
-			if (pet instanceof Cat cat) {
-				cat.setLying(on);
-			} else if (!pet.isOrderedToSit()) {
-				pet.setInSittingPose(on);
+			if (!on) {
+				getOffCushion(pet);
 			}
+			restingPose(pet, on);
 		}
 
 		/** Where this pet should rest now, or null when it shouldn't (day, owner away, told to sit...). */
 		private @Nullable BlockPos restingSpot() {
-			if (!(pet.level() instanceof ServerLevel level) || !pet.isTame() || pet.isOrderedToSit() || pet.isLeashed() || pet.isPassenger()) {
+			if (!(pet.level() instanceof ServerLevel level) || !pet.isTame() || pet.isOrderedToSit() || pet.isLeashed()
+					|| (pet.isPassenger() && !(pet.getVehicle() instanceof Cushion))) {
 				return null;
 			}
 			if (!Rules.is(level, Rules.PETS_COME_HOME)) {
@@ -246,7 +256,7 @@ public final class HomeLife {
 			if (owner == null || owner.level() != level || !owner.isAlive()) {
 				return null;
 			}
-			BlockPos lantern = HearthLanterns.nearest(level, owner.blockPosition());
+			lantern = HearthLanterns.nearest(level, owner.blockPosition());
 			if (lantern == null || HearthLanterns.distanceSqr(lantern, pet.blockPosition()) > 48L * 48L) {
 				return null;
 			}
@@ -275,6 +285,82 @@ public final class HomeLife {
 				return null;
 			}
 			return stand;
+		}
+	}
+
+	// ------------------------------------------------------------------ cushion naps
+
+	/** How far from a Hearth Lantern (blocks, each way) a cushion is by the hearth. */
+	public static final int CUSHION_REACH = 5;
+
+	/**
+	 * How an animal rests by the hearth: a cat lies down, a dog sits (unless it was told to sit, which
+	 * is its owner's to undo), a fox sits; a rabbit has no resting pose and just keeps still.
+	 */
+	static void restingPose(Mob mob, boolean on) {
+		if (mob instanceof Cat cat) {
+			cat.setLying(on);
+		} else if (mob instanceof Fox fox) {
+			fox.setSitting(on);
+		} else if (mob instanceof TamableAnimal pet && !pet.isOrderedToSit()) {
+			pet.setInSittingPose(on);
+		}
+	}
+
+	/**
+	 * The cushion an animal settling by this lantern should nap on: the one it's on, or else the free
+	 * cushion by the lantern nearest it (one with no one on it). Null when there's none.
+	 */
+	public static @Nullable Cushion cushionFor(ServerLevel level, BlockPos lantern, Mob mob) {
+		if (mob.getVehicle() instanceof Cushion on) {
+			return on;
+		}
+		Cushion best = null;
+		double bestDistance = 0;
+		for (Cushion c : level.getEntitiesOfClass(Cushion.class, new AABB(lantern).inflate(CUSHION_REACH, 3, CUSHION_REACH), c -> c.isAlive() && !c.isVehicle())) {
+			double d = c.distanceToSqr(mob);
+			if (best == null || d < bestDistance) {
+				best = c;
+				bestDistance = d;
+			}
+		}
+		return best;
+	}
+
+	/**
+	 * One step of a nap on a cushion: walk to it, then get on and rest (a cat curls up, the way it lies
+	 * on a bed). Vanilla cushions take any rider, and an animal rests on top of one, as on a bed. False
+	 * when there's no cushion, or it was taken just now, so the animal rests by the lantern instead.
+	 */
+	public static boolean napOn(@Nullable Cushion cushion, Mob mob, double speed) {
+		if (cushion == null) {
+			return false;
+		}
+		if (mob.getVehicle() == cushion) {
+			mob.getNavigation().stop();
+			restingPose(mob, true);
+			return true;
+		}
+		// Within a step and a half: a rabbit's hops end about 1.4 blocks short (seen 2026-10-30).
+		if (mob.distanceToSqr(cushion) > 1.5 * 1.5) {
+			restingPose(mob, false);
+			if (mob.getNavigation().isDone()) {
+				mob.getNavigation().moveTo(cushion.getX(), cushion.getY(), cushion.getZ(), speed);
+			}
+			return true;
+		}
+		mob.getNavigation().stop();
+		if (mob.startRiding(cushion)) {
+			restingPose(mob, true);
+			return true;
+		}
+		return false;
+	}
+
+	/** Gets an animal off the cushion it's napping on, if it is. */
+	static void getOffCushion(Mob mob) {
+		if (mob.getVehicle() instanceof Cushion) {
+			mob.stopRiding();
 		}
 	}
 
@@ -396,7 +482,7 @@ public final class HomeLife {
 	 */
 	public static final class VisitGoal extends Goal {
 		private final Mob mob;
-		private @Nullable BlockPos spot;
+		private @Nullable BlockPos spot, lantern;
 		private boolean leaving;
 		private int recheck;
 
@@ -465,6 +551,9 @@ public final class HomeLife {
 			if (spot == null) {
 				return;
 			}
+			if (mob.level() instanceof ServerLevel level && lantern != null && napOn(cushionFor(level, lantern, mob), mob, 0.9)) {
+				return;
+			}
 			double d = mob.distanceToSqr(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5);
 			if (d > 2.5 * 2.5) {
 				rest(false);
@@ -478,16 +567,15 @@ public final class HomeLife {
 		}
 
 		private void rest(boolean on) {
-			if (mob instanceof Cat cat) {
-				cat.setLying(on);
-			} else if (mob instanceof Fox fox) {
-				fox.setSitting(on);
+			if (!on) {
+				getOffCushion(mob);
 			}
+			restingPose(mob, on);
 		}
 
 		/** The ground by the nearest lantern whose reach takes in this visitor, or null away from home. */
 		private @Nullable BlockPos restingSpot(ServerLevel level) {
-			BlockPos lantern = HearthLanterns.nearest(level, mob.blockPosition());
+			lantern = HearthLanterns.nearest(level, mob.blockPosition());
 			return lantern == null ? null : SettleByHearthGoal.groundUnder(level, lantern);
 		}
 	}

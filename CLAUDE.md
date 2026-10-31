@@ -117,6 +117,18 @@ it first, and add this session's row before ending.
   lantern until 23000, then walk off and be removed once no player is within 24. `isVisitor` takes the
   tag off a tamed, leashed or named one, so it stays and stops counting (a goal's `canUse` isn't called
   while a same-priority goal holds its flags, so the count has to check too: found 2026-10-22).
+- **Cushion naps (0.9.0, `HomeLife`; Gabby's picks, 2026-10-30):** no rule of its own (it follows
+  `pets_come_home` and `hearth_visitors`). 26.3's cushion is an entity (`decoration/Cushion`, 1 x 0.25)
+  that takes any rider, not a block, so vanilla's cat block tags can't name it. Every animal with
+  `SettleByHearthGoal` (pet cats and dogs) or `VisitGoal` (visiting cats, rabbits, foxes; Gabby added
+  dogs, foxes and rabbits the same day) uses it: `cushionFor` picks the cushion it's on or the nearest
+  free one within `CUSHION_REACH` (5) of the lantern, and `napOn` walks it there (within 1.5: a
+  rabbit's hops stop about 1.4 short), `startRiding`s it and sets `restingPose` (a cat lies, a dog or fox
+  sits, a rabbit has no pose). An animal rests on the cushion's top, as on a bed (no vehicle offset; a
+  player sinks 0.6). With none free, or one just taken, it rests by the lantern as before. Getting up
+  (`rest(false)`) gets it off, and a pet found on a cushion when its goal can't run (a world loaded in
+  the morning) gets off in `canUse`. Vanilla shyness still wins: a stray cat runs from a survival
+  player within 16 blocks, and a rabbit from any dog within 10. 26.3 only: 1.21.1 has no cushions.
 - `art/icon.png`: the mod's icon, three candles on a wooden board (512x512; Gabby's pick, 2026-10-21,
   the same as the listings'; it replaced the first lantern sprite). The build puts it in the zip as `pack.png` and Gradle puts it in the jars as `icon.png` (Fabric
   `icon`, NeoForge `logoFile`). Change it only when Gabby gives a new one.
@@ -204,7 +216,9 @@ it first, and add this session's row before ending.
   real random tick at dusk, in the morning, lit by hand at noon, in the wild and with the rule off;
   the garden, at chance 1 and once at play's odds through grass's own random tick, plus the wild,
   the cap and the rule off; a tamed cat at night leaving its owner to lie by the lantern, then
-  getting up at noon). The "home_..." environments pin the reach to 32: their checks were laid out
+  getting up at noon) and 0.9.0's cushion naps (`CushionChecks.java`: a pet cat, a pet dog and a visiting cat each on a
+  free cushion, a taken cushion left alone, a broken cushion, the morning, a cat found on a
+  cushion by day; a visiting fox and a visiting rabbit, each alone, as foxes and cats hunt rabbits and rabbits flee dogs; cushions stay inside the test area, whose edge is barrier blocks that break them). The "home_..." environments pin the reach to 32: their checks were laid out
   for it (a spot 45 or 60 blocks out stands in the wild). The item, lightning and pet checks keep
   every spot inside the test's own area and use the "lanterns" template, not the 1-block "empty":
   items only age, a mob only turns into another, and a mob's mind only runs where entities tick,
