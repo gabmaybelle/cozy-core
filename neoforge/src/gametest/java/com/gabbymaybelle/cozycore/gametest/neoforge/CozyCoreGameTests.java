@@ -155,7 +155,7 @@ public final class CozyCoreGameTests {
 		test(event, "visitor_settles_then_leaves", home(event, "home_visitor_night"), id("lanterns"), 600);
 		test(event, "visitor_suits_the_biome", home(event, "home_visitor_biome"), EMPTY, 20);
 		// 0.9.0, cushion naps (CushionChecks).
-		test(event, "pets_nap_on_cushions", home(event, "home_cushions"), id("lanterns"), 900);
+		test(event, "pets_nap_on_cushions", home(event, "home_cushions"), id("lanterns"), 1200);
 		test(event, "a_fox_naps_on_a_cushion", home(event, "home_cushion_fox"), id("lanterns"), 600);
 		test(event, "a_rabbit_naps_on_a_cushion", home(event, "home_cushion_rabbit"), id("lanterns"), 600);
 	}

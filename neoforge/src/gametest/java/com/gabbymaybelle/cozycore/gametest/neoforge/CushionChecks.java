@@ -109,7 +109,11 @@ final class CushionChecks {
 			cats[1] = (Cat) HomeLife.visit(level, hearth.offset(12, 0, 0), EntityTypes.CAT);
 			helper.assertTrue(cats[1] != null, "the check's visitor should arrive");
 			dog[0] = EntityTypes.WOLF.create(level, EntitySpawnReason.COMMAND);
-			dog[0].snapTo(hearth.getX() + 10.5, hearth.getY(), hearth.getZ() - 1.5, 0, 0);
+			// Inside the test's own area, as every animal here must start: the game only keeps the chunks
+			// under the test's structure running, and the lantern is one block in from its north edge. A
+			// dog placed 1.5 blocks north of the lantern stood frozen whenever that edge fell on a chunk
+			// border (issue 4).
+			dog[0].snapTo(hearth.getX() + 10.5, hearth.getY(), hearth.getZ() + 0.5, 0, 0);
 			dog[0].tame(owner);
 			dog[0].setOrderedToSit(false);
 			dog[0].setPersistenceRequired();
@@ -121,53 +125,86 @@ final class CushionChecks {
 			boolean petOn = pet.getVehicle() instanceof Cushion, petLying = pet.isLying();
 			boolean visitorOn = visitor.getVehicle() instanceof Cushion, visitorLying = visitor.isLying();
 			boolean sameCushion = petOn && pet.getVehicle() == visitor.getVehicle();
-			boolean dogOn = dog[0].getVehicle() instanceof Cushion, dogSitting = dog[0].isInSittingPose();
 			boolean takenKept = sitter[0].getVehicle() == cushions[2] && cushions[2].getPassengers().size() == 1;
 			System.out.println("[cozy_core_gametest] cushions: at night the pet is on a cushion " + petOn + ", lying " + petLying
-					+ "; the visitor on a cushion " + visitorOn + ", lying " + visitorLying + String.format(", %.1f blocks from the lantern", from(visitor, hearth)) + " (a visitor " + HomeLife.isVisitor(visitor) + ", navigating " + !visitor.getNavigation().isDone() + "); the dog on a cushion " + dogOn + ", sitting " + dogSitting + "; the pig kept its cushion " + takenKept);
+					+ "; the visitor on a cushion " + visitorOn + ", lying " + visitorLying + String.format(", %.1f blocks from the lantern", from(visitor, hearth)) + " (a visitor " + HomeLife.isVisitor(visitor) + ", navigating " + !visitor.getNavigation().isDone() + "); the pig kept its cushion " + takenKept);
 			helper.assertTrue(petOn && petLying, "at night a pet cat should curl up on a free cushion by the lantern (on " + petOn + ", lying " + petLying + ")");
 			helper.assertTrue(visitorOn && visitorLying, "a visiting cat should curl up on a free cushion too (on " + visitorOn + ", lying " + visitorLying + ")");
 			helper.assertFalse(sameCushion, "two cats shouldn't share a cushion");
-			helper.assertTrue(dogOn && dogSitting, "a pet dog should sit on a free cushion too (on " + dogOn + ", sitting " + dogSitting + ")");
 			helper.assertTrue(takenKept, "a cushion with someone on it should be left to them");
-			// Break the pet's cushion: no free one is left, so it should lie by the lantern instead.
-			Cushion petCushion = (Cushion) pet.getVehicle();
-			petCushion.hurtServer(level, level.damageSources().generic(), 1.0F);
-			helper.runAfterDelay(120, () -> RuleChecks.orTidy(tidy, () -> {
-				boolean stillOn = pet.isPassenger();
-				double fromHearth = from(pet, hearth);
-				boolean lyingByLantern = pet.isLying() && fromHearth < 3.5;
-				boolean dropped = !level.getEntitiesOfClass(ItemEntity.class, new AABB(petCushion.blockPosition()).inflate(3)).isEmpty();
-				System.out.println("[cozy_core_gametest] cushions: the broken cushion dropped " + dropped + "; the pet riding " + stillOn
-						+ ", " + String.format("%.1f", fromHearth) + " blocks from the lantern, lying " + pet.isLying());
-				helper.assertFalse(stillOn, "with its cushion broken, the cat should be off it");
-				helper.assertTrue(dropped, "a broken cushion should drop as an item");
-				helper.assertTrue(lyingByLantern, "with no free cushion, the cat should lie by the lantern (" + String.format("%.1f", fromHearth) + " blocks away, lying " + pet.isLying() + ")");
-				helper.assertTrue(pet.isAlive(), "the cat should be fine");
-				command(level, "time set 1000");
-				helper.runAfterDelay(100, () -> RuleChecks.orTidy(tidy, () -> {
-					boolean visitorOff = !visitor.isPassenger() || visitor.isRemoved();
-					boolean petUp = !pet.isLying();
-					boolean dogUp = !dog[0].isPassenger() && !dog[0].isInSittingPose();
-					System.out.println("[cozy_core_gametest] cushions: in the morning the visitor is off its cushion " + visitorOff + ", the pet up " + petUp + ", the dog off and up " + dogUp);
-					helper.assertTrue(visitorOff, "in the morning the visitor should get off its cushion");
-					helper.assertTrue(petUp, "in the morning the pet should get up");
-					helper.assertTrue(dogUp, "in the morning the dog should get off its cushion and up");
-					// A cat found curled up on a cushion by day, as after loading a world, gets off.
-					pet.startRiding(cushions[1].isAlive() ? cushions[1] : cushions[0], true, false);
-					pet.setLying(true);
-					boolean put = pet.isPassenger();
-					helper.runAfterDelay(80, () -> RuleChecks.orTidy(tidy, () -> {
-						boolean off = !pet.isPassenger() && !pet.isLying();
-						System.out.println("[cozy_core_gametest] cushions: put on a cushion at 1000 " + put + ", off and up after 80 ticks " + off);
-						tidy.run();
-						helper.assertTrue(put, "the check should have put the cat on a cushion");
-						helper.assertTrue(off, "a cat on a cushion by day should get off and up");
-						helper.succeed();
+			// The dog walks to its cushion in its own time: wait for it (issue 4), then carry on.
+			whenDogSits(helper, dog, cushions, hearth, DOG_WAIT, tidy, () -> RuleChecks.orTidy(tidy, () -> {
+				// Break the pet's cushion: no free one is left, so it should lie by the lantern instead.
+				Cushion petCushion = (Cushion) pet.getVehicle();
+				petCushion.hurtServer(level, level.damageSources().generic(), 1.0F);
+				helper.runAfterDelay(120, () -> RuleChecks.orTidy(tidy, () -> {
+					boolean stillOn = pet.isPassenger();
+					double fromHearth = from(pet, hearth);
+					boolean lyingByLantern = pet.isLying() && fromHearth < 3.5;
+					boolean dropped = !level.getEntitiesOfClass(ItemEntity.class, new AABB(petCushion.blockPosition()).inflate(3)).isEmpty();
+					System.out.println("[cozy_core_gametest] cushions: the broken cushion dropped " + dropped + "; the pet riding " + stillOn
+							+ ", " + String.format("%.1f", fromHearth) + " blocks from the lantern, lying " + pet.isLying());
+					helper.assertFalse(stillOn, "with its cushion broken, the cat should be off it");
+					helper.assertTrue(dropped, "a broken cushion should drop as an item");
+					helper.assertTrue(lyingByLantern, "with no free cushion, the cat should lie by the lantern (" + String.format("%.1f", fromHearth) + " blocks away, lying " + pet.isLying() + ")");
+					helper.assertTrue(pet.isAlive(), "the cat should be fine");
+					command(level, "time set 1000");
+					helper.runAfterDelay(100, () -> RuleChecks.orTidy(tidy, () -> {
+						boolean visitorOff = !visitor.isPassenger() || visitor.isRemoved();
+						boolean petUp = !pet.isLying();
+						boolean dogUp = !dog[0].isPassenger() && !dog[0].isInSittingPose();
+						System.out.println("[cozy_core_gametest] cushions: in the morning the visitor is off its cushion " + visitorOff + ", the pet up " + petUp + ", the dog off and up " + dogUp);
+						helper.assertTrue(visitorOff, "in the morning the visitor should get off its cushion");
+						helper.assertTrue(petUp, "in the morning the pet should get up");
+						helper.assertTrue(dogUp, "in the morning the dog should get off its cushion and up");
+						// A cat found curled up on a cushion by day, as after loading a world, gets off.
+						pet.startRiding(cushions[1].isAlive() ? cushions[1] : cushions[0], true, false);
+						pet.setLying(true);
+						boolean put = pet.isPassenger();
+						helper.runAfterDelay(80, () -> RuleChecks.orTidy(tidy, () -> {
+							boolean off = !pet.isPassenger() && !pet.isLying();
+							System.out.println("[cozy_core_gametest] cushions: put on a cushion at 1000 " + put + ", off and up after 80 ticks " + off);
+							tidy.run();
+							helper.assertTrue(put, "the check should have put the cat on a cushion");
+							helper.assertTrue(off, "a cat on a cushion by day should get off and up");
+							helper.succeed();
+						}));
 					}));
 				}));
 			}));
 		}));
+	}
+
+	/** How long the dog may still take after tick 300 to get on a cushion and sit. */
+	private static final int DOG_WAIT = 300;
+
+	/**
+	 * Runs {@code then} once the pet dog sits on a cushion, checking every tick for up to
+	 * {@code ticksLeft} ticks, and fails (after {@code tidy}) with where the dog is if it never does.
+	 * A dog walks to its cushion in its own time, so a check at one fixed tick could catch it on its
+	 * way; and when it never gets there, where it stands says why (issue 4: a dog started outside the
+	 * test's area, in a chunk the game wasn't running, and never moved).
+	 */
+	private static void whenDogSits(GameTestHelper helper, Wolf[] dog, Cushion[] cushions, BlockPos hearth, int ticksLeft, Runnable tidy, Runnable then) {
+		Wolf d = dog[0];
+		boolean on = d.getVehicle() instanceof Cushion, sitting = d.isInSittingPose();
+		if (on && sitting) {
+			System.out.println("[cozy_core_gametest] cushions: the dog sits on a cushion " + (DOG_WAIT - ticksLeft) + " ticks after the cats were checked");
+			then.run();
+		} else if (ticksLeft <= 0) {
+			double nearest = Double.MAX_VALUE;
+			for (Cushion c : cushions) {
+				if (c.isAlive() && c.getPassengers().isEmpty()) {
+					nearest = Math.min(nearest, d.distanceTo(c));
+				}
+			}
+			String where = String.format("at %.1f %.1f %.1f, %.1f blocks from the lantern, ", d.getX(), d.getY(), d.getZ(), from(d, hearth))
+					+ (nearest == Double.MAX_VALUE ? "no free cushion left" : String.format("%.2f from the nearest free cushion", nearest)) + ", navigating " + !d.getNavigation().isDone() + ", goals " + goals(d);
+			System.out.println("[cozy_core_gametest] cushions: the dog never sat on a cushion: on " + on + ", sitting " + sitting + ", " + where);
+			RuleChecks.orTidy(tidy, () -> helper.assertTrue(false, "a pet dog should sit on a free cushion too (on " + on + ", sitting " + sitting + ", " + where + ")"));
+		} else {
+			helper.runAfterDelay(1, () -> whenDogSits(helper, dog, cushions, hearth, ticksLeft - 1, tidy, then));
+		}
 	}
 
 	/** The goals running in a mob's mind, for when a check fails. */
