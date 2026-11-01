@@ -8,15 +8,19 @@ import org.bukkit.plugin.java.JavaPlugin;
  * Cozy Core as a Paper plugin: "Light a hearth. Home is safe." The Hearth Lantern is a vanilla
  * lantern carrying the plugin's tag ({@link HearthItems}); where the placed ones are is kept in
  * each chunk's own data ({@link Hearths}); inside a lantern's reach no monster spawns and blasts,
- * fire and endermen leave blocks alone ({@link HomeGuard}); walking in shows "Home"
- * ({@link HomeSign}). The mod's game rules are settings in {@code plugins/CozyCore/config.yml}.
+ * fire and endermen leave blocks alone ({@link HomeGuard}); home is kind to drops, animals, falls
+ * and glass, and a player who dies keeps their hotbar ({@link HomeComforts}); walking in shows
+ * "Home" ({@link HomeSign}). The mod's recipes, trades and advancements tab are its data pack,
+ * which {@link CozyCoreBootstrap} turns on. The mod's game rules are settings in
+ * {@code plugins/CozyCore/config.yml}.
  */
 public final class CozyCorePlugin extends JavaPlugin {
 	static final int MAX_RADIUS = 128;
 
-	private int radius = 64;
-	private boolean protectsBuilds = true, mobExplosionsBreakBlocks = true, endermenTakeBlocks = true, fireBurnsBlocks = true;
+	private int radius = 64, hearthItemMinutes = 60;
+	private boolean protectsBuilds = true, mobExplosionsBreakBlocks = true, endermenTakeBlocks = true, fireBurnsBlocks = true, keepHotbarOnDeath = true;
 	private Hearths hearths;
+	private HomeComforts comforts;
 
 	@Override
 	public void onEnable() {
@@ -26,14 +30,18 @@ public final class CozyCorePlugin extends JavaPlugin {
 		mobExplosionsBreakBlocks = getConfig().getBoolean("mobExplosionsBreakBlocks", true);
 		endermenTakeBlocks = getConfig().getBoolean("endermenTakeBlocks", true);
 		fireBurnsBlocks = getConfig().getBoolean("fireBurnsBlocks", true);
+		hearthItemMinutes = Math.max(5, Math.min(1440, getConfig().getInt("hearthItemMinutes", 60)));
+		keepHotbarOnDeath = getConfig().getBoolean("keepHotbarOnDeath", true);
 
 		HearthItems items = new HearthItems(this);
 		items.registerRecipes();
 		hearths = new Hearths(this, items);
 		hearths.loadAll();
 		HomeSign sign = new HomeSign(hearths);
+		comforts = new HomeComforts(this, hearths, items);
 		Bukkit.getPluginManager().registerEvents(hearths, this);
-		Bukkit.getPluginManager().registerEvents(new HomeGuard(this, hearths), this);
+		Bukkit.getPluginManager().registerEvents(new HomeGuard(this, hearths, comforts), this);
+		Bukkit.getPluginManager().registerEvents(comforts, this);
 		Bukkit.getPluginManager().registerEvents(sign, this);
 		Bukkit.getScheduler().runTaskTimer(this, sign, HomeSign.HOME_CHECK, HomeSign.HOME_CHECK);
 		getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event ->
@@ -68,5 +76,18 @@ public final class CozyCorePlugin extends JavaPlugin {
 
 	boolean fireBurnsBlocks() {
 		return fireBurnsBlocks;
+	}
+
+	/** How many minutes a dropped item lasts at home; 5 is vanilla's five minutes. */
+	int hearthItemMinutes() {
+		return hearthItemMinutes;
+	}
+
+	boolean keepHotbarOnDeath() {
+		return keepHotbarOnDeath;
+	}
+
+	HomeComforts comforts() {
+		return comforts;
 	}
 }

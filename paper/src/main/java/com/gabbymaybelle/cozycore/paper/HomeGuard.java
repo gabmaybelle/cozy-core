@@ -28,16 +28,19 @@ import org.bukkit.event.entity.EntityExplodeEvent;
  * <li>Fire doesn't burn a block away at home nor spread into home. Fire lit by hand, lightning or
  * lava still appears; a fire at home goes out the first time it tries to burn something.</li>
  * <li>Endermen don't pick blocks up at home.</li>
+ * <li>A creeper's or ghast's blast centred at home awards "Safe and sound" to the players near it.</li>
  * </ul>
  * The world-wide switches in config.yml make the last three apply everywhere when off.
  */
 final class HomeGuard implements Listener {
 	private final CozyCorePlugin plugin;
 	private final Hearths hearths;
+	private final HomeComforts comforts;
 
-	HomeGuard(CozyCorePlugin plugin, Hearths hearths) {
+	HomeGuard(CozyCorePlugin plugin, Hearths hearths, HomeComforts comforts) {
 		this.plugin = plugin;
 		this.hearths = hearths;
+		this.comforts = comforts;
 	}
 
 	@EventHandler(ignoreCancelled = true)
@@ -67,6 +70,9 @@ final class HomeGuard implements Listener {
 	public void onExplode(EntityExplodeEvent event) {
 		if (!sparingMob(event.getEntity())) {
 			return;
+		}
+		if (hearths.guards(event.getLocation().getBlock())) {
+			comforts.safeAndSound(event.getLocation());
 		}
 		if (!plugin.mobExplosionsBreakBlocks()) {
 			event.blockList().clear();

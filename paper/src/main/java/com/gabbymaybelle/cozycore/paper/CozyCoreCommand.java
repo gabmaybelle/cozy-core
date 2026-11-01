@@ -8,7 +8,9 @@ import java.util.Collection;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
@@ -24,7 +26,9 @@ import org.jspecify.annotations.Nullable;
  * <li>{@code place <x> <y> <z> [style] [name...]}: puts a Hearth Lantern in the world, for a home
  * in a world that already exists, or a server console with no one on.</li>
  * <li>{@code selftest}: checks the nearest loaded lantern's home through the real spawn event (a
- * natural zombie spawn at home is refused, one in the wild goes through) and says pass or fail.
+ * natural zombie spawn at home is refused, one in the wild goes through), checks the data pack's
+ * recipes and advancements are in the game and the mod's whole keeps_at_home list was read, and
+ * says pass or fail.
  * It's what the headless server test runs.</li>
  * </ul>
  */
@@ -156,8 +160,17 @@ final class CozyCoreCommand implements BasicCommand {
 		if (inWild != null) {
 			inWild.remove();
 		}
+		// The data pack from the jar: a stonecutter recipe, the tab, and the mod's whole keeps_at_home list.
+		check(failed, sender, "the data pack's recipes are in the game",
+				Bukkit.getRecipe(new NamespacedKey("cozy_core", "oak_planks_from_slabs")) != null
+						&& Bukkit.getRecipe(new NamespacedKey("cozy_core", "oak_fence_from_oak_planks_stonecutting")) != null);
+		check(failed, sender, "the advancements tab is in the game",
+				Bukkit.getAdvancement(new NamespacedKey("cozy_core", "cozy/safe_and_sound")) != null
+						&& Bukkit.getAdvancement(new NamespacedKey("cozy_core", "cozy/the_kettles_on")) != null);
+		int keeps = plugin.comforts().keepsAtHomeCount();
+		check(failed, sender, "39 blocks drop themselves at home (" + keeps + ")", keeps == 39);
 		if (failed.isEmpty()) {
-			say(sender, "Cozy Core selftest: passed (4 checks, radius " + radius + ", lantern at " + lantern.pos().x() + " " + lantern.pos().y() + " " + lantern.pos().z() + ")");
+			say(sender, "Cozy Core selftest: passed (7 checks, radius " + radius + ", lantern at " + lantern.pos().x() + " " + lantern.pos().y() + " " + lantern.pos().z() + ")");
 		} else {
 			fail(sender, "Cozy Core selftest: failed: " + String.join("; ", failed));
 		}

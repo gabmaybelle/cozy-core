@@ -226,6 +226,52 @@ async function main() {
 		check('fire burns no planks at home', home === 0, `${home} of 9 planks burnt`);
 		check('fire still burns planks in the wild', wild > 0, `${wild} of 9 planks burnt`);
 
+		// Home comforts, side by side at home (from x 20) and in the wild (from x WILD), on a stone floor.
+		const Z = -15, HOME = 20;
+		await server.command(`fill ${HOME - 2} ${Y} ${Z - 3} ${HOME + 24} ${Y} ${Z + 3} minecraft:stone`);
+		await server.command(`fill ${WILD - 2} ${Y} ${Z - 3} ${WILD + 24} ${Y} ${Z + 3} minecraft:stone`);
+		const summoned = /Summoned|System chat: |Unknown|Incorrect/;
+		const replied = /System chat: |Applied|Unknown|Incorrect|damage/i;
+		for (const [x, where] of [[HOME, 'h'], [WILD, 'w']]) {
+			// Dropped items about to reach vanilla's five minutes, and one at home already given its hour.
+			await server.command(`summon item ${x} ${Y + 1} ${Z} {Tags:["${where}item"],Age:5990s,Item:{id:"minecraft:stone",count:1}}`, summoned);
+			await server.command(`summon item ${x + 2} ${Y + 1} ${Z} {Tags:["${where}done"],Age:5990s,Item:{id:"minecraft:dirt",count:1},BukkitValues:{"cozycore:extra_ticks":66000}}`, summoned);
+			// A cow hurt by fire, lightning and a creeper's blast; a tamed wolf and a wild one falling.
+			await server.command(`summon cow ${x + 6} ${Y + 1} ${Z} {Tags:["${where}cow"],NoAI:1b}`, summoned);
+			await server.command(`summon creeper ${x + 6} ${Y + 1} ${Z + 3} {Tags:["${where}boom"],NoAI:1b}`, summoned);
+			await server.command(`summon wolf ${x + 10} ${Y + 1} ${Z} {Tags:["${where}pet"],NoAI:1b,Owner:[I;1,2,3,4]}`, summoned);
+			await server.command(`summon wolf ${x + 12} ${Y + 1} ${Z} {Tags:["${where}stray"],NoAI:1b}`, summoned);
+			await server.command(`summon pig ${x + 18} ${Y + 1} ${Z} {Tags:["${where}pig"],NoAI:1b}`, summoned);
+			await server.command(`summon mooshroom ${x + 22} ${Y + 1} ${Z} {Tags:["${where}moo"],NoAI:1b,Type:"red"}`, summoned);
+		}
+		for (const where of ['h', 'w']) {
+			for (const type of ['minecraft:in_fire', 'minecraft:lightning_bolt']) {
+				await server.command(`damage @e[tag=${where}cow,limit=1] 4 ${type}`, replied);
+			}
+			await server.command(`damage @e[tag=${where}cow,limit=1] 100 minecraft:explosion by @e[tag=${where}boom,limit=1]`, replied);
+			await server.command(`damage @e[tag=${where}pet,limit=1] 100 minecraft:fall`, replied);
+			await server.command(`damage @e[tag=${where}stray,limit=1] 100 minecraft:fall`, replied);
+		}
+		await server.command(`summon lightning_bolt ${HOME + 18} ${Y + 1} ${Z}`, summoned);
+		await server.command(`summon lightning_bolt ${WILD + 18} ${Y + 1} ${Z}`, summoned);
+		await server.command(`summon lightning_bolt ${HOME + 22} ${Y + 1} ${Z}`, summoned);
+		await server.command(`summon lightning_bolt ${WILD + 22} ${Y + 1} ${Z}`, summoned);
+		await sleep(3000);
+		await passed('an item at home outlasts five minutes', 'execute if entity @e[tag=hitem]');
+		await passed('an item in the wild goes at five minutes', 'execute unless entity @e[tag=witem]');
+		await passed('an item at home goes once its hour is up', 'execute unless entity @e[tag=hdone]');
+		await passed('a cow at home is spared fire, lightning and a creeper', 'execute if entity @e[tag=hcow]');
+		await passed('a cow in the wild is not', 'execute unless entity @e[tag=wcow]');
+		await passed('a tamed wolf at home takes no fall damage', 'execute if entity @e[tag=hpet]');
+		await passed('a tamed wolf in the wild does', 'execute unless entity @e[tag=wpet]');
+		await passed('an untamed wolf at home still does', 'execute unless entity @e[tag=hstray]');
+		await passed('lightning at home leaves a pig a pig', 'execute if entity @e[tag=hpig,type=minecraft:pig]');
+		await passed('lightning in the wild turns a pig', 'execute unless entity @e[tag=wpig,type=minecraft:pig]');
+		await passed('lightning at home leaves a red mooshroom red', 'execute if entity @e[tag=hmoo,nbt={Type:"red"}]');
+		await passed('lightning in the wild turns a red mooshroom brown', 'execute if entity @e[tag=wmoo,nbt={Type:"brown"}]');
+		await server.command(`kill @e[type=!minecraft:player,x=${HOME - 5},y=${Y - 2},z=${Z - 6},dx=${WILD - HOME + 35},dy=8,dz=12]`, summoned);
+		await server.command(`fill ${HOME - 2} ${Y + 1} ${Z - 3} ${WILD + 22} ${Y + 3} ${Z + 3} minecraft:air replace minecraft:fire`);
+
 		const errors = () => server.lines.filter((l) => /^\[[\d:]+ (ERROR|WARN)\]/.test(l) && /CozyCore|Cozy Core|cozycore/i.test(l));
 		check('no errors or warnings from the plugin', errors().length === 0, errors().join(' | '));
 

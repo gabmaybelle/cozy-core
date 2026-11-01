@@ -1,6 +1,7 @@
 name: CozyCore
 version: ${version}
 main: com.gabbymaybelle.cozycore.paper.CozyCorePlugin
+bootstrapper: com.gabbymaybelle.cozycore.paper.CozyCoreBootstrap
 description: Light a hearth. Home is safe. The Hearth Lantern for Paper servers.
 author: Gabby
 website: https://github.com/gabmaybelle/cozy-core

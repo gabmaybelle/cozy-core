@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.11.0: Home comforts on Paper servers
+
+- **The Paper plugin gets home comforts.** At home, dropped items last an hour instead of five
+  minutes; animals, pets and villagers aren't hurt by creeper and ghast blasts, fire or lightning, and
+  lightning doesn't turn them into something else; you and your tamed pets take no fall damage; and
+  glass, ice and bookshelves drop themselves when you break them, with no puddle from the ice.
+- **Keep your hotbar on Paper too.** When a player dies, their hotbar, armour and off-hand stay with
+  them and the rest drops, as with the mod.
+- **The recipes, trades and advancements come with the plugin.** The stonecutter wood, re-dyeing and
+  the other recipes, the wandering trader's and mason's builder trades, and the Cozy Core
+  advancements tab, "Safe and sound" included, are built into the plugin and switch on by themselves.
+  There's no data pack to add any more.
+- New settings in `plugins/CozyCore/config.yml`: `hearthItemMinutes` (60) and `keepHotbarOnDeath`
+  (true). The plugin now needs Paper; it doesn't load on Spigot.
+
 ## 0.10.0: Cozy Core on Paper servers
 
 - **A plugin for Paper servers.** Cozy Core now comes as a third file, `cozy-core-0.10.0-paper.jar`, for

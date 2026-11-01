@@ -18,3 +18,10 @@ mobExplosionsBreakBlocks: true
 endermenTakeBlocks: true
 # false: fire still burns and goes out, but never spreads onto a block or burns one away.
 fireBurnsBlocks: true
+
+# How many minutes a dropped item lasts at home, instead of vanilla's five (5 to 1440).
+hearthItemMinutes: 60
+
+# When a player dies, their hotbar, armour and off-hand stay with them; the rest drops. Items with
+# Curse of Vanishing still vanish. The keepInventory game rule keeps everything and wins when on.
+keepHotbarOnDeath: true

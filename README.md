@@ -11,7 +11,7 @@ Cozy Core also takes the grind out of decorating, with wood in the stonecutter, 
 ## Three ways to get it
 
 - **The mod** (Fabric with [Fabric API](https://modrinth.com/mod/fabric-api), or NeoForge): everything below.
-- **The Paper plugin** (`-paper.jar`): for servers that run [Paper](https://papermc.io/); players need nothing installed. The Hearth Lantern and home being safe, with the "Home" sign and named homes. The details are under Requirements.
+- **The Paper plugin** (`-paper.jar`): for servers that run [Paper](https://papermc.io/); players need nothing installed. The Hearth Lantern, home being safe, home comforts, keeping your hotbar, the recipes, trades and advancements, with the "Home" sign and named homes. The details are under Requirements.
 - **The data pack** (`.zip`): only the recipes, for a world on plain vanilla. Drop it in the world's `datapacks` folder and type `/reload`.
 
 ## Light a hearth
@@ -79,7 +79,7 @@ Each rule is an ordinary game rule: it shows in the Game Rules screen when you m
 
 Want the whole world kept safe? Turn off the three "anywhere" rules. Worlds you already have keep the settings they were made with.
 
-On a Paper server the lantern's reach, home keeping builds safe and the three "anywhere" rules are settings in `plugins/CozyCore/config.yml`, and apply when the server starts.
+On a Paper server the lantern's reach, home keeping builds safe, the three "anywhere" rules, how long drops last at home and keeping your hotbar are settings in `plugins/CozyCore/config.yml`, and apply when the server starts.
 
 ## Other mods
 
@@ -90,7 +90,7 @@ With the mod version, wood from Biomes O' Plenty, Ecologics, Promenade and Wilde
 Minecraft 26.3. The mod version runs on Fabric (with Fabric API) or NeoForge; download the file
 for your loader. For Minecraft 1.21.1, see the `1.21.1` branch and its releases.
 
-**Paper servers:** the `paper` file is a plugin for [Paper](https://papermc.io/) 26.3 (Java 25). Drop it in the server's `plugins` folder; players need nothing installed. It brings the Hearth Lantern in its six styles, made from the same lantern and four amethyst shards, and keeps home safe around it: no monsters or phantoms, blasts that break nothing, fire that can't spread in, endermen that leave your blocks alone, and "Home" or your home's name above the hotbar. The lantern looks like the plain lantern it's made from, with a glint, since a plugin can't bring its own textures. The rest of the mod isn't in the plugin yet: animals and pets being safe, drops lasting an hour, no fall damage, glass dropping itself, the flames at home's edge, the lights, garden, pets and visitors, keeping your hotbar, the trades and the advancements. For the recipes, put the data pack in the world's `datapacks` folder as well. Operators have `/cozycore give`, `/cozycore place` and `/cozycore selftest`.
+**Paper servers:** the `paper` file is a plugin for [Paper](https://papermc.io/) 26.3 (Java 25). Drop it in the server's `plugins` folder; players need nothing installed. It brings the Hearth Lantern in its six styles, made from the same lantern and four amethyst shards, and keeps home safe around it: no monsters or phantoms, blasts that break nothing, fire that can't spread in, endermen that leave your blocks alone, and "Home" or your home's name above the hotbar. The lantern looks like the plain lantern it's made from, with a glint, since a plugin can't bring its own textures. Home comforts come too: animals, pets and villagers kept safe, drops lasting an hour, no fall damage, glass, ice and bookshelves dropping themselves, and keeping your hotbar when you die. The recipes, trades and advancements are built in, so there's no data pack to add. Not in the plugin yet: the flames at home's edge, and the lights, garden, pets coming home, visitors and cushion naps. The plugin needs Paper; it doesn't load on Spigot. Operators have `/cozycore give`, `/cozycore place` and `/cozycore selftest`.
 
 ## Licence
 

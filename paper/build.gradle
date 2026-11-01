@@ -18,10 +18,42 @@ dependencies {
 	compileOnly "io.papermc.paper:paper-api:${project.paper_api_version}"
 }
 
+// The mod's data pack (recipes, trades, the advancements tab) goes inside the plugin as
+// `datapack/`, and CozyCoreBootstrap has Paper turn it on at start-up. It is `pack/` without
+// the wood-mod compat recipes (Paper has no modded woods), and with the two places that name the
+// mod's own Hearth Lantern item changed: the tab shows a vanilla lantern, and "The kettle's on" is
+// awarded by the plugin when a Hearth Lantern is crafted (HomeComforts), since the plugin's recipes
+// aren't in the data pack.
+def paperPack = tasks.register('paperPack', Sync) {
+	from(rootProject.file('pack')) {
+		exclude('**/compat/**')
+		into('datapack')
+	}
+	into(layout.buildDirectory.dir('paperPack'))
+	doLast { task ->
+		def advancements = new File(task.destinationDir, 'datapack/data/cozy_core/advancement/cozy')
+		def edit = { String name, Closure change ->
+			def file = new File(advancements, name + '.json')
+			def json = new groovy.json.JsonSlurper().parse(file)
+			change(json)
+			file.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(json)) + '\n'
+		}
+		edit('root') { it.display.icon.id = 'minecraft:lantern' }
+		edit('the_kettles_on') {
+			it.display.icon.id = 'minecraft:lantern'
+			it.criteria = [the_kettles_on: [trigger: 'minecraft:impossible']]
+		}
+	}
+}
+
+sourceSets.main.resources.srcDir(paperPack)
+
 processResources {
 	def version = project.version
 	inputs.property "version", version
-	filesMatching("plugin.yml") {
+	// The blocks that drop themselves at home: the mod's own tag file, read by HomeComforts.
+	from(rootProject.file('common/src/main/resources/data/cozy_core/tags/block/keeps_at_home.json'))
+	filesMatching("paper-plugin.yml") {
 		expand "version": version
 	}
 }
