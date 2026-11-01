@@ -84,6 +84,7 @@ public final class CozyCoreGameTests {
 	public CozyCoreGameTests(IEventBus modBus) {
 		modBus.addListener(RegisterEvent.class, CozyCoreGameTests::registerFunctions);
 		modBus.addListener(RegisterGameTestsEvent.class, CozyCoreGameTests::registerTests);
+		MockPlayerGuard.install();
 	}
 
 	static Identifier id(String path) {
