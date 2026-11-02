@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased: Visitors on Paper servers
+## 0.12.0: Visitors on Paper servers
 
 - **A visitor at your door, on Paper too.** Now and then in the evening, while someone is home, a
   stray cat, or a rabbit or fox where they live, walks up to the Hearth Lantern and rests by it, on a
