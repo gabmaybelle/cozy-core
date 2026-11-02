@@ -10,7 +10,8 @@ import org.bukkit.plugin.java.JavaPlugin;
  * each chunk's own data ({@link Hearths}); inside a lantern's reach no monster spawns and blasts,
  * fire and endermen leave blocks alone ({@link HomeGuard}); home is kind to drops, animals, falls
  * and glass, and a player who dies keeps their hotbar ({@link HomeComforts}); walking in shows
- * "Home" ({@link HomeSign}). The mod's recipes, trades and advancements tab are its data pack,
+ * "Home" ({@link HomeSign}); now and then in the evening a visitor comes to the lantern
+ * ({@link Visitors}). The mod's recipes, trades and advancements tab are its data pack,
  * which {@link CozyCoreBootstrap} turns on. The mod's game rules are settings in
  * {@code plugins/CozyCore/config.yml}.
  */
@@ -18,7 +19,7 @@ public final class CozyCorePlugin extends JavaPlugin {
 	static final int MAX_RADIUS = 128;
 
 	private int radius = 64, hearthItemMinutes = 60;
-	private boolean protectsBuilds = true, mobExplosionsBreakBlocks = true, endermenTakeBlocks = true, fireBurnsBlocks = true, keepHotbarOnDeath = true;
+	private boolean protectsBuilds = true, mobExplosionsBreakBlocks = true, endermenTakeBlocks = true, fireBurnsBlocks = true, keepHotbarOnDeath = true, hearthVisitors = true;
 	private Hearths hearths;
 	private HomeComforts comforts;
 
@@ -32,6 +33,7 @@ public final class CozyCorePlugin extends JavaPlugin {
 		fireBurnsBlocks = getConfig().getBoolean("fireBurnsBlocks", true);
 		hearthItemMinutes = Math.max(5, Math.min(1440, getConfig().getInt("hearthItemMinutes", 60)));
 		keepHotbarOnDeath = getConfig().getBoolean("keepHotbarOnDeath", true);
+		hearthVisitors = getConfig().getBoolean("hearthVisitors", true);
 
 		HearthItems items = new HearthItems(this);
 		items.registerRecipes();
@@ -44,8 +46,11 @@ public final class CozyCorePlugin extends JavaPlugin {
 		Bukkit.getPluginManager().registerEvents(comforts, this);
 		Bukkit.getPluginManager().registerEvents(sign, this);
 		Bukkit.getScheduler().runTaskTimer(this, sign, HomeSign.HOME_CHECK, HomeSign.HOME_CHECK);
+		Visitors visitors = new Visitors(this, hearths);
+		Bukkit.getPluginManager().registerEvents(visitors, this);
+		Bukkit.getScheduler().runTaskTimer(this, visitors, Visitors.EVERY, Visitors.EVERY);
 		getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event ->
-				event.registrar().register("cozycore", "Hearth Lanterns for operators: give, place, selftest", new CozyCoreCommand(this, items, hearths)));
+				event.registrar().register("cozycore", "Hearth Lanterns for operators: give, place, visit, selftest", new CozyCoreCommand(this, items, hearths, visitors)));
 		getLogger().info("Cozy Core: ready, Hearth Lanterns reach " + radius + " blocks" + (radius == 0 ? " (off)" : "")
 				+ (protectsBuilds ? ", builds safe at home" : ", builds not protected"));
 	}
@@ -85,6 +90,11 @@ public final class CozyCorePlugin extends JavaPlugin {
 
 	boolean keepHotbarOnDeath() {
 		return keepHotbarOnDeath;
+	}
+
+	/** Whether a stray cat, rabbit or fox now and then visits a home in the evening. */
+	boolean hearthVisitors() {
+		return hearthVisitors;
 	}
 
 	HomeComforts comforts() {

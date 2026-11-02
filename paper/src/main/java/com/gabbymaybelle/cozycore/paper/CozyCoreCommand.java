@@ -14,7 +14,11 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Cat;
+import org.bukkit.entity.Fox;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Rabbit;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jspecify.annotations.Nullable;
@@ -25,6 +29,9 @@ import org.jspecify.annotations.Nullable;
  * <li>{@code give [style] [count]}: hands you Hearth Lanterns (a player only).</li>
  * <li>{@code place <x> <y> <z> [style] [name...]}: puts a Hearth Lantern in the world, for a home
  * in a world that already exists, or a server console with no one on.</li>
+ * <li>{@code visit [cat|rabbit|fox]}: a visitor comes to the nearest loaded lantern now, out in its
+ * yard, whatever the hour (the biome's pick when no kind is given). It walks in and rests in the
+ * evening and at night, and leaves in the morning like any visitor.</li>
  * <li>{@code selftest}: checks the nearest loaded lantern's home through the real spawn event (a
  * natural zombie spawn at home is refused, one in the wild goes through), checks the data pack's
  * recipes and advancements are in the game and the mod's whole keeps_at_home list was read, and
@@ -36,11 +43,13 @@ final class CozyCoreCommand implements BasicCommand {
 	private final CozyCorePlugin plugin;
 	private final HearthItems items;
 	private final Hearths hearths;
+	private final Visitors visitors;
 
-	CozyCoreCommand(CozyCorePlugin plugin, HearthItems items, Hearths hearths) {
+	CozyCoreCommand(CozyCorePlugin plugin, HearthItems items, Hearths hearths, Visitors visitors) {
 		this.plugin = plugin;
 		this.items = items;
 		this.hearths = hearths;
+		this.visitors = visitors;
 	}
 
 	@Override
@@ -51,10 +60,13 @@ final class CozyCoreCommand implements BasicCommand {
 	@Override
 	public Collection<String> suggest(CommandSourceStack source, String[] args) {
 		if (args.length <= 1) {
-			return List.of("give", "place", "selftest");
+			return List.of("give", "place", "visit", "selftest");
 		}
 		if (args[0].equals("give") && args.length == 2 || args[0].equals("place") && args.length == 5) {
 			return HearthStyle.words();
+		}
+		if (args[0].equals("visit") && args.length == 2) {
+			return List.of("cat", "rabbit", "fox");
 		}
 		return List.of();
 	}
@@ -63,15 +75,47 @@ final class CozyCoreCommand implements BasicCommand {
 	public void execute(CommandSourceStack source, String[] args) {
 		CommandSender sender = source.getSender();
 		if (args.length == 0) {
-			fail(sender, "Usage: /cozycore give [style] [count], /cozycore place <x> <y> <z> [style] [name], /cozycore selftest");
+			fail(sender, "Usage: /cozycore give [style] [count], /cozycore place <x> <y> <z> [style] [name], /cozycore visit [cat|rabbit|fox], /cozycore selftest");
 			return;
 		}
 		switch (args[0]) {
 			case "give" -> give(source, args);
 			case "place" -> place(source, args);
+			case "visit" -> visit(source, args);
 			case "selftest" -> selftest(source);
-			default -> fail(sender, "Unknown: " + args[0] + ". Try give, place or selftest.");
+			default -> fail(sender, "Unknown: " + args[0] + ". Try give, place, visit or selftest.");
 		}
+	}
+
+	private void visit(CommandSourceStack source, String[] args) {
+		CommandSender sender = source.getSender();
+		Class<? extends Mob> kind = null;
+		if (args.length >= 2) {
+			kind = switch (args[1]) {
+				case "cat" -> Cat.class;
+				case "rabbit" -> Rabbit.class;
+				case "fox" -> Fox.class;
+				default -> null;
+			};
+			if (kind == null) {
+				fail(sender, "Cozy Core: a visitor is a cat, a rabbit or a fox.");
+				return;
+			}
+		}
+		World world = source.getLocation().getWorld();
+		Hearths.Hearth lantern = nearest(world, source.getLocation());
+		if (lantern == null || plugin.radius() <= 0) {
+			fail(sender, "Cozy Core: no Hearth Lantern is loaded in " + world.getName() + ".");
+			return;
+		}
+		Mob visitor = visitors.arrive(world, lantern.pos(), kind);
+		if (visitor == null) {
+			fail(sender, "Cozy Core: no open ground 16 to 24 blocks from the lantern for a visitor to arrive on.");
+			return;
+		}
+		Location at = visitor.getLocation();
+		say(sender, "Cozy Core: a " + visitor.getType().getKey().getKey() + " is visiting the lantern at " + lantern.pos().x() + " " + lantern.pos().y() + " " + lantern.pos().z()
+				+ ", from " + at.getBlockX() + " " + at.getBlockY() + " " + at.getBlockZ() + ".");
 	}
 
 	private void give(CommandSourceStack source, String[] args) {

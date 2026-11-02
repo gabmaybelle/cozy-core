@@ -3,8 +3,9 @@
 // Lantern placed by /cozycore place is a lantern block; /cozycore selftest passes (a natural
 // monster spawn at home is refused, one in the wild goes through); a creeper's blast at home breaks
 // nothing while one in the wild leaves a hole and TNT at home still does (the rule is creepers and
-// ghasts only); fire on planks at home burns none while fire on planks in the wild burns some; and
-// the plugin logs no errors or warnings. Then the server is stopped and started again on the same
+// ghasts only); fire on planks at home burns none while fire on planks in the wild burns some; a
+// visitor brought by /cozycore visit walks to the lantern, naps on a free cushion and is gone in the
+// morning, while a named one stops being a visitor and stays; and the plugin logs no errors or warnings. Then the server is stopped and started again on the same
 // world: the lantern must still be known (the chunk's own data remembers it). No window opens.
 // The Paper server jar is downloaded once into the folder.
 //
@@ -271,6 +272,31 @@ async function main() {
 		await passed('lightning in the wild turns a red mooshroom brown', 'execute if entity @e[tag=wmoo,nbt={Type:"brown"}]');
 		await server.command(`kill @e[type=!minecraft:player,x=${HOME - 5},y=${Y - 2},z=${Z - 6},dx=${WILD - HOME + 35},dy=8,dz=12]`, summoned);
 		await server.command(`fill ${HOME - 2} ${Y + 1} ${Z - 3} ${WILD + 22} ${Y + 3} ${Z + 3} minecraft:air replace minecraft:fire`);
+
+		// A visitor at your door: a yard of stone with a lantern hanging over its middle (the nearest
+		// lantern to anything in the yard), a cushion beside the spot under it, in the evening.
+		const V = { x: -60, z: 0 };
+		await server.command(`forceload add ${V.x - 30} ${V.z - 30} ${V.x + 30} ${V.z + 30}`);
+		await server.command(`fill ${V.x - 26} ${Y} ${V.z - 26} ${V.x + 26} ${Y} ${V.z + 26} minecraft:stone`);
+		await server.command(`cozycore place ${V.x} ${Y + 3} ${V.z}`, plain);
+		await server.command('time set 13000');
+		const cat = await server.command(`execute positioned ${V.x} ${Y + 3} ${V.z} run cozycore visit cat`, plain);
+		check('/cozycore visit brings a cat out in the yard', /a cat is visiting the lantern at -60 303 0, from/.test(cat), cat);
+		await passed('the visitor carries the visitor tag', `execute if entity @e[type=minecraft:cat,tag=cozy_core_visitor]`);
+		// A named one is yours: its mark comes off and it stays (a second cat, as cats hunt rabbits).
+		await server.command(`summon cat ${V.x - 8} ${Y + 1} ${V.z} {Tags:["cozy_core_visitor","named"],CustomName:"Clover"}`, summoned);
+		await sleep(20000);
+		await passed('the cat walked in and rests by the lantern', `execute if entity @e[type=minecraft:cat,tag=cozy_core_visitor,tag=!named,x=${V.x + 0.5},y=${Y + 1},z=${V.z + 0.5},distance=..3]`);
+		await server.command(`summon cushion ${V.x + 3} ${Y + 1} ${V.z}`, summoned);
+		await sleep(10000);
+		await passed('the cat naps on the free cushion', `execute if data entity @e[type=minecraft:cushion,limit=1] Passengers[{id:"minecraft:cat"}]`);
+		await passed('a named visitor is no longer one', `execute unless entity @e[tag=named,tag=cozy_core_visitor]`);
+		// Morning, and no one within 24 blocks: the visitor goes; the named cat stays.
+		await server.command('time set 0');
+		await sleep(5000);
+		await passed('in the morning the visitor is gone', `execute unless entity @e[type=minecraft:cat,tag=cozy_core_visitor]`);
+		await passed('the named cat stayed', `execute if entity @e[type=minecraft:cat,tag=named]`);
+		await server.command(`kill @e[type=!minecraft:player,x=${V.x - 26},y=${Y - 2},z=${V.z - 26},dx=52,dy=10,dz=52]`, summoned);
 
 		const errors = () => server.lines.filter((l) => /^\[[\d:]+ (ERROR|WARN)\]/.test(l) && /CozyCore|Cozy Core|cozycore/i.test(l));
 		check('no errors or warnings from the plugin', errors().length === 0, errors().join(' | '));

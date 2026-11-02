@@ -22,6 +22,11 @@ fireBurnsBlocks: true
 # How many minutes a dropped item lasts at home, instead of vanilla's five (5 to 1440).
 hearthItemMinutes: 60
 
+# Now and then in the evening, while someone is home, a visitor walks up to the Hearth Lantern: a
+# stray cat, or a rabbit or fox where they live. It rests by the lantern (on a cushion, if there's a
+# free one near) and leaves in the morning, unless it's tamed, on a lead or named.
+hearthVisitors: true
+
 # When a player dies, their hotbar, armour and off-hand stay with them; the rest drops. Items with
 # Curse of Vanishing still vanish. The keepInventory game rule keeps everything and wins when on.
 keepHotbarOnDeath: true

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased: Visitors on Paper servers
+
+- **A visitor at your door, on Paper too.** Now and then in the evening, while someone is home, a
+  stray cat, or a rabbit or fox where they live, walks up to the Hearth Lantern and rests by it, on a
+  free cushion if there's one near. It leaves in the morning unless you name it, tame it or put it on a
+  lead. Visitors carry the same mark as the mod's, so a world can move between the mod and the plugin.
+- New setting `hearthVisitors` (true), and `/cozycore visit [cat|rabbit|fox]` for operators brings a
+  visitor to the nearest lantern now.
+
 ## 0.11.0: Home comforts on Paper servers
 
 - **The Paper plugin gets home comforts.** At home, dropped items last an hour instead of five
