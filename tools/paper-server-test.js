@@ -160,6 +160,20 @@ async function main() {
 	const allLines = [];
 	const check = (name, ok, detail) => { console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}${detail ? ': ' + detail : ''}`); if (!ok) failures.push(name); };
 	const passed = async (name, cmd) => { const reply = await server.command(cmd); check(name, /Test passed/.test(reply), reply); };
+	/**
+	 * Like passed, but asks every two seconds for up to `seconds`, for an animal's walk: with no player
+	 * on, Paper only lets far-off mobs think now and then, so how long a walk takes varies (CI is slower).
+	 */
+	const eventually = async (name, cmd, seconds) => {
+		const until = Date.now() + seconds * 1000;
+		let reply;
+		do {
+			reply = await server.command(cmd);
+			if (/Test passed/.test(reply)) break;
+			await sleep(2000);
+		} while (Date.now() < until);
+		check(name, /Test passed/.test(reply), reply);
+	};
 	const plain = /Cozy Core|Unknown or incomplete command|Incorrect argument|System chat: /;
 	/** How many of the nine planks of a 3x3 at (x..x+2, Y, z..z+2) are gone. */
 	const burnt = async (x, z) => {
@@ -285,16 +299,13 @@ async function main() {
 		await passed('the visitor carries the visitor tag', `execute if entity @e[type=minecraft:cat,tag=cozy_core_visitor]`);
 		// A named one is yours: its mark comes off and it stays (a second cat, as cats hunt rabbits).
 		await server.command(`summon cat ${V.x - 8} ${Y + 1} ${V.z} {Tags:["cozy_core_visitor","named"],CustomName:"Clover"}`, summoned);
-		await sleep(20000);
-		await passed('the cat walked in and rests by the lantern', `execute if entity @e[type=minecraft:cat,tag=cozy_core_visitor,tag=!named,x=${V.x + 0.5},y=${Y + 1},z=${V.z + 0.5},distance=..3]`);
+		await eventually('the cat walked in and rests by the lantern', `execute if entity @e[type=minecraft:cat,tag=cozy_core_visitor,tag=!named,x=${V.x + 0.5},y=${Y + 1},z=${V.z + 0.5},distance=..3]`, 40);
 		await server.command(`summon cushion ${V.x + 3} ${Y + 1} ${V.z}`, summoned);
-		await sleep(10000);
-		await passed('the cat naps on the free cushion', `execute if data entity @e[type=minecraft:cushion,limit=1] Passengers[{id:"minecraft:cat"}]`);
+		await eventually('the cat naps on the free cushion', `execute if data entity @e[type=minecraft:cushion,limit=1] Passengers[{id:"minecraft:cat"}]`, 40);
 		await passed('a named visitor is no longer one', `execute unless entity @e[tag=named,tag=cozy_core_visitor]`);
 		// Morning, and no one within 24 blocks: the visitor goes; the named cat stays.
 		await server.command('time set 0');
-		await sleep(5000);
-		await passed('in the morning the visitor is gone', `execute unless entity @e[type=minecraft:cat,tag=cozy_core_visitor]`);
+		await eventually('in the morning the visitor is gone', `execute unless entity @e[type=minecraft:cat,tag=cozy_core_visitor]`, 30);
 		await passed('the named cat stayed', `execute if entity @e[type=minecraft:cat,tag=named]`);
 		await server.command(`kill @e[type=!minecraft:player,x=${V.x - 26},y=${Y - 2},z=${V.z - 26},dx=52,dy=10,dz=52]`, summoned);
 
