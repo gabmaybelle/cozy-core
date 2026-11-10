@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Fixed: with a Hearth Lantern placed, `/give` left ghost copies of the item on the floor that couldn't be picked up (issue #5). The game drops a throwaway copy of a given item for the pickup animation, and "dropped items last longer at home" was keeping it alive; an item nobody can ever pick up is now left alone.
+
 ## 0.8.0+1.21.1: A visitor at your door
 
 - **A visitor at your door.** Now and then in the evening, while you're home, a stray cat walks up to
