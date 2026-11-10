@@ -7,6 +7,8 @@
   items last longer at home" was keeping it around for an hour. Items nobody can ever pick up are now
   left alone. Thanks to bloodconfetti for the report (issue #5). Fixed in the Fabric and NeoForge
   jars and the Paper plugin; the data pack is unchanged.
+- With Beautify installed, its new poplar blinds and trellises go in the stonecutter too, at the same
+  rate as the other woods.
 
 ## 0.12.0: Visitors on Paper servers
 

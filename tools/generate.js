@@ -56,9 +56,9 @@ const DEFAULT_MODS = path.join(ROOT, '..', 'cozy-core-test', 'mods'); // filled 
 function extractMods(modsDir) {
 	const roots = {};
 	for (const modid of [...WOOD_MODS, ...DECOR_MODS]) {
-		const cached = fs.existsSync(MOD_CACHE) && fs.readdirSync(MOD_CACHE).find(d => d.startsWith(JAR_PREFIX[modid]));
+		const cached = fs.existsSync(MOD_CACHE) && fs.readdirSync(MOD_CACHE).find(d => d.toLowerCase().startsWith(JAR_PREFIX[modid].toLowerCase()));
 		if (cached) { roots[modid] = path.join(MOD_CACHE, cached, 'data'); continue; }
-		const jar = fs.existsSync(modsDir) && fs.readdirSync(modsDir).find(f => f.startsWith(JAR_PREFIX[modid]) && f.endsWith('.jar'));
+		const jar = fs.existsSync(modsDir) && fs.readdirSync(modsDir).find(f => f.toLowerCase().startsWith(JAR_PREFIX[modid].toLowerCase()) && f.endsWith('.jar'));
 		if (!jar) throw new Error(`No ${modid} jar in ${modsDir}: run node tools/fetch-test-mods.js "<test folder>" first`);
 		const out = path.join(MOD_CACHE, jar.slice(0, -4));
 		unzipSome(path.join(modsDir, jar), ['data/*/recipe/*', 'data/*/tags/item/*', 'data/*/tags/item/*/*'], out);
