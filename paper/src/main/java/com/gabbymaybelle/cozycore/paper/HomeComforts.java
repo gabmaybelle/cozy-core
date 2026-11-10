@@ -121,11 +121,16 @@ final class HomeComforts implements Listener {
 	/**
 	 * An item at home that would vanish now gets another minute, until it has lived
 	 * {@code hearthItemMinutes}. Cancelling the event starts the item's five minutes again, so the
-	 * next tick sets its age to leave it only the time it's owed.
+	 * next tick sets its age to leave it only the time it's owed. An item nobody can ever pick up
+	 * is left alone: {@code /give} shows its pickup animation with one that's due to vanish on its
+	 * first tick, and giving it more time left ghost items lying at home (issue 5).
 	 */
 	@EventHandler(ignoreCancelled = true)
 	public void onDespawn(ItemDespawnEvent event) {
 		Item item = event.getEntity();
+		if (item.getPickupDelay() >= Short.MAX_VALUE) {
+			return;
+		}
 		int extra = item.getPersistentDataContainer().getOrDefault(extraKey, PersistentDataType.INTEGER, 0);
 		int owed = plugin.hearthItemMinutes() * MINUTE - LIFETIME - extra;
 		if (owed <= 0 || !hearths.protects(item.getLocation())) {

@@ -251,6 +251,8 @@ async function main() {
 			// Dropped items about to reach vanilla's five minutes, and one at home already given its hour.
 			await server.command(`summon item ${x} ${Y + 1} ${Z} {Tags:["${where}item"],Age:5990s,Item:{id:"minecraft:stone",count:1}}`, summoned);
 			await server.command(`summon item ${x + 2} ${Y + 1} ${Z} {Tags:["${where}done"],Age:5990s,Item:{id:"minecraft:dirt",count:1},BukkitValues:{"cozycore:extra_ticks":66000}}`, summoned);
+			// The throwaway item /give drops for its pickup animation: never picked up, due to vanish next tick.
+			await server.command(`summon item ${x + 4} ${Y + 1} ${Z} {Tags:["${where}fake"],Age:5999s,PickupDelay:32767s,Item:{id:"minecraft:stick",count:1}}`, summoned);
 			// A cow hurt by fire, lightning and a creeper's blast; a tamed wolf and a wild one falling.
 			await server.command(`summon cow ${x + 6} ${Y + 1} ${Z} {Tags:["${where}cow"],NoAI:1b}`, summoned);
 			await server.command(`summon creeper ${x + 6} ${Y + 1} ${Z + 3} {Tags:["${where}boom"],NoAI:1b}`, summoned);
@@ -275,6 +277,7 @@ async function main() {
 		await passed('an item at home outlasts five minutes', 'execute if entity @e[tag=hitem]');
 		await passed('an item in the wild goes at five minutes', 'execute unless entity @e[tag=witem]');
 		await passed('an item at home goes once its hour is up', 'execute unless entity @e[tag=hdone]');
+		await passed("/give's throwaway item at home goes at once", 'execute unless entity @e[tag=hfake]');
 		await passed('a cow at home is spared fire, lightning and a creeper', 'execute if entity @e[tag=hcow]');
 		await passed('a cow in the wild is not', 'execute unless entity @e[tag=wcow]');
 		await passed('a tamed wolf at home takes no fall damage', 'execute if entity @e[tag=hpet]');

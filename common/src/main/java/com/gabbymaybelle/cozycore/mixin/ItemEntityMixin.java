@@ -20,6 +20,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * home that's about to go is set back a minute, and the minutes it was given are kept beside it
  * (and saved with it) until it has had its full time. The check runs only when an item is about
  * to go, so at most once a minute per item.
+ *
+ * <p>An item nobody can ever pick up is left to vanilla: {@code /give} shows its pickup animation
+ * with a throwaway item that starts a tick from the end and can never be picked up, and giving
+ * that one more time left ghost items lying at home (issue 5).
  */
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin {
@@ -27,9 +31,14 @@ public abstract class ItemEntityMixin {
 	private static final String COZY_CORE$EXTRA = "cozy_core_extra_ticks";
 	@Unique
 	private static final int COZY_CORE$LIFETIME = 6000, COZY_CORE$MINUTE = 1200;
+	/** Vanilla's pickup delay for an item that can never be picked up ({@code setNeverPickUp}). */
+	@Unique
+	private static final int COZY_CORE$NEVER_PICK_UP = 32767;
 
 	@Shadow
 	private int age;
+	@Shadow
+	private int pickupDelay;
 
 	/** Ticks this item has been given back at home so far. */
 	@Unique
@@ -38,7 +47,7 @@ public abstract class ItemEntityMixin {
 	@Inject(method = "tick", at = @At("HEAD"))
 	private void cozyCore$lastLongerAtHome(CallbackInfo ci) {
 		ItemEntity item = (ItemEntity) (Object) this;
-		if (age < COZY_CORE$LIFETIME - 1 || !(item.level() instanceof ServerLevel level)) {
+		if (age < COZY_CORE$LIFETIME - 1 || pickupDelay == COZY_CORE$NEVER_PICK_UP || !(item.level() instanceof ServerLevel level)) {
 			return;
 		}
 		int lifetime = Rules.get(level, Rules.HEARTH_ITEM_MINUTES) * COZY_CORE$MINUTE;

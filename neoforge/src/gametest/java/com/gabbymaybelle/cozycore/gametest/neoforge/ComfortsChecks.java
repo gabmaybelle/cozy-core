@@ -65,7 +65,8 @@ final class ComfortsChecks {
 	/**
 	 * Two dropped items, one at home and one in the wild (45 blocks from the lantern), each set to a moment before vanilla's five
 	 * minutes run out. After 20 ticks the wild one is gone and the one at home is still there; with
-	 * {@code hearth_item_minutes} at 5 (vanilla's time) the one at home goes too.
+	 * {@code hearth_item_minutes} at 5 (vanilla's time) the one at home goes too. A {@code /give}-style
+	 * fake item at home (never picked up, a tick from the end) goes at once like vanilla's (issue 5).
 	 */
 	static void items(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -85,10 +86,13 @@ final class ComfortsChecks {
 		helper.runAfterDelay(1, () -> RuleChecks.orTidy(tidy, () -> {
 			ItemEntity atHome = item(level, home, made);
 			ItemEntity inWild = item(level, wild, made);
+			ItemEntity fake = fakeItem(level, home, made);
 			helper.runAfterDelay(20, () -> RuleChecks.orTidy(tidy, () -> {
 				System.out.println("[cozy_core_gametest] items: at home age " + ageOf(atHome) + ", removed " + atHome.isRemoved()
-						+ "; in the wild removed " + inWild.isRemoved() + " (age " + ageOf(inWild) + ")");
+						+ "; in the wild removed " + inWild.isRemoved() + " (age " + ageOf(inWild) + ")"
+						+ "; /give's fake item at home removed " + fake.isRemoved() + " (age " + ageOf(fake) + ")");
 				helper.assertTrue(inWild.isRemoved(), "a dropped item in the wild should be gone after five minutes");
+				helper.assertTrue(fake.isRemoved(), "/give's throwaway pickup-animation item should go at once at home too (age " + ageOf(fake) + ")");
 				helper.assertFalse(atHome.isRemoved(), "a dropped item at home should last longer than five minutes");
 				helper.assertTrue(ageOf(atHome) < 6000 - 10, "the item at home should have been given more time (age " + ageOf(atHome) + ")");
 				level.getGameRules().set(Rules.HEARTH_ITEM_MINUTES, 5, level.getServer());
@@ -126,6 +130,16 @@ final class ComfortsChecks {
 		} catch (ReflectiveOperationException e) {
 			throw new IllegalStateException("couldn't set an item's age", e);
 		}
+		level.addFreshEntity(item);
+		made.add(item);
+		return item;
+	}
+
+	/** The throwaway item {@code /give} spawns for its pickup animation: a stick that can never be picked up, a tick from the end. */
+	private static ItemEntity fakeItem(ServerLevel level, BlockPos at, List<Entity> made) {
+		ItemEntity item = new ItemEntity(level, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, new ItemStack(Items.STICK));
+		item.setDeltaMovement(0, 0, 0);
+		item.makeFakeItem();
 		level.addFreshEntity(item);
 		made.add(item);
 		return item;

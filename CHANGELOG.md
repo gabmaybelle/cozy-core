@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.12.1: No more ghost items from /give
+
+- Fixed: with a Hearth Lantern nearby, `/give` left copies of the item on the floor that couldn't be
+  picked up. The game drops a throwaway copy of a given item for the pickup animation, and "dropped
+  items last longer at home" was keeping it around for an hour. Items nobody can ever pick up are now
+  left alone. Thanks to bloodconfetti for the report (issue #5). Fixed in the Fabric and NeoForge
+  jars and the Paper plugin; the data pack is unchanged.
+
 ## 0.12.0: Visitors on Paper servers
 
 - **A visitor at your door, on Paper too.** Now and then in the evening, while someone is home, a
