@@ -1,8 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.8.1+1.21.1: No more ghost items from /give
 
-- Fixed: with a Hearth Lantern placed, `/give` left ghost copies of the item on the floor that couldn't be picked up (issue #5). The game drops a throwaway copy of a given item for the pickup animation, and "dropped items last longer at home" was keeping it alive; an item nobody can ever pick up is now left alone.
+- Fixed: with a Hearth Lantern nearby, `/give` left copies of the item on the floor that couldn't be
+  picked up. The game drops a throwaway copy of a given item for the pickup animation, and "dropped
+  items last longer at home" was keeping it around for an hour. Items nobody can ever pick up are now
+  left alone. Thanks to bloodconfetti for the report (issue #5). The data pack is unchanged.
 
 ## 0.8.0+1.21.1: A visitor at your door
 
