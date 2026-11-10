@@ -6,6 +6,8 @@
   picked up. The game drops a throwaway copy of a given item for the pickup animation, and "dropped
   items last longer at home" was keeping it around for an hour. Items nobody can ever pick up are now
   left alone. Thanks to bloodconfetti for the report (issue #5). The data pack is unchanged.
+- With Ecologics installed, its new maple wood goes in the stonecutter like its other woods, and its
+  shelves come from stripped logs. With Beautify installed, its bamboo blinds and trellises go in too.
 
 ## 0.8.0+1.21.1: A visitor at your door
 
